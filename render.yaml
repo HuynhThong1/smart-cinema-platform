@@ -3,7 +3,7 @@ services:
   - type: web
     name: smart-cinema-admin
     runtime: static
-    buildCommand: corepack enable && corepack prepare pnpm@11.10.0 --activate && pnpm --dir frontend install --frozen-lockfile && pnpm --dir frontend build:admin:render
+    buildCommand: corepack prepare pnpm@11.10.0 --activate && corepack pnpm --dir frontend install --frozen-lockfile && corepack pnpm --dir frontend build:admin:render
     staticPublishPath: ./frontend/dist/apps/smart-admin/browser
     autoDeployTrigger: checksPass
     envVars:
