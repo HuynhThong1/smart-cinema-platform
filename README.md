@@ -68,6 +68,10 @@ API_INTERNAL_URL=http://127.0.0.1:8080 SSR_ALLOWED_HOSTS=localhost,127.0.0.1 POR
 
 ## Deployment notes
 
+For a free, reviewable demo deployment, use the checked-in Render Blueprint and follow the [Render deployment guide](docs/deploy-render-free.md).
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/HuynhThong1/smart-cinema-platform)
+
 Local Compose uses MongoDB 7 because MongoDB 8 rejects the current Podman host kernel; use a supported database/kernel combination in deployment. MongoDB requires a replica set for transactions. Local Keycloak uses its development database; production needs PostgreSQL, TLS, backups and a hardened realm configuration.
 
 Set `SSR_ALLOWED_HOSTS` to the deployed customer hostname. Apply HTTPS at the reverse proxy, set explicit CORS origins and trusted proxy IPs, replace all local credentials, configure Keycloak redirect URIs/audience, and disable development seeding. Feedback pages must remain `noindex,nofollow`. Pilot rollout requires a cinema's operational sign-off; local tests do not constitute a completed pilot.

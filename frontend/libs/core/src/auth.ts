@@ -3,7 +3,7 @@ import { HttpInterceptorFn } from '@angular/common/http';
 import { CanActivateFn, Router } from '@angular/router';
 import { from, switchMap } from 'rxjs';
 import Keycloak from 'keycloak-js';
-import { Api, AUTH_CONFIG } from './api';
+import { Api, API_URL, AUTH_CONFIG } from './api';
 import { Principal } from './models';
 @Injectable({ providedIn: 'root' })
 export class Auth {
@@ -56,7 +56,8 @@ export class Auth {
   }
 }
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  if (!req.url.startsWith('/api/v1/admin')) return next(req);
+  const apiUrl = inject(API_URL);
+  if (!req.url.startsWith(`${apiUrl}/admin`)) return next(req);
   return from(inject(Auth).token()).pipe(
     switchMap((token) =>
       next(token ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : req),

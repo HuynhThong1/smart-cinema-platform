@@ -1,0 +1,15 @@
+FROM node:24-alpine AS build
+WORKDIR /app
+RUN corepack enable && corepack prepare pnpm@11.10.0 --activate
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+RUN pnpm install --frozen-lockfile
+COPY . .
+RUN NX_DAEMON=false pnpm nx build smart-customer --configuration=production
+
+FROM node:24-alpine
+WORKDIR /app
+COPY --from=build /app/dist/apps/smart-customer ./
+ENV NODE_ENV=production HOST=0.0.0.0 PORT=10000
+USER node
+EXPOSE 10000
+CMD ["node", "server/server.mjs"]

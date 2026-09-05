@@ -6,6 +6,7 @@
     "dev:admin": "nx serve smart-admin --port=4200 --host=127.0.0.1",
     "dev:customer": "nx serve smart-customer --port=4201 --host=127.0.0.1",
     "build": "nx run-many -t build --projects=smart-admin,smart-customer --parallel=2",
+    "build:admin:render": "node scripts/write-admin-config.mjs && nx build smart-admin --configuration=production",
     "typecheck": "tsc --noEmit -p apps/smart-admin/tsconfig.app.json && tsc --noEmit -p apps/smart-customer/tsconfig.app.json",
     "format": "prettier --write \"apps/**/*.{ts,html,json}\" \"libs/**/*.{ts,html,css}\"",
     "format:check": "prettier --check \"apps/**/*.{ts,html,json}\" \"libs/**/*.{ts,html,css}\""

@@ -29,15 +29,17 @@
       "directAccessGrantsEnabled": false,
       "redirectUris": [
         "http://localhost:4200/*",
-        "http://127.0.0.1:4200/*"
+        "http://127.0.0.1:4200/*",
+        "${ADMIN_URL}/*"
       ],
       "webOrigins": [
         "http://localhost:4200",
-        "http://127.0.0.1:4200"
+        "http://127.0.0.1:4200",
+        "${ADMIN_URL}"
       ],
       "attributes": {
         "pkce.code.challenge.method": "S256",
-        "post.logout.redirect.uris": "http://localhost:4200/*##http://127.0.0.1:4200/*"
+        "post.logout.redirect.uris": "http://localhost:4200/*##http://127.0.0.1:4200/*##${ADMIN_URL}/*"
       },
       "protocolMappers": [
         {
@@ -68,7 +70,7 @@
       "clientId": "smart-cinema-service",
       "enabled": true,
       "publicClient": false,
-      "secret": "local-service-secret-change-before-deployment",
+      "secret": "${KEYCLOAK_SERVICE_SECRET}",
       "serviceAccountsEnabled": true,
       "standardFlowEnabled": false,
       "directAccessGrantsEnabled": false
@@ -93,7 +95,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "CinemaLocal2026!",
+          "value": "${DEMO_USER_PASSWORD}",
           "temporary": false
         }
       ]
@@ -116,7 +118,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "CinemaLocal2026!",
+          "value": "${DEMO_USER_PASSWORD}",
           "temporary": false
         }
       ]
@@ -139,7 +141,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "CinemaLocal2026!",
+          "value": "${DEMO_USER_PASSWORD}",
           "temporary": false
         }
       ]
@@ -162,7 +164,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "CinemaLocal2026!",
+          "value": "${DEMO_USER_PASSWORD}",
           "temporary": false
         }
       ]
