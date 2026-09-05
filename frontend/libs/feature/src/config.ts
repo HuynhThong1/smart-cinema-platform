@@ -1,8 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { DialogModule } from 'primeng/dialog';
 import { FeedbackConfig, Reason } from '@cinema/core';
-import { RatingControl } from '@cinema/ui';
+import { RatingControl, Overlay } from '@cinema/ui';
 import { AsyncPage, PageState } from './shared';
 @Component({
   selector: 'cinema-rating-config',
@@ -137,7 +136,7 @@ export class RatingPage extends AsyncPage {
 }
 @Component({
   selector: 'cinema-reasons',
-  imports: [FormsModule, DialogModule, PageState],
+  imports: [FormsModule, Overlay, PageState],
   template: ` <div class="page-title">
       <div>
         <p class="kicker">Cấu hình / Feedback reasons</p>
@@ -188,7 +187,7 @@ export class RatingPage extends AsyncPage {
         </tbody>
       </table>
     </div>
-    <p-dialog [(visible)]="dialog" [modal]="true" header="Lý do feedback"
+    <cinema-overlay [(open)]="dialog" header="Lý do feedback"
       ><form class="form-fields" (ngSubmit)="save()">
         <label
           >Mã *<input
@@ -236,11 +235,11 @@ export class RatingPage extends AsyncPage {
         @if (error()) {
           <p class="field-error" role="alert">{{ error() }}</p>
         }
-        <div class="actions section">
+        <div class="overlay-actions">
           <button type="button" class="secondary" (click)="dialog = false">Huỷ</button
           ><button class="primary" [disabled]="busy()">Lưu lý do</button>
         </div>
-      </form></p-dialog
+      </form></cinema-overlay
     >`,
 })
 export class ReasonPage extends AsyncPage {

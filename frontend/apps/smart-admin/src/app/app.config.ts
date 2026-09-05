@@ -1,13 +1,11 @@
 import { ApplicationConfig, inject, provideAppInitializer } from '@angular/core';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideRouter, Router } from '@angular/router';
-import { providePrimeNG } from 'primeng/config';
 import { Auth, authInterceptor, authGuard, globalGuard } from '@cinema/core';
 import { Shell, Login, Forbidden } from './shell';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideHttpClient(withInterceptors([authInterceptor])),
-    providePrimeNG({ unstyled: true }),
     provideAppInitializer(() => inject(Auth).init()),
     provideRouter([
       { path: 'login', component: Login },

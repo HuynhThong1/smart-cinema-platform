@@ -1,12 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { DrawerModule } from 'primeng/drawer';
 import { Feedback, Page, Staff, Reason, FeedbackConfig, download, localDate } from '@cinema/core';
+import { Overlay } from '@cinema/ui';
 import { AsyncPage, Filters, PageState, Pager } from './shared';
 @Component({
   selector: 'cinema-feedback-list',
-  imports: [FormsModule, RouterLink, DrawerModule, Filters, PageState, Pager],
+  imports: [FormsModule, RouterLink, Overlay, Filters, PageState, Pager],
   template: ` <div class="page-title">
       <div>
         <p class="kicker">Feedback</p>
@@ -97,7 +97,7 @@ import { AsyncPage, Filters, PageState, Pager } from './shared';
       </div>
       <cinema-pager [total]="data().total" [page]="page()" (changed)="page.set($event); load()" />
     }
-    <p-drawer [(visible)]="drawer" position="right" header="Chi tiết feedback" [modal]="true">
+    <cinema-overlay [(open)]="drawer" variant="drawer" header="Chi tiết feedback">
       @if (detail(); as f) {
         <p class="english">{{ localDate(f.createdAt) }}</p>
         <h3>{{ f.rating.value }} / 5 · {{ f.rating.label }}</h3>
@@ -126,7 +126,7 @@ import { AsyncPage, Filters, PageState, Pager } from './shared';
           <dt>Đồng ý bảo mật</dt>
           <dd>{{ f.consent.version }} · {{ localDate(f.consent.acceptedAt) }}</dd>
         </dl>
-        <div class="actions">
+        <div class="overlay-actions">
           <a class="secondary" [routerLink]="['/staff', f.staff.id, 'performance']"
             >Hiệu suất nhân viên</a
           ><a
@@ -137,7 +137,7 @@ import { AsyncPage, Filters, PageState, Pager } from './shared';
           >
         </div>
       }
-    </p-drawer>`,
+    </cinema-overlay>`,
 })
 export class FeedbackList extends AsyncPage {
   route = inject(ActivatedRoute);

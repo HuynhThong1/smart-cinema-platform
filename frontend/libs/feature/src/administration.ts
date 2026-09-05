@@ -1,11 +1,11 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { DialogModule } from 'primeng/dialog';
 import { Cinema, Audit, Page, localDate } from '@cinema/core';
+import { Overlay } from '@cinema/ui';
 import { AsyncPage, PageState, Pager } from './shared';
 @Component({
   selector: 'cinema-cinemas',
-  imports: [FormsModule, DialogModule, PageState, Pager],
+  imports: [FormsModule, Overlay, PageState, Pager],
   template: ` <div class="page-title">
       <div>
         <p class="kicker">Hệ thống / Cinemas</p>
@@ -42,7 +42,7 @@ import { AsyncPage, PageState, Pager } from './shared';
       </table>
     </div>
     <cinema-pager [total]="data().total" [page]="page()" (changed)="page.set($event); load()" />
-    <p-dialog [(visible)]="dialog" [modal]="true" header="Thông tin rạp"
+    <cinema-overlay [(open)]="dialog" header="Thông tin rạp"
       ><form class="form-fields" (ngSubmit)="save()">
         <label>Mã rạp *<input name="code" [(ngModel)]="draft.code" required maxlength="30" /></label
         ><label
@@ -56,11 +56,11 @@ import { AsyncPage, PageState, Pager } from './shared';
         @if (error()) {
           <p class="field-error" role="alert">{{ error() }}</p>
         }
-        <div class="actions section">
+        <div class="overlay-actions">
           <button type="button" class="secondary" (click)="dialog = false">Huỷ</button
           ><button class="primary" [disabled]="busy()">Lưu rạp</button>
         </div>
-      </form></p-dialog
+      </form></cinema-overlay
     >`,
 })
 export class CinemaPage extends AsyncPage {

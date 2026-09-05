@@ -1,12 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { DialogModule } from 'primeng/dialog';
 import { QR, Staff, Cinema, Page, download } from '@cinema/core';
+import { Overlay } from '@cinema/ui';
 import { AsyncPage, PageState, Pager } from './shared';
 @Component({
   selector: 'cinema-qr',
-  imports: [FormsModule, DialogModule, PageState, Pager],
+  imports: [FormsModule, Overlay, PageState, Pager],
   template: ` <div class="page-title">
       <div>
         <p class="kicker">Nhân viên / QR Management</p>
@@ -159,9 +159,8 @@ import { AsyncPage, PageState, Pager } from './shared';
         </div>
       </div>
     }
-    <p-dialog
-      [(visible)]="dialog"
-      [modal]="true"
+    <cinema-overlay
+      [(open)]="dialog"
       [header]="
         action === 'batch'
           ? 'Generate QR cho tất cả nhân viên?'
@@ -169,7 +168,6 @@ import { AsyncPage, PageState, Pager } from './shared';
             ? 'Vô hiệu hoá QR?'
             : 'Tạo lại QR?'
       "
-      [style]="{ width: '440px' }"
       ><p>
         {{
           action === 'batch'
@@ -179,7 +177,7 @@ import { AsyncPage, PageState, Pager } from './shared';
               : 'Token cũ mất hiệu lực ngay lập tức. Bạn cần in lại thẻ QR tại POS.'
         }}
       </p>
-      <div class="actions">
+      <div class="overlay-actions">
         <button class="secondary" (click)="dialog = false">Huỷ</button
         ><button
           [class]="action === 'batch' ? 'primary' : 'danger'"
@@ -188,7 +186,7 @@ import { AsyncPage, PageState, Pager } from './shared';
         >
           Xác nhận
         </button>
-      </div></p-dialog
+      </div></cinema-overlay
     >`,
 })
 export class QRPage extends AsyncPage {

@@ -1,12 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { DialogModule } from 'primeng/dialog';
 import { Coaching, Staff, Page } from '@cinema/core';
+import { Overlay } from '@cinema/ui';
 import { AsyncPage, PageState, Pager } from './shared';
 @Component({
   selector: 'cinema-coaching',
-  imports: [FormsModule, DialogModule, PageState, Pager],
+  imports: [FormsModule, Overlay, PageState, Pager],
   template: ` <div class="page-title">
       <div>
         <p class="kicker">Coaching</p>
@@ -66,10 +66,7 @@ import { AsyncPage, PageState, Pager } from './shared';
       </table>
     </div>
     <cinema-pager [page]="page()" [total]="data().total" (changed)="page.set($event); load()" />
-    <p-dialog
-      [(visible)]="dialog"
-      [modal]="true"
-      [header]="draft.id ? 'Chi tiết coaching' : 'Tạo coaching'"
+    <cinema-overlay [(open)]="dialog" [header]="draft.id ? 'Chi tiết coaching' : 'Tạo coaching'"
       ><form class="form-fields" (ngSubmit)="save()">
         <label
           >Nhân viên *<select
@@ -115,11 +112,11 @@ import { AsyncPage, PageState, Pager } from './shared';
         @if (error()) {
           <p class="field-error" role="alert">{{ error() }}</p>
         }
-        <div class="actions section">
+        <div class="overlay-actions">
           <button type="button" class="secondary" (click)="dialog = false">Huỷ</button
           ><button class="primary" [disabled]="busy()">Lưu coaching</button>
         </div>
-      </form></p-dialog
+      </form></cinema-overlay
     >`,
 })
 export class CoachingPage extends AsyncPage {
