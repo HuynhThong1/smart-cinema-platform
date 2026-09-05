@@ -1,0 +1,254 @@
+<div class="page-title">
+  <div>
+    <p class="kicker">{{ auth.global() ? 'Head Office · toàn hệ thống' : 'Cinema Manager' }}</p>
+    <h2>{{ title() }}</h2>
+    <p class="english">Service quality, at a glance</p>
+  </div>
+  @if(staffId) {
+  <a class="primary" routerLink="/coaching" [queryParams]="{staffId:staffId,create:'true'}"
+    >Tạo coaching</a
+  >
+  } @else { <button class="secondary" (click)="export()">Xuất CSV</button> }
+</div>
+<cinema-filters (changed)="setFilters($event)" />
+<cinema-state [busy]="busy()" [error]="error()" (retry)="load()" />
+@if (!busy() && data(); as d) { @if (d.summary[0]; as s) {
+<div class="kpis">
+  <div>
+    <div class="kicker">Tổng feedback</div>
+    <div class="kpi-value positive">{{ s.count | number }}</div>
+    <small>Total feedback</small>
+  </div>
+  <div>
+    <div class="kicker">Điểm trung bình</div>
+    <div class="kpi-value" style="color: var(--primary)">{{ s.average | number:'1.2-2' }}</div>
+    <small>Average rating / 5</small>
+  </div>
+  <div>
+    <div class="kicker">Tích cực</div>
+    <div class="kpi-value positive">{{ percent(s.positive,s.count) }}%</div>
+    <small>Positive · 4–5</small>
+  </div>
+  <div>
+    <div class="kicker">Trung lập</div>
+    <div class="kpi-value">{{ percent(s.neutral,s.count) }}%</div>
+    <small>Neutral · 3</small>
+  </div>
+  <div>
+    <div class="kicker">Tiêu cực</div>
+    <a
+      routerLink="/feedback"
+      [queryParams]="{rating:'negative',staffId:staffId}"
+      class="kpi-value negative"
+      >{{ percent(s.negative,s.count) }}%</a
+    ><small>Negative · 1–2</small>
+  </div>
+  <div>
+    <div class="kicker">Đủ điều kiện ranking</div>
+    <div class="kpi-value">{{ d.eligible[0]?.count || 0 }}</div>
+    <small>Minimum {{ d.minimumFeedbackForRanking }} feedback</small>
+  </div>
+</div>
+<div class="split">
+  <section>
+    <h4>Xu hướng feedback</h4>
+    <p class="english">Volume & average rating</p>
+    <svg
+      class="chart"
+      viewBox="0 0 500 190"
+      role="img"
+      aria-label="Biểu đồ số feedback và điểm trung bình"
+    >
+      <line x1="15" y1="160" x2="485" y2="160" stroke="#E5E7EB" />
+      <polyline [attr.points]="trendPoints()" fill="none" stroke="#034EA2" stroke-width="2" />
+      <polyline [attr.points]="ratingPoints()" fill="none" stroke="#F26B38" stroke-width="1.5" />
+      <text x="15" y="185" fill="#6B7280" font-size="11">{{ d.trend[0]?._id }}</text>
+      <text x="485" y="185" text-anchor="end" fill="#6B7280" font-size="11">
+        {{ d.trend[d.trend.length-1]?._id }}
+      </text>
+      @if (coachingMarker(); as x) {
+      <line [attr.x1]="x" y1="15" [attr.x2]="x" y2="160" stroke="#DC2626" stroke-dasharray="4 3" />
+      <text [attr.x]="x" y="12" fill="#DC2626" font-size="10">Coaching</text>
+      }
+    </svg>
+    <div class="actions">
+      <span class="english positive">● Feedback</span
+      ><span class="english" style="color: var(--primary)">● Điểm trung bình / 5</span>
+    </div>
+  </section>
+  <section>
+    <h4>Phân bố đánh giá</h4>
+    <p class="english">Rating distribution</p>
+    @for (row of d.distribution; track row._id) {
+    <div class="bar-row">
+      <span
+        >{{ row._id }} · {{ row._id >= 4 ? 'Hài lòng' : row._id === 3 ? 'Bình thường' : 'Chưa tốt'
+        }}</span
+      >
+      <div class="bar-track">
+        <div
+          class="bar-fill"
+          [style.width.%]="percent(row.count,s.count)"
+          [style.background]="row._id <= 2 ? 'var(--red)' : row._id === 3 ? '#9CA3AF' : 'var(--blue)'"
+        ></div>
+      </div>
+      <span>{{ row.count }} · {{ percent(row.count,s.count) }}%</span>
+    </div>
+    }
+  </section>
+</div>
+<div class="split section">
+  @for(type of ['POSITIVE','NEGATIVE']; track type) {
+  <section>
+    <h4>{{ type === 'POSITIVE' ? 'Điều khách hài lòng' : 'Cần cải thiện' }}</h4>
+    <p class="english">{{ type === 'POSITIVE' ? 'Positive reasons' : 'Negative reasons' }}</p>
+    @for(row of d.reasons; track row._id) { @if(row.type === type) {
+    <div class="reason-row">
+      <div class="actions">
+        <span>{{ row.label }}</span><span class="spacer"></span><span>{{ row.count }}</span>
+      </div>
+      <div class="bar-track">
+        <div
+          class="bar-fill"
+          [style.width.%]="row.count/maxReason()*100"
+          [style.background]="type === 'NEGATIVE' ? 'var(--red)' : 'var(--blue)'"
+        ></div>
+      </div>
+    </div>
+    } }
+  </section>
+  }
+</div>
+@if (route.snapshot.routeConfig?.path === 'analytics') {
+<section class="section">
+  <h4>Feedback theo giờ</h4>
+  <p class="english">Asia/Ho_Chi_Minh</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Giờ</th>
+          <th>Feedback</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for(row of d.hours; track row._id) {
+        <tr>
+          <td>{{ row._id }}:00</td>
+          <td>{{ row.count }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>
+} @if (auth.global() && !staffId) {
+<section class="section">
+  <h4>So sánh rạp</h4>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Rạp</th>
+          <th>Feedback</th>
+          <th>Điểm TB</th>
+          <th>Tiêu cực</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for(row of d.cinemas; track row._id) {
+        <tr>
+          <td>
+            <a routerLink="/feedback" [queryParams]="{cinemaId:row._id}">{{ row.unit.name }}</a>
+          </td>
+          <td>{{ row.count }}</td>
+          <td>{{ row.average | number:'1.2-2' }}</td>
+          <td class="negative">{{ percent(row.negative,row.count) }}%</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>
+}
+<section class="section">
+  <h4>{{ staffId ? 'Tổng quan nhân viên' : 'Hiệu suất nhân viên' }}</h4>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Nhân viên</th>
+          <th>Rạp</th>
+          <th>Feedback</th>
+          <th>Điểm</th>
+          <th>Tích cực</th>
+          <th>Tiêu cực</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for(row of d.staff; track row._id) {
+        <tr>
+          <td><strong>{{ row.unit.code }}</strong><small>{{ row.unit.name }}</small></td>
+          <td>{{ row.cinema?.name }}</td>
+          <td>{{ row.count }}</td>
+          <td>{{ row.average | number:'1.2-2' }}</td>
+          <td>{{ percent(row.positive,row.count) }}%</td>
+          <td class="negative">{{ percent(row.negative,row.count) }}%</td>
+          <td>
+            <a [routerLink]="['/staff',row._id,'performance']">Chi tiết</a>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>
+} @else {
+<div class="empty">
+  <h3>Chưa có feedback nào</h3>
+  <p class="muted">Mở rộng khoảng ngày hoặc tạo QR để bắt đầu ghi nhận trải nghiệm của khách.</p>
+  <a routerLink="/qr" class="primary">Đến QR Management</a>
+</div>
+} @if (staffId) {
+<section class="section">
+  <h4>Lịch sử coaching</h4>
+  @for(c of coaching();track c.id) {
+  <p>
+    <a routerLink="/coaching" [queryParams]="{staffId:staffId}">{{ c.topic }}</a>
+    · {{ c.followUpDate }} <span class="tag">{{ c.status }}</span>
+  </p>
+  } @empty {
+  <p class="muted">Chưa có coaching.</p>
+  }
+</section>
+<a routerLink="/feedback" [queryParams]="{staffId:staffId,rating:'negative'}"
+  >Xem feedback tiêu cực của nhân viên</a
+>
+} } @if (staffId && data()?.latestCoaching; as c) {
+<section class="section">
+  <h4>Trước và sau coaching</h4>
+  <p class="english">{{ c.topic }} · {{ c.followUpDate }} · Theo khoảng ngày đang chọn</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Giai đoạn</th>
+        <th>Feedback</th>
+        <th>Điểm trung bình</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Trước coaching</td>
+        <td>{{ data()?.beforeCoaching?.[0]?.count || 0 }}</td>
+        <td>{{ data()?.beforeCoaching?.[0]?.average | number:'1.2-2' }}</td>
+      </tr>
+      <tr>
+        <td>Sau coaching</td>
+        <td>{{ data()?.afterCoaching?.[0]?.count || 0 }}</td>
+        <td>{{ data()?.afterCoaching?.[0]?.average | number:'1.2-2' }}</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+}

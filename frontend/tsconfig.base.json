@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM"],
+    "strict": true,
+    "experimentalDecorators": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "useDefineForClassFields": false,
+    "baseUrl": ".",
+    "paths": {
+      "@cinema/core": ["libs/core/src/index.ts"],
+      "@cinema/ui": ["libs/ui/src/index.ts"]
+    }
+  },
+  "angularCompilerOptions": {
+    "strictTemplates": true,
+    "strictInjectionParameters": true
+  }
+}

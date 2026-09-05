@@ -1,0 +1,7 @@
+{
+  "auth": {
+    "url": "http://localhost:8081",
+    "realm": "smart-cinema",
+    "clientId": "smart-admin"
+  }
+}

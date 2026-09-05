@@ -1,0 +1,51 @@
+{
+  "name": "smart-cinema-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev:admin": "nx serve smart-admin --port=4200 --host=127.0.0.1",
+    "dev:customer": "nx serve smart-customer --port=4201 --host=127.0.0.1",
+    "build": "nx run-many -t build --projects=smart-admin,smart-customer --parallel=2",
+    "typecheck": "tsc --noEmit -p apps/smart-admin/tsconfig.app.json && tsc --noEmit -p apps/smart-customer/tsconfig.app.json",
+    "format": "prettier --write \"apps/**/*.{ts,html,json}\" \"libs/**/*.{ts,html,css}\"",
+    "format:check": "prettier --check \"apps/**/*.{ts,html,json}\" \"libs/**/*.{ts,html,css}\""
+  },
+  "dependencies": {
+    "@angular/common": "21.2.22",
+    "@angular/compiler": "21.2.22",
+    "@angular/core": "21.2.22",
+    "@angular/forms": "21.2.22",
+    "@angular/platform-browser": "21.2.22",
+    "@angular/platform-server": "21.2.22",
+    "@angular/router": "21.2.22",
+    "@angular/ssr": "21.2.22",
+    "@fontsource/source-serif-4": "^5.3.0",
+    "@phosphor-icons/web": "^2.1.2",
+    "@primeuix/themes": "^2.0.0",
+    "express": "^5.1.0",
+    "keycloak-js": "^26.2.0",
+    "primeicons": "^7.0.0",
+    "primeng": "21.1.9",
+    "rxjs": "~7.8.2",
+    "tslib": "^2.8.1"
+  },
+  "devDependencies": {
+    "@angular-devkit/core": "21.2.22",
+    "@angular/build": "21.2.22",
+    "@angular/compiler-cli": "21.2.22",
+    "@nx/angular": "22.7.9",
+    "@playwright/test": "^1.58.0",
+    "@tailwindcss/postcss": "^4.1.0",
+    "@types/express": "^5.0.0",
+    "@types/node": "^24.0.0",
+    "nx": "22.7.9",
+    "postcss": "^8.5.0",
+    "prettier": "^3.9.6",
+    "tailwindcss": "^4.1.0",
+    "typescript": "~5.9.3"
+  },
+  "packageManager": "pnpm@11.10.0",
+  "nx": {
+    "includedScripts": []
+  }
+}

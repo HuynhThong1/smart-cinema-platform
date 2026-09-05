@@ -1,0 +1,15 @@
+node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/.nx/
+coverage/
+.env
+.env.*
+!.env.example
+.DS_Store
+backend/bin/
+artifacts/
+frontend/.playwright-cli/
+frontend/output/
+frontend/playwright-report/
+frontend/test-results/

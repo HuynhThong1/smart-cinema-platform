@@ -1,0 +1,2814 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Smart Cinema Platform API",
+    "version": "1.0.0",
+    "description": "Phase 1. Admin bearer tokens require issuer/audience validation and server-enforced role/cinema scope. Times are UTC; input date filters are inclusive from and exclusive to."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/api/v1"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "error",
+          "requestId"
+        ]
+      },
+      "Cinema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 30
+          },
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "INACTIVE"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "status"
+        ]
+      },
+      "Staff": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "staffCode": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50
+          },
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "cinemaId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "INACTIVE"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "staffCode",
+          "name",
+          "cinemaId",
+          "status"
+        ]
+      },
+      "Submission": {
+        "type": "object",
+        "properties": {
+          "qrToken": {
+            "type": "string",
+            "minLength": 32,
+            "maxLength": 32
+          },
+          "rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "name": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "phone": {
+            "type": "string",
+            "description": "Vietnamese local or +84 format; separators spaces, parentheses, dot and dash allowed"
+          },
+          "comment": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "consent": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          },
+          "consentVersion": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "qrToken",
+          "rating",
+          "name",
+          "phone",
+          "consent",
+          "consentVersion"
+        ]
+      },
+      "Rating": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "label": {
+            "type": "string"
+          },
+          "english": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": []
+      },
+      "Reason": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]{1,49}$"
+          },
+          "label": {
+            "type": "string"
+          },
+          "english": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "POSITIVE",
+              "NEGATIVE",
+              "NEUTRAL",
+              "BOTH"
+            ]
+          },
+          "ratings": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5
+            }
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "DISABLED"
+            ]
+          },
+          "order": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "code",
+          "label",
+          "type",
+          "ratings",
+          "status"
+        ]
+      },
+      "FeedbackConfig": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "ratingType": {
+            "type": "string",
+            "enum": [
+              "ICON+TEXT",
+              "STAR",
+              "BUTTON",
+              "TEXT"
+            ]
+          },
+          "ratingOptions": {
+            "type": "array",
+            "minItems": 5,
+            "maxItems": 5,
+            "items": {
+              "$ref": "#/components/schemas/Rating"
+            }
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Reason"
+            }
+          },
+          "minimumFeedbackForRanking": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000
+          },
+          "consentVersion": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ratingType",
+          "ratingOptions",
+          "minimumFeedbackForRanking",
+          "consentVersion"
+        ]
+      },
+      "Snapshot": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": []
+      },
+      "Feedback": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "staff": {
+            "$ref": "#/components/schemas/Snapshot"
+          },
+          "cinema": {
+            "$ref": "#/components/schemas/Snapshot"
+          },
+          "customer": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "phone": {
+                "type": "string",
+                "description": "Masked on list/export; full in authorized detail"
+              }
+            },
+            "required": []
+          },
+          "rating": {
+            "$ref": "#/components/schemas/Rating"
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Reason"
+            }
+          },
+          "comment": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "metadata": {
+            "type": "object",
+            "properties": {
+              "suspicious": {
+                "type": "boolean"
+              },
+              "ipHash": {
+                "type": "string"
+              },
+              "userAgent": {
+                "type": "string"
+              }
+            },
+            "required": []
+          },
+          "consent": {
+            "type": "object",
+            "properties": {
+              "accepted": {
+                "type": "boolean"
+              },
+              "version": {
+                "type": "string"
+              },
+              "acceptedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": []
+          }
+        },
+        "required": []
+      },
+      "Coaching": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "staffId": {
+            "type": "string"
+          },
+          "cinemaId": {
+            "type": "string"
+          },
+          "topic": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 200
+          },
+          "action": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 2000
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "IN_PROGRESS",
+              "COMPLETED",
+              "CANCELLED"
+            ]
+          },
+          "followUpDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "completedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "staffId",
+          "topic",
+          "action",
+          "followUpDate"
+        ]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "SYSTEM_ADMIN",
+              "HEAD_OFFICE",
+              "CINEMA_MANAGER"
+            ]
+          },
+          "cinemaId": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "temporaryPassword": {
+            "type": "string",
+            "minLength": 12,
+            "writeOnly": true,
+            "description": "Required for create; user must change at first sign-in"
+          }
+        },
+        "required": [
+          "username",
+          "firstName",
+          "email",
+          "role",
+          "enabled"
+        ]
+      },
+      "QR": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "staffId": {
+            "type": "string"
+          },
+          "publicToken": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "DISABLED",
+              "NOT_GENERATED"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": []
+      },
+      "Audit": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "actor": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "cinemaId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": []
+      },
+      "StaffPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Staff"
+            }
+          },
+          "total": {
+            "type": "integer"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          }
+        },
+        "required": []
+      },
+      "CinemaPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Cinema"
+            }
+          },
+          "total": {
+            "type": "integer"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          }
+        },
+        "required": []
+      },
+      "FeedbackPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Feedback"
+            }
+          },
+          "total": {
+            "type": "integer"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          }
+        },
+        "required": []
+      },
+      "CoachingPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Coaching"
+            }
+          },
+          "total": {
+            "type": "integer"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          }
+        },
+        "required": []
+      },
+      "UserPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/User"
+            }
+          },
+          "total": {
+            "type": "integer"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          }
+        },
+        "required": []
+      },
+      "AuditPage": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Audit"
+            }
+          },
+          "total": {
+            "type": "integer"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  "paths": {
+    "/public/feedback/{qrToken}": {
+      "get": {
+        "summary": "Validate active QR",
+        "description": "",
+        "operationId": "get_public_feedback_qrToken",
+        "security": [],
+        "parameters": [
+          {
+            "name": "qrToken",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "valid": {
+                      "type": "boolean"
+                    },
+                    "serverTime": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": []
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public/feedback-config": {
+      "get": {
+        "summary": "Read customer configuration",
+        "description": "",
+        "operationId": "get_public_feedback_config",
+        "security": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackConfig"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/public/feedback": {
+      "post": {
+        "summary": "Submit a new feedback record",
+        "description": "No deduplication. Same phone/staff within ten minutes is flagged suspicious. Public API rate limited; Retry-After is returned on HTTP 429.",
+        "operationId": "post_public_feedback",
+        "security": [],
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": []
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Submission"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/me": {
+      "get": {
+        "summary": "Current verified identity",
+        "description": "",
+        "operationId": "get_admin_me",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/cinemas": {
+      "get": {
+        "summary": "List cinemas",
+        "description": "",
+        "operationId": "get_admin_cinemas",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "One-based, defaults to 1"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "1–100, defaults to 20"
+          },
+          {
+            "name": "cinemaId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CinemaPage"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create Cinema",
+        "description": "",
+        "operationId": "post_admin_cinemas",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cinema"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Cinema"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/cinemas/{id}": {
+      "put": {
+        "summary": "Update Cinema",
+        "description": "",
+        "operationId": "put_admin_cinemas_id",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cinema"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Cinema"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/staff": {
+      "get": {
+        "summary": "List staff",
+        "description": "",
+        "operationId": "get_admin_staff",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "One-based, defaults to 1"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "1–100, defaults to 20"
+          },
+          {
+            "name": "cinemaId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffPage"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create Staff",
+        "description": "",
+        "operationId": "post_admin_staff",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Staff"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Staff"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/staff/{id}": {
+      "put": {
+        "summary": "Update Staff",
+        "description": "",
+        "operationId": "put_admin_staff_id",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Staff"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Staff"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/coaching": {
+      "get": {
+        "summary": "List coaching",
+        "description": "",
+        "operationId": "get_admin_coaching",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "One-based, defaults to 1"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "1–100, defaults to 20"
+          },
+          {
+            "name": "cinemaId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "staffId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "followUp",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoachingPage"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create Coaching",
+        "description": "",
+        "operationId": "post_admin_coaching",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Coaching"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Coaching"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/coaching/{id}": {
+      "put": {
+        "summary": "Update Coaching",
+        "description": "",
+        "operationId": "put_admin_coaching_id",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Coaching"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Coaching"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Read coaching",
+        "description": "",
+        "operationId": "get_admin_coaching_id",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Coaching"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/users": {
+      "get": {
+        "summary": "List users",
+        "description": "",
+        "operationId": "get_admin_users",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "One-based, defaults to 1"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "1–100, defaults to 20"
+          },
+          {
+            "name": "cinemaId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPage"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create User",
+        "description": "",
+        "operationId": "post_admin_users",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/users/{id}": {
+      "put": {
+        "summary": "Update User",
+        "description": "",
+        "operationId": "put_admin_users_id",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/feedbacks": {
+      "get": {
+        "summary": "List masked feedback",
+        "description": "",
+        "operationId": "get_admin_feedbacks",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "One-based, defaults to 1"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "1–100, defaults to 20"
+          },
+          {
+            "name": "cinemaId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional global filter; managers may only select their own cinema"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Inclusive RFC3339 timestamp"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exclusive RFC3339 timestamp"
+          },
+          {
+            "name": "includeSuspicious",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Defaults to false"
+          },
+          {
+            "name": "staffId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "rating",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "1–5, negative, neutral, positive"
+          },
+          {
+            "name": "reason",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "suspicious",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "True selects suspicious only"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackPage"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/feedbacks/{id}": {
+      "get": {
+        "summary": "Read scoped feedback detail",
+        "description": "",
+        "operationId": "get_admin_feedbacks_id",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Feedback"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/audit-logs": {
+      "get": {
+        "summary": "List scoped audit",
+        "description": "",
+        "operationId": "get_admin_audit_logs",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "One-based, defaults to 1"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "1–100, defaults to 20"
+          },
+          {
+            "name": "cinemaId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional global filter; managers may only select their own cinema"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Inclusive RFC3339 timestamp"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exclusive RFC3339 timestamp"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditPage"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/dashboard": {
+      "get": {
+        "summary": "dashboard",
+        "description": "",
+        "operationId": "get_admin_dashboard",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cinemaId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional global filter; managers may only select their own cinema"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Inclusive RFC3339 timestamp"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exclusive RFC3339 timestamp"
+          },
+          {
+            "name": "includeSuspicious",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Defaults to false"
+          },
+          {
+            "name": "staffId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "rating",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "1–5, negative, neutral, positive"
+          },
+          {
+            "name": "reason",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "suspicious",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "True selects suspicious only"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/dashboard/ranking": {
+      "get": {
+        "summary": "dashboard/ranking",
+        "description": "",
+        "operationId": "get_admin_dashboard_ranking",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cinemaId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional global filter; managers may only select their own cinema"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Inclusive RFC3339 timestamp"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exclusive RFC3339 timestamp"
+          },
+          {
+            "name": "includeSuspicious",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Defaults to false"
+          },
+          {
+            "name": "staffId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "rating",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "1–5, negative, neutral, positive"
+          },
+          {
+            "name": "reason",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "suspicious",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "True selects suspicious only"
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "staff or cinema; cinema requires global role"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/feedback-config": {
+      "get": {
+        "summary": "Read configuration (global roles)",
+        "description": "",
+        "operationId": "get_admin_feedback_config",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackConfig"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Save configuration (global roles)",
+        "description": "",
+        "operationId": "put_admin_feedback_config",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackConfig"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackConfig"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/feedback-reasons": {
+      "get": {
+        "summary": "Read reasons (global roles)",
+        "description": "",
+        "operationId": "get_admin_feedback_reasons",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Reason"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create reason (global roles)",
+        "description": "",
+        "operationId": "post_admin_feedback_reasons",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Reason"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Reason"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/feedback-reasons/{id}": {
+      "put": {
+        "summary": "Update reason (global roles)",
+        "description": "",
+        "operationId": "put_admin_feedback_reasons_id",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Reason"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Reason"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/staff/{id}/qr": {
+      "get": {
+        "summary": "Read QR",
+        "description": "",
+        "operationId": "get_admin_staff_id_qr",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QR"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Generate QR if missing",
+        "description": "",
+        "operationId": "post_admin_staff_id_qr",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QR"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Disable QR",
+        "description": "",
+        "operationId": "delete_admin_staff_id_qr",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QR"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/staff/{id}/qr/regenerate": {
+      "post": {
+        "summary": "Rotate and revoke old token",
+        "description": "",
+        "operationId": "post_admin_staff_id_qr_regenerate",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QR"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/staff/qr/batch": {
+      "post": {
+        "summary": "Generate missing QRs",
+        "description": "",
+        "operationId": "post_admin_staff_qr_batch",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cinemaId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "created": {
+                      "type": "integer"
+                    },
+                    "existing": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": []
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/staff/{id}/qr/download": {
+      "get": {
+        "summary": "Download QR",
+        "description": "",
+        "operationId": "get_admin_staff_id_qr_download",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "format",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "png (default), svg or pdf"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/svg+xml": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/staff/qr/package": {
+      "get": {
+        "summary": "Download ZIP",
+        "description": "",
+        "operationId": "get_admin_staff_qr_package",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cinemaId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/zip": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/feedbacks/export": {
+      "get": {
+        "summary": "Export masked CSV",
+        "description": "",
+        "operationId": "get_admin_feedbacks_export",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cinemaId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional global filter; managers may only select their own cinema"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Inclusive RFC3339 timestamp"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Exclusive RFC3339 timestamp"
+          },
+          {
+            "name": "includeSuspicious",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Defaults to false"
+          },
+          {
+            "name": "staffId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "rating",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "1–5, negative, neutral, positive"
+          },
+          {
+            "name": "reason",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "suspicious",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "True selects suspicious only"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/staff/import/template": {
+      "get": {
+        "summary": "Download CSV template",
+        "description": "",
+        "operationId": "get_admin_staff_import_template",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/staff/import": {
+      "post": {
+        "summary": "Preview or confirm staff import",
+        "description": "Multipart CSV/XLSX, 5 MB, 1000 data rows. Preview never writes. Confirm revalidates every row and imports currently valid rows transactionally. Header: Staff Code, Full Name, Cinema Code.",
+        "operationId": "post_admin_staff_import",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "confirm": {
+                    "type": "boolean",
+                    "default": false
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

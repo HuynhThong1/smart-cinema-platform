@@ -1,0 +1,162 @@
+<main class="customer-page">
+  <header class="customer-header">
+    <img src="/galaxy-logo.png" width="112" height="34" alt="Galaxy Cinema" /><span class="kicker"
+      >VI / EN</span
+    >
+  </header>
+  @switch (screen()) { @case ('form') {
+  <h1>Đánh giá trải nghiệm</h1>
+  <p class="english">Rate your experience</p>
+  @if (serverTime()) {
+  <p class="dateline">{{ localDate(serverTime()) }}</p>
+  }
+  <form (ngSubmit)="submit()" novalidate>
+    <section>
+      <h2 class="question">Trải nghiệm của bạn hôm nay thế nào?</h2>
+      <p class="english">How was your visit today?</p>
+      @if (config(); as cfg) {
+      <cinema-rating [config]="cfg" [value]="rating()" (changed)="selectRating($event)" />
+      } @if (attempted() && !rating()) {
+      <p class="field-error" role="alert">Vui lòng chọn mức đánh giá / Rating is required</p>
+      }
+    </section>
+    @if (rating()) {
+    <section>
+      <h2 class="question">
+        {{ rating() >= 4 ? 'Điều gì làm bạn hài lòng?' : 'Bạn muốn chia sẻ điều gì?' }}
+      </h2>
+      <p class="english">Select all that apply · Các mục có * là bắt buộc</p>
+      <div class="chips">
+        @for (reason of reasonsForRating(); track reason.code) {
+        <button
+          type="button"
+          class="chip"
+          [class.selected]="reasons().includes(reason.code)"
+          [attr.aria-pressed]="reasons().includes(reason.code)"
+          (click)="toggleReason(reason.code)"
+        >
+          {{ reason.label }}{{ reason.required ? ' *' : '' }}
+        </button>
+        }
+      </div>
+      @if (attempted() && !requiredReasonsValid()) {
+      <p class="field-error" role="alert">Vui lòng chọn lý do bắt buộc.</p>
+      }
+    </section>
+    }
+    <div class="form-fields">
+      <label for="full-name">Họ và tên * <small>Full name</small></label
+      ><input
+        pInputText
+        id="full-name"
+        name="name"
+        [(ngModel)]="name"
+        autocomplete="name"
+        placeholder="Nguyễn Văn A"
+        maxlength="100"
+        [attr.aria-invalid]="attempted() && !nameValid()"
+        aria-describedby="name-error"
+      />
+      @if (attempted() && !nameValid()) {
+      <p id="name-error" class="field-error" role="alert">
+        Vui lòng nhập họ tên từ 2–100 ký tự / Name is required
+      </p>
+      } <label for="phone">Số điện thoại * <small>Phone number</small></label
+      ><input
+        pInputText
+        id="phone"
+        name="phone"
+        [(ngModel)]="phone"
+        type="tel"
+        inputmode="tel"
+        autocomplete="tel"
+        placeholder="0912 345 678"
+        maxlength="25"
+        [attr.aria-invalid]="attempted() && !phoneValid()"
+        aria-describedby="phone-error"
+      />
+      @if (attempted() && !phoneValid()) {
+      <p id="phone-error" class="field-error" role="alert">
+        Số điện thoại không đúng định dạng Việt Nam
+      </p>
+      } <label for="comment">Chia sẻ thêm <small>Anything else</small></label
+      ><textarea
+        id="comment"
+        name="comment"
+        [(ngModel)]="comment"
+        rows="3"
+        maxlength="2000"
+        placeholder="Không bắt buộc / Optional"
+      ></textarea>
+    </div>
+    <div class="consent">
+      <input type="checkbox" id="consent" name="consent" [(ngModel)]="consent" /><label
+        for="consent"
+        >Tôi đồng ý cho rạp sử dụng thông tin trên để ghi nhận và cải thiện chất lượng dịch
+        vụ.</label
+      >
+    </div>
+    <button class="text-button privacy-link" type="button" (click)="screen.set('privacy')">
+      Chính sách bảo mật
+    </button>
+    @if (attempted() && !consent) {
+    <p class="field-error" role="alert">Cần đồng ý để gửi đánh giá / Consent required</p>
+    } @if (submitError()) {
+    <p class="error-panel" role="alert">{{ submitError() }}</p>
+    <button type="button" class="text-button" (click)="reload()">
+      Tải lại cấu hình, giữ câu trả lời
+    </button>
+    }
+    <button pButton type="submit" class="primary submit" [disabled]="submitting()">
+      {{ submitting() ? 'Đang gửi…' : 'GỬI ĐÁNH GIÁ' }}
+    </button>
+    <p class="footnote">Chỉ mất 15–30 giây <span>· Takes 15–30 seconds</span></p>
+  </form>
+  } @case ('thanks') {
+  <section class="customer-result">
+    <span class="success-mark" aria-hidden="true">✓</span>
+    <h1>Cảm ơn bạn!</h1>
+    <p class="english">Thank you — your feedback was recorded</p>
+    <p>
+      Đánh giá của bạn đã được ghi nhận lúc {{ localDate(recordedAt()) }}. Cảm ơn bạn đã giúp chúng
+      tôi phục vụ tốt hơn.
+    </p>
+    <button pButton class="secondary" (click)="reset()">Gửi đánh giá khác / Send another</button>
+  </section>
+  } @case ('privacy') {
+  <button class="text-button" (click)="screen.set('form')">← Quay lại</button>
+  <h1>Chính sách bảo mật</h1>
+  <p class="english">Privacy policy · consent version {{ config()?.consentVersion }}</p>
+  <p>
+    Galaxy Cinema thu thập họ tên, số điện thoại và đánh giá của bạn để ghi nhận trải nghiệm và cải
+    thiện chất lượng dịch vụ.
+  </p>
+  <p>
+    Thông tin này không được dùng để đăng ký tiếp thị. Việc đồng ý gửi feedback không đồng nghĩa với
+    đồng ý nhận quảng cáo.
+  </p>
+  <p>
+    Bạn có thể liên hệ bộ phận chăm sóc khách hàng tại rạp để yêu cầu hỗ trợ hoặc xoá thông tin đã
+    cung cấp.
+  </p>
+  } @case ('loading') {
+  <div aria-busy="true" aria-label="Đang tải biểu mẫu">
+    @for (n of [1,2,3,4,5,6,7]; track n) {
+    <div class="skeleton"></div>
+    }
+    <p class="english">Đang tải biểu mẫu… / Loading</p>
+  </div>
+  } @default {
+  <section class="customer-result">
+    <p class="kicker negative">
+      {{ screen() === 'invalid' ? 'QR không hợp lệ / Invalid QR' : 'Lỗi hệ thống / System error' }}
+    </p>
+    <h1>{{ screen() === 'invalid' ? 'Mã QR hiện không khả dụng' : 'Không tải được biểu mẫu' }}</h1>
+    <p>
+      {{ screen() === 'invalid' ? 'Vui lòng liên hệ nhân viên tại rạp để được hỗ trợ.' : 'Vui lòng
+      kiểm tra kết nối và thử lại.' }}
+    </p>
+    <button pButton class="secondary" (click)="reload()">Thử lại / Retry</button>
+  </section>
+  } }
+</main>

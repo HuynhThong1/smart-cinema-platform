@@ -1,0 +1,45 @@
+{
+  "name": "smart-admin",
+  "projectType": "application",
+  "sourceRoot": "apps/smart-admin/src",
+  "targets": {
+    "build": {
+      "executor": "@angular/build:application",
+      "options": {
+        "outputPath": "dist/apps/smart-admin",
+        "index": "apps/smart-admin/src/index.html",
+        "browser": "apps/smart-admin/src/main.ts",
+        "tsConfig": "apps/smart-admin/tsconfig.app.json",
+        "styles": ["libs/ui/src/styles.css"],
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/smart-admin/public"
+          }
+        ]
+      },
+      "configurations": {
+        "production": {
+          "outputHashing": "all",
+          "optimization": {
+            "scripts": true,
+            "styles": true,
+            "fonts": false
+          }
+        },
+        "development": {
+          "optimization": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "executor": "@angular/build:dev-server",
+      "options": {
+        "buildTarget": "smart-admin:build:development",
+        "proxyConfig": "proxy.conf.json"
+      }
+    }
+  }
+}

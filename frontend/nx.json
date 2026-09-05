@@ -1,0 +1,14 @@
+{
+  "defaultBase": "main",
+  "targetDefaults": {
+    "build": { "cache": true, "inputs": ["default", "^default"] }
+  },
+  "namedInputs": {
+    "default": [
+      "{projectRoot}/**/*",
+      "{workspaceRoot}/libs/**/*",
+      "{workspaceRoot}/tsconfig.base.json"
+    ]
+  },
+  "analytics": false
+}

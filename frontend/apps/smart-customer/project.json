@@ -1,0 +1,50 @@
+{
+  "name": "smart-customer",
+  "projectType": "application",
+  "sourceRoot": "apps/smart-customer/src",
+  "targets": {
+    "build": {
+      "executor": "@angular/build:application",
+      "options": {
+        "outputPath": "dist/apps/smart-customer",
+        "index": "apps/smart-customer/src/index.html",
+        "browser": "apps/smart-customer/src/main.ts",
+        "tsConfig": "apps/smart-customer/tsconfig.app.json",
+        "styles": ["libs/ui/src/styles.css"],
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/smart-customer/public"
+          }
+        ],
+        "server": "apps/smart-customer/src/main.server.ts",
+        "ssr": {
+          "entry": "apps/smart-customer/src/server.ts"
+        },
+        "outputMode": "server"
+      },
+      "configurations": {
+        "production": {
+          "outputHashing": "all",
+          "optimization": {
+            "scripts": true,
+            "styles": true,
+            "fonts": false
+          }
+        },
+        "development": {
+          "optimization": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "executor": "@angular/build:dev-server",
+      "options": {
+        "buildTarget": "smart-customer:build:development",
+        "proxyConfig": "proxy.conf.json"
+      }
+    }
+  }
+}

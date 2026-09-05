@@ -1,0 +1,196 @@
+{
+  "realm": "smart-cinema",
+  "enabled": true,
+  "registrationAllowed": false,
+  "resetPasswordAllowed": true,
+  "bruteForceProtected": true,
+  "failureFactor": 5,
+  "passwordPolicy": "length(12)",
+  "roles": {
+    "realm": [
+      {
+        "name": "SYSTEM_ADMIN"
+      },
+      {
+        "name": "HEAD_OFFICE"
+      },
+      {
+        "name": "CINEMA_MANAGER"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "smart-admin",
+      "name": "Smart Cinema Admin",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": [
+        "http://localhost:4200/*",
+        "http://127.0.0.1:4200/*"
+      ],
+      "webOrigins": [
+        "http://localhost:4200",
+        "http://127.0.0.1:4200"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:4200/*##http://127.0.0.1:4200/*"
+      },
+      "protocolMappers": [
+        {
+          "name": "api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.custom.audience": "smart-cinema-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        },
+        {
+          "name": "cinema-scope",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "config": {
+            "user.attribute": "cinema_id",
+            "claim.name": "cinema_id",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "smart-cinema-service",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "local-service-secret-change-before-deployment",
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false
+    }
+  ],
+  "users": [
+    {
+      "username": "manager",
+      "enabled": true,
+      "firstName": "Local",
+      "lastName": "manager",
+      "email": "manager@example.test",
+      "emailVerified": true,
+      "attributes": {
+        "cinema_id": [
+          "cinema-gnd"
+        ]
+      },
+      "realmRoles": [
+        "CINEMA_MANAGER"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "CinemaLocal2026!",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "manager2",
+      "enabled": true,
+      "firstName": "Local",
+      "lastName": "manager2",
+      "email": "manager2@example.test",
+      "emailVerified": true,
+      "attributes": {
+        "cinema_id": [
+          "cinema-gbt"
+        ]
+      },
+      "realmRoles": [
+        "CINEMA_MANAGER"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "CinemaLocal2026!",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "headoffice",
+      "enabled": true,
+      "firstName": "Local",
+      "lastName": "headoffice",
+      "email": "headoffice@example.test",
+      "emailVerified": true,
+      "attributes": {
+        "cinema_id": [
+          ""
+        ]
+      },
+      "realmRoles": [
+        "HEAD_OFFICE"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "CinemaLocal2026!",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "sysadmin",
+      "enabled": true,
+      "firstName": "Local",
+      "lastName": "sysadmin",
+      "email": "sysadmin@example.test",
+      "emailVerified": true,
+      "attributes": {
+        "cinema_id": [
+          ""
+        ]
+      },
+      "realmRoles": [
+        "SYSTEM_ADMIN"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "CinemaLocal2026!",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "service-account-smart-cinema-service",
+      "enabled": true,
+      "serviceAccountClientId": "smart-cinema-service",
+      "clientRoles": {
+        "realm-management": [
+          "view-users",
+          "query-users",
+          "manage-users",
+          "view-realm"
+        ]
+      }
+    }
+  ],
+  "components": {
+    "org.keycloak.userprofile.UserProfileProvider": [
+      {
+        "providerId": "declarative-user-profile",
+        "config": {
+          "kc.user.profile.config": [
+            "{\"attributes\":[{\"name\":\"username\",\"displayName\":\"${username}\",\"validations\":{\"length\":{\"min\":3,\"max\":255},\"username-prohibited-characters\":{},\"up-username-not-idn-homograph\":{}},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"email\",\"displayName\":\"${email}\",\"validations\":{\"email\":{},\"length\":{\"max\":255}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"firstName\",\"displayName\":\"${firstName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"lastName\",\"displayName\":\"${lastName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"cinema_id\",\"displayName\":\"Cinema scope\",\"permissions\":{\"view\":[\"admin\"],\"edit\":[\"admin\"]},\"multivalued\":false}],\"groups\":[{\"name\":\"user-metadata\",\"displayHeader\":\"User metadata\",\"displayDescription\":\"Attributes, which refer to user metadata\"}]}"
+          ]
+        }
+      }
+    ]
+  }
+}
