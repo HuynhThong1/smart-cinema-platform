@@ -133,6 +133,8 @@ export interface ImportRow {
   staffCode: string;
   name: string;
   cinemaCode: string;
+  managerUsername: string;
+  managerId: string;
   error: string;
 }
 export interface ImportResult {

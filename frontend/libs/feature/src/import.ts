@@ -19,19 +19,29 @@ import { AsyncPage, PageState } from './shared';
       }
     </div>
     <cinema-state [busy]="busy()" [error]="error()" (retry)="preview()" />
+    @if (busy()) {
+      <p role="status" aria-live="polite">{{ operation() }}</p>
+    }
     @if (step() === 1) {
       <div class="dropzone" (dragover)="$event.preventDefault()" (drop)="drop($event)">
         <h4>Kéo tệp .xlsx / .csv vào đây</h4>
         <p class="english">Tối đa 5 MB · 1.000 dòng</p>
         <input #fileInput type="file" accept=".csv,.xlsx" hidden (change)="select($event)" /><button
           class="primary"
+          [disabled]="busy()"
           (click)="fileInput.click()"
         >
           Chọn tệp
         </button>
       </div>
-      <button class="text-button" (click)="template()">↓ Tải template mẫu</button>
-      <p class="muted">Staff Code · Full Name · Cinema Code</p>
+      <button class="text-button" [disabled]="busy()" (click)="template()">
+        ↓ Tải template Excel (.xlsx)
+      </button>
+      <p class="muted">Staff Code · Full Name · Cinema Code · Manager Username</p>
+      <p class="muted">
+        Nhập tên đăng nhập của quản lý trực tiếp đang hoạt động cùng rạp. Để trống nếu chưa gán quản
+        lý.
+      </p>
     }
     @if (result(); as r) {
       @if (step() === 2) {
@@ -57,6 +67,7 @@ import { AsyncPage, PageState } from './shared';
                 <th>Staff Code</th>
                 <th>Họ tên</th>
                 <th>Cinema Code</th>
+                <th>Quản lý trực tiếp</th>
                 <th>Kết quả</th>
               </tr>
             </thead>
@@ -67,6 +78,7 @@ import { AsyncPage, PageState } from './shared';
                   <td>{{ row.staffCode }}</td>
                   <td>{{ row.name }}</td>
                   <td>{{ row.cinemaCode }}</td>
+                  <td>{{ row.managerUsername || 'Chưa gán quản lý' }}</td>
                   <td>
                     <span class="tag" [class.bad]="row.error" [class.good]="!row.error">{{
                       row.error || 'Hợp lệ'
@@ -79,9 +91,9 @@ import { AsyncPage, PageState } from './shared';
         </div>
         <div class="actions section">
           <button class="primary" [disabled]="busy() || !r.valid" (click)="confirm()">
-            Xác nhận import {{ r.valid }} dòng</button
-          ><button class="secondary" (click)="errors()">↓ Tải file lỗi</button
-          ><button class="text-button" (click)="reset()">Huỷ</button>
+            {{ busy() ? 'Đang import…' : 'Xác nhận import ' + r.valid + ' dòng' }}</button
+          ><button class="secondary" [disabled]="busy()" (click)="errors()">↓ Tải file lỗi</button
+          ><button class="text-button" [disabled]="busy()" (click)="reset()">Huỷ</button>
         </div>
       }
       @if (step() === 3) {
@@ -90,8 +102,10 @@ import { AsyncPage, PageState } from './shared';
           <p>{{ r.invalid }} dòng bị bỏ qua.</p>
           <div class="actions">
             <a routerLink="/qr" class="primary">Generate QR cho nhân viên mới</a
-            ><button class="secondary" (click)="errors()">↓ Tải file lỗi</button
-            ><button class="text-button" (click)="reset()">Import tệp khác</button>
+            ><button class="secondary" [disabled]="busy()" (click)="errors()">↓ Tải file lỗi</button
+            ><button class="text-button" [disabled]="busy()" (click)="reset()">
+              Import tệp khác
+            </button>
           </div>
         </section>
       }
@@ -99,15 +113,18 @@ import { AsyncPage, PageState } from './shared';
   `,
 })
 export class ImportPage extends AsyncPage {
+  operation = signal('');
   file: File | null = null;
   result = signal<ImportResult | null>(null);
   step = signal(1);
   select(e: Event) {
+    if (this.busy()) return;
     this.file = (e.target as HTMLInputElement).files?.[0] || null;
     void this.preview();
   }
   drop(e: DragEvent) {
     e.preventDefault();
+    if (this.busy()) return;
     this.file = e.dataTransfer?.files[0] || null;
     void this.preview();
   }
@@ -118,25 +135,30 @@ export class ImportPage extends AsyncPage {
     return data;
   }
   preview() {
-    if (!this.file) return;
+    if (this.busy() || !this.file) return;
     if (this.file.size > 5 * 1024 * 1024) {
       this.error.set('Tệp vượt quá 5 MB');
       return;
     }
+    this.operation.set('Đang kiểm tra tệp…');
     return this.run(async () => {
       this.result.set(await this.api.post<ImportResult>('/admin/staff/import', this.form()));
       this.step.set(2);
     });
   }
   confirm() {
+    if (this.busy() || !this.file || !this.result()?.valid || this.step() !== 2) return;
+    this.operation.set('Đang import nhân viên, vui lòng chờ…');
     return this.run(async () => {
       this.result.set(await this.api.post<ImportResult>('/admin/staff/import', this.form(true)));
       this.step.set(3);
     });
   }
   template() {
+    if (this.busy()) return;
+    this.operation.set('Đang tải template Excel…');
     return this.run(async () =>
-      download(await this.api.blob('/admin/staff/import/template'), 'staff-template.csv'),
+      download(await this.api.blob('/admin/staff/import/template'), 'staff-template.xlsx'),
     );
   }
   errors() {
@@ -146,10 +168,12 @@ export class ImportPage extends AsyncPage {
     download(
       new Blob(
         [
-          '\ufeffDòng,Staff Code,Full Name,Cinema Code,Error\n' +
+          '\ufeffDòng,Staff Code,Full Name,Cinema Code,Manager Username,Error\n' +
             rows
               .map((r) =>
-                [String(r.row), r.staffCode, r.name, r.cinemaCode, r.error].map(cell).join(','),
+                [String(r.row), r.staffCode, r.name, r.cinemaCode, r.managerUsername, r.error]
+                  .map(cell)
+                  .join(','),
               )
               .join('\n'),
         ],
@@ -159,6 +183,7 @@ export class ImportPage extends AsyncPage {
     );
   }
   reset() {
+    if (this.busy()) return;
     this.file = null;
     this.result.set(null);
     this.step.set(1);

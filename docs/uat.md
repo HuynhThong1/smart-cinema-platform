@@ -38,3 +38,12 @@ Local automated checks and browser evidence are recorded in `implementation-stat
 ## Manager feedback notifications
 
 See [notification behavior, configuration and UAT](manager-feedback-notifications.md). In-app inbox and Resend email outbox extend the original Phase 1 scope.
+
+## Staff XLSX import — 2026-09-07 local verification
+
+- Template is an XLSX workbook with four text-formatted columns and a Vietnamese instruction sheet. The data sheet starts empty so example staff cannot be imported accidentally.
+- `Manager Username` is optional; a supplied username must match an enabled Cinema Manager in the staff's cinema. Legacy three-column CSV/XLSX files remain supported.
+- Go integration tests verify preview without writes, invalid/locked/cross-cinema managers, confirmation revalidation, persisted manager IDs, and no import on identity-service failure.
+- Browser QA at admin width 1366px used a synthetic XLSX with `manager` (same cinema) and `manager2` (other cinema): preview showed one valid row and one row error. Screenshot captured in the task.
+- Confirming with Enter showed “Đang import…” with confirm, error-download and cancel buttons disabled, then “Đã import 1 nhân viên” and one skipped row. Browser console had no errors.
+- Go tests with local MongoDB, Go vet, frontend typecheck, format check and both production builds passed. Customer pages were unchanged; mobile customer QA was not repeated for this admin-only change.

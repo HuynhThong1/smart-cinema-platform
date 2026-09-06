@@ -212,7 +212,7 @@ func (a *UserAdmin) Managers(ctx context.Context, cinemaID string) ([]User, erro
 		}
 		for _, u := range batch {
 			if ids := u.Attributes["cinema_id"]; u.Enabled && len(ids) > 0 && ids[0] == cinemaID {
-				out = append(out, User{ID: u.ID, FirstName: u.FirstName, LastName: u.LastName})
+				out = append(out, User{ID: u.ID, Username: u.Username, FirstName: u.FirstName, LastName: u.LastName})
 			}
 		}
 		if len(batch) < 100 {

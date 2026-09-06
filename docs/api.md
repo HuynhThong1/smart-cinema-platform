@@ -35,7 +35,7 @@ Dashboard returns `summary`, `distribution`, `trend`, `hours`, `reasons`, `staff
 
 ## Import and download
 
-`POST /admin/staff/import` is multipart: `file` plus `confirm=false` for preview, then the same file with `confirm=true`. Columns must be `Staff Code`, `Full Name`, `Cinema Code`. Limits: 5 MB, 1,000 data rows. Confirmation revalidates; concurrent duplicate codes fail the transaction instead of partially committing. The response includes per-row errors and `total`, `valid`, `invalid`, `imported`, `confirmed`.
+`POST /admin/staff/import` is multipart: `file` plus `confirm=false` for preview, then the same file with `confirm=true`. Download `GET /admin/staff/import/template` for an XLSX workbook with text-formatted columns and a Vietnamese instruction sheet. Columns are `Staff Code`, `Full Name`, `Cinema Code`, `Manager Username`. The optional fourth column accepts an exact Keycloak username for an enabled CINEMA_MANAGER in the same cinema; it resolves to the persisted `managerId`. Blank values and legacy three-column files leave the manager unassigned. Preview rows include `managerUsername` and `managerId`. Identity-service outages abort the request without importing; confirmation checks managers again. Limits: 5 MB, 1,000 data rows. Confirmation revalidates; concurrent duplicate codes fail the transaction instead of partially committing. The response includes per-row errors and `total`, `valid`, `invalid`, `imported`, `confirmed`.
 
 QR download: `/admin/staff/{id}/qr/download?format=png|svg|pdf`. ZIP: `/admin/staff/qr/package?cinemaId=...`. Feedback export: `/admin/feedbacks/export` with the same filters, masked phones and formula-safe CSV cells; narrow filters if more than 10,000 records match.
 
