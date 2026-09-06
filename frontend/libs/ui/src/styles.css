@@ -835,6 +835,192 @@ html:has(.overlay[open]) {
   color: var(--muted);
   margin: 25px 0;
 }
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  max-width: 1000px;
+  margin-top: 30px;
+}
+.module-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  min-height: 184px;
+  margin: 0;
+  padding: 15px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+  font: inherit;
+}
+a.module-card:hover,
+button.module-card:hover {
+  background: #eaf1fa;
+  text-decoration: none;
+}
+.module-card .kicker {
+  color: var(--blue);
+  letter-spacing: 0.08em;
+}
+.module-card h3 {
+  font-size: 17px;
+  line-height: 1.2;
+  margin: 0;
+}
+.module-card .english {
+  margin: 0;
+}
+.module-card .module-desc {
+  flex: 1;
+  margin: 0;
+  font-size: 13px;
+  text-wrap: pretty;
+}
+.module-head,
+.module-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.module-meta {
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted);
+}
+.module-action {
+  color: #013d80;
+  font-weight: 600;
+  white-space: nowrap;
+}
+/* Locked modules read as "not built yet" through a dashed edge and muted ink
+   rather than the prototype's blanket opacity, which pushed the body copy
+   below the 4.5:1 contrast floor. */
+.module-card.locked {
+  background: #fff;
+  border-style: dashed;
+  color: var(--muted);
+}
+.module-card.locked .kicker,
+.module-card.locked .module-action {
+  color: var(--muted);
+  font-weight: 400;
+}
+.module-card.locked h3 {
+  font-weight: 400;
+}
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 25px 0 5px;
+}
+.pill {
+  min-height: 34px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: #fff;
+  color: var(--text);
+  font-size: 13px;
+}
+.pill:hover {
+  background: #eaf1fa;
+}
+.pill[aria-pressed='true'] {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+}
+.bell-count {
+  background: var(--red);
+  color: #fff;
+  font-size: 11px;
+  padding: 1px 7px;
+}
+.notif-list {
+  display: flex;
+  flex-direction: column;
+  margin-top: 15px;
+}
+.notif-row {
+  display: grid;
+  grid-template-columns: 8px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: start;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+.notif-row.read {
+  opacity: 0.62;
+}
+.notif-dot {
+  width: 8px;
+  height: 8px;
+  margin-top: 7px;
+  border-radius: 50%;
+  background: var(--blue);
+}
+.notif-dot.alert {
+  background: var(--red);
+}
+.notif-row.read .notif-dot {
+  background: transparent;
+}
+.notif-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.notif-row h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 600;
+}
+.notif-row.read h3 {
+  font-weight: 400;
+}
+.notif-body {
+  margin: 0;
+  font-size: 14px;
+  text-wrap: pretty;
+}
+.notif-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+.notif-actions .secondary,
+.notif-actions .text-button {
+  min-height: 32px;
+  margin: 0;
+  padding: 5px 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.note-block {
+  max-width: 640px;
+  margin-top: 34px;
+}
+.note-block p {
+  font-size: 13px;
+  text-wrap: pretty;
+}
+.columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 40px;
+  margin-top: 40px;
+}
 @media (max-width: 1100px) {
   .admin-shell {
     padding: 18px 20px 40px;
@@ -851,6 +1037,17 @@ html:has(.overlay[open]) {
   .qr-preview,
   .config-layout aside {
     position: static;
+  }
+}
+@media (max-width: 760px) {
+  .notif-row {
+    grid-template-columns: 8px minmax(0, 1fr);
+  }
+  .notif-actions {
+    grid-column: 2;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
   }
 }
 @media (max-width: 700px) {

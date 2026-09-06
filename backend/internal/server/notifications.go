@@ -99,6 +99,20 @@ func (s *Server) unreadNotifications(c *gin.Context) {
 	}
 	c.JSON(200, gin.H{"count": count})
 }
+
+// readAllNotifications clears the whole unread queue in one write. Looping the
+// per-id endpoint from the client would leave the inbox half-read whenever a
+// request in the middle of the batch failed.
+func (s *Server) readAllNotifications(c *gin.Context) {
+	f := notificationScope(c)
+	f["readAt"] = nil
+	n, err := s.Store.Update(c.Request.Context(), "notifications", f, bson.M{"$set": bson.M{"readAt": time.Now().UTC()}})
+	if err != nil {
+		dbError(c, err)
+		return
+	}
+	c.JSON(200, gin.H{"updated": n})
+}
 func (s *Server) readNotification(c *gin.Context) {
 	f := notificationScope(c)
 	f["_id"] = c.Param("id")

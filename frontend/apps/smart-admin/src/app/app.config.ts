@@ -17,6 +17,11 @@ export const appConfig: ApplicationConfig = {
           {
             path: '',
             loadComponent: () =>
+              import('../../../../libs/feature/src/modules').then((m) => m.ModuleLauncherPage),
+          },
+          {
+            path: 'dashboard',
+            loadComponent: () =>
               import('../../../../libs/feature/src/dashboard').then((m) => m.DashboardPage),
           },
           {
@@ -28,6 +33,13 @@ export const appConfig: ApplicationConfig = {
             path: 'notifications',
             loadComponent: () =>
               import('../../../../libs/feature/src/notifications').then((m) => m.NotificationsPage),
+          },
+          {
+            path: 'notification-rules',
+            loadComponent: () =>
+              import('../../../../libs/feature/src/notification-rules').then(
+                (m) => m.NotificationRulesPage,
+              ),
           },
           {
             path: 'feedback',

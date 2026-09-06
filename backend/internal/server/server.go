@@ -83,6 +83,7 @@ func (s *Server) Router(verifier auth.Verifier, origins []string) *gin.Engine {
 	a.GET("/managers", s.listManagers)
 	a.GET("/notifications", s.listNotifications)
 	a.GET("/notifications/unread-count", s.unreadNotifications)
+	a.PUT("/notifications/read-all", s.readAllNotifications)
 	a.PUT("/notifications/:id/read", s.readNotification)
 	a.GET("/me", func(c *gin.Context) { c.JSON(200, auth.Current(c)) })
 	a.GET("/cinemas", s.listCinemas)
