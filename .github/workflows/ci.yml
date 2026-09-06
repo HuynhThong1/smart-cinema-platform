@@ -79,11 +79,37 @@ jobs:
             fi
           done
           exit "${missing}"
-      - name: Deploy verified commit
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Deploy services whose sources changed
         shell: bash
         env:
           COMMIT_SHA: ${{ github.sha }}
+          PREVIOUS_SHA: ${{ github.event.before }}
         run: |
+          # Only redeploy what actually changed. Rebuilding an untouched service
+          # buys nothing and costs a cold start, which on the free plan is where
+          # a container is most likely to fall over. Note that a deploy hook
+          # rebuilds a service from the configuration Render already holds; it
+          # does not read render.yaml, so Blueprint edits need a Blueprint sync
+          # and are deliberately not mapped to a service here.
+          changed=""
+          if [[ -n "${PREVIOUS_SHA}" ]] && git cat-file -e "${PREVIOUS_SHA}^{commit}" 2>/dev/null; then
+            changed="$(git diff --name-only "${PREVIOUS_SHA}" "${COMMIT_SHA}")"
+            echo "Changed files:"
+            echo "${changed}" | sed 's/^/  /'
+          else
+            echo "No usable previous commit; treating every service as changed."
+          fi
+
+          touched() {
+            if [[ -z "${changed}" ]]; then
+              return 0
+            fi
+            grep -qE "$1" <<<"${changed}"
+          }
+
           deploy() {
             local service="$1"
             local hook="$2"
@@ -100,7 +126,19 @@ jobs:
             echo
           }
 
-          deploy "smart-cinema-keycloak" "${RENDER_KEYCLOAK_DEPLOY_HOOK_URL}"
-          deploy "smart-cinema-api" "${RENDER_API_DEPLOY_HOOK_URL}"
-          deploy "smart-cinema-customer" "${RENDER_CUSTOMER_DEPLOY_HOOK_URL}"
-          deploy "smart-cinema-admin" "${RENDER_ADMIN_DEPLOY_HOOK_URL}"
+          maybe_deploy() {
+            local service="$1"
+            local hook="$2"
+            local pattern="$3"
+
+            if touched "${pattern}"; then
+              deploy "${service}" "${hook}"
+            else
+              echo "Skipping ${service}: nothing changed under ${pattern}"
+            fi
+          }
+
+          maybe_deploy "smart-cinema-keycloak" "${RENDER_KEYCLOAK_DEPLOY_HOOK_URL}" '^infra/keycloak/'
+          maybe_deploy "smart-cinema-api" "${RENDER_API_DEPLOY_HOOK_URL}" '^backend/'
+          maybe_deploy "smart-cinema-customer" "${RENDER_CUSTOMER_DEPLOY_HOOK_URL}" '^frontend/'
+          maybe_deploy "smart-cinema-admin" "${RENDER_ADMIN_DEPLOY_HOOK_URL}" '^frontend/'
