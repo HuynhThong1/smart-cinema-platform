@@ -136,5 +136,19 @@ services:
         generateValue: true
       - key: DEMO_USER_PASSWORD
         sync: false
-      - key: JAVA_OPTS_KC_HEAP
-        value: -XX:InitialRAMPercentage=20 -XX:MaxRAMPercentage=60
+      # Absolute heap sizes, not RAMPercentage. A percentage is applied to whatever
+      # memory the JVM detects, so on a host where it does not see the 512MB cap the
+      # 20% initial heap alone commits far more than the instance has and the
+      # container is OOM-killed before it ever binds a port. Fixed sizes cannot drift
+      # with the host. SerialGC replaces kc.sh's G1 (leaner native footprint on a
+      # small heap); overriding JAVA_OPTS wholesale is required because appending
+      # -XX:+UseSerialGC to the built-in -XX:+UseG1GC aborts the JVM. That also means
+      # kc.sh ignores JAVA_OPTS_KC_HEAP, so it is deliberately absent.
+      # Measured: boots in ~15s and holds ~350MB under a hard 512MB limit.
+      - key: JAVA_OPTS
+        value: >-
+          -Xms96m -Xmx224m
+          -XX:MetaspaceSize=64M -XX:MaxMetaspaceSize=128m
+          -XX:ReservedCodeCacheSize=48m -Xss512k
+          -XX:+UseSerialGC -XX:+ExitOnOutOfMemoryError
+          -Djava.security.egd=file:/dev/urandom -Dfile.encoding=UTF-8
