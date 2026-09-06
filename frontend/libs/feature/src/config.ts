@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FeedbackConfig, Reason } from '@cinema/core';
-import { RatingControl, Overlay } from '@cinema/ui';
+import { RatingControl, Overlay, RowLink } from '@cinema/ui';
 import { AsyncPage, PageState } from './shared';
 @Component({
   selector: 'cinema-rating-config',
@@ -136,7 +136,7 @@ export class RatingPage extends AsyncPage {
 }
 @Component({
   selector: 'cinema-reasons',
-  imports: [FormsModule, Overlay, PageState],
+  imports: [FormsModule, Overlay, RowLink, PageState],
   template: ` <div class="page-title">
       <div>
         <p class="kicker">Cấu hình / Feedback reasons</p>
@@ -161,12 +161,8 @@ export class RatingPage extends AsyncPage {
         </thead>
         <tbody>
           @for (r of reasons(); track r.id) {
-            <tr>
-              <td>
-                <button class="row-action" (click)="edit(r)">
-                  {{ r.code }}
-                </button>
-              </td>
+            <tr (rowOpen)="edit(r)">
+              <td>{{ r.code }}</td>
               <td>
                 {{ r.label }}<small>{{ r.english }}</small>
               </td>

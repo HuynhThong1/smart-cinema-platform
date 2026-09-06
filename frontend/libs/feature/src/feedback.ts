@@ -11,11 +11,11 @@ import {
   errorMessage,
   localDate,
 } from '@cinema/core';
-import { Overlay } from '@cinema/ui';
+import { Overlay, RowLink } from '@cinema/ui';
 import { AsyncPage, Filters, PageState, Pager } from './shared';
 @Component({
   selector: 'cinema-feedback-list',
-  imports: [FormsModule, RouterLink, Overlay, Filters, PageState, Pager],
+  imports: [FormsModule, RouterLink, Overlay, RowLink, Filters, PageState, Pager],
   template: ` <div class="page-title">
       <div>
         <p class="kicker">Feedback</p>
@@ -74,12 +74,8 @@ import { AsyncPage, Filters, PageState, Pager } from './shared';
           </thead>
           <tbody>
             @for (f of data().items; track f.id) {
-              <tr>
-                <td>
-                  <button class="row-action" (click)="open(f.id)">
-                    {{ localDate(f.createdAt) }}
-                  </button>
-                </td>
+              <tr (rowOpen)="open(f.id)">
+                <td>{{ localDate(f.createdAt) }}</td>
                 <td>
                   <span
                     class="tag"

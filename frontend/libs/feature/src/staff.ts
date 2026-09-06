@@ -2,11 +2,11 @@ import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Cinema, Staff, Page, localDate } from '@cinema/core';
-import { Overlay } from '@cinema/ui';
+import { Overlay, RowLink } from '@cinema/ui';
 import { AsyncPage, PageState, Pager } from './shared';
 @Component({
   selector: 'cinema-staff',
-  imports: [FormsModule, RouterLink, Overlay, PageState, Pager],
+  imports: [FormsModule, RouterLink, Overlay, RowLink, PageState, Pager],
   template: ` <div class="page-title">
       <div>
         <p class="kicker">Nhân viên</p>
@@ -46,15 +46,11 @@ import { AsyncPage, PageState, Pager } from './shared';
           </thead>
           <tbody>
             @for (s of data().items; track s.id) {
-              <tr>
+              <tr (rowOpen)="edit(s)">
                 <td>
                   <strong>{{ s.staffCode }}</strong>
                 </td>
-                <td>
-                  <button class="row-action" (click)="edit(s)">
-                    {{ s.name }}
-                  </button>
-                </td>
+                <td>{{ s.name }}</td>
                 <td>
                   {{ cinemaName(s.cinemaId) }}
                   @if (!s.managerId) {

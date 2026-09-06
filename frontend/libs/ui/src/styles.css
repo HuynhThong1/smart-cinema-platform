@@ -326,12 +326,11 @@ td {
 tbody tr:hover {
   background: #f8fafc;
 }
-.row-action {
-  color: var(--blue);
-  background: none;
-  border: 0;
-  text-align: left;
-  padding: 0;
+tr.row-link {
+  cursor: pointer;
+}
+tr.row-link:focus-visible {
+  outline-offset: -2px;
 }
 .table-wide {
   min-width: 880px;

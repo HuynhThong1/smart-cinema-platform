@@ -2,11 +2,11 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { QR, Staff, Cinema, Page, download } from '@cinema/core';
-import { Overlay } from '@cinema/ui';
+import { Overlay, RowLink } from '@cinema/ui';
 import { AsyncPage, PageState, Pager } from './shared';
 @Component({
   selector: 'cinema-qr',
-  imports: [FormsModule, Overlay, PageState, Pager],
+  imports: [FormsModule, Overlay, RowLink, PageState, Pager],
   template: ` <div class="page-title">
       <div>
         <p class="kicker">Nhân viên / QR Management</p>
@@ -48,7 +48,10 @@ import { AsyncPage, PageState, Pager } from './shared';
             </thead>
             <tbody>
               @for (s of data().items; track s.id) {
-                <tr [style.background]="selected()?.id === s.id ? '#eaf1fa' : ''">
+                <tr
+                  [style.background]="selected()?.id === s.id ? '#eaf1fa' : ''"
+                  (rowOpen)="select(s)"
+                >
                   <td>{{ s.staffCode }}</td>
                   <td>{{ s.name }}</td>
                   <td>

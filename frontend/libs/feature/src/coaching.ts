@@ -2,11 +2,11 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Coaching, Staff, Page } from '@cinema/core';
-import { Overlay } from '@cinema/ui';
+import { Overlay, RowLink } from '@cinema/ui';
 import { AsyncPage, PageState, Pager } from './shared';
 @Component({
   selector: 'cinema-coaching',
-  imports: [FormsModule, Overlay, PageState, Pager],
+  imports: [FormsModule, Overlay, RowLink, PageState, Pager],
   template: ` <div class="page-title">
       <div>
         <p class="kicker">Coaching</p>
@@ -43,13 +43,9 @@ import { AsyncPage, PageState, Pager } from './shared';
         </thead>
         <tbody>
           @for (c of data().items; track c.id) {
-            <tr>
+            <tr (rowOpen)="edit(c)">
               <td>{{ staffName(c.staffId) }}</td>
-              <td>
-                <button class="row-action" (click)="edit(c)">
-                  {{ c.topic }}
-                </button>
-              </td>
+              <td>{{ c.topic }}</td>
               <td>{{ c.action }}</td>
               <td>{{ c.followUpDate }}</td>
               <td>

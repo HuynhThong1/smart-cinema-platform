@@ -2,6 +2,7 @@ import { Component, Injectable, inject, signal, DestroyRef } from '@angular/core
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Api, Page, localDate } from '@cinema/core';
+import { RowLink } from '@cinema/ui';
 import { AsyncPage, PageState, Pager } from './shared';
 
 export interface FeedbackNotification {
@@ -69,7 +70,7 @@ export class NotificationBell {
 }
 @Component({
   selector: 'cinema-notifications',
-  imports: [FormsModule, PageState, Pager],
+  imports: [FormsModule, RowLink, PageState, Pager],
   template: `<div class="page-title">
       <div>
         <p class="kicker">Thông báo</p>
@@ -99,7 +100,7 @@ export class NotificationBell {
           </thead>
           <tbody>
             @for (n of data().items; track n.id) {
-              <tr>
+              <tr (rowOpen)="goToFeedback(n)">
                 <td>{{ localDate(n.createdAt) }}</td>
                 <td>{{ n.staffName }}</td>
                 <td>
@@ -231,6 +232,9 @@ export class NotificationsPage extends AsyncPage {
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
       return;
     event.preventDefault();
+    await this.goToFeedback(n);
+  }
+  async goToFeedback(n: FeedbackNotification) {
     if (!(await this.mark(n))) return;
     await this.counter.refresh();
     await this.router.navigateByUrl(this.feedbackUrl(n));
