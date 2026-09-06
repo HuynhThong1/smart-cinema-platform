@@ -50,3 +50,57 @@ jobs:
         working-directory: backend
       - if: always()
         run: docker compose down -v
+  deploy:
+    name: Deploy to Render
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [frontend, backend]
+    runs-on: ubuntu-latest
+    concurrency:
+      group: render-production
+      cancel-in-progress: true
+    env:
+      RENDER_KEYCLOAK_DEPLOY_HOOK_URL: ${{ secrets.RENDER_KEYCLOAK_DEPLOY_HOOK_URL }}
+      RENDER_API_DEPLOY_HOOK_URL: ${{ secrets.RENDER_API_DEPLOY_HOOK_URL }}
+      RENDER_CUSTOMER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_CUSTOMER_DEPLOY_HOOK_URL }}
+      RENDER_ADMIN_DEPLOY_HOOK_URL: ${{ secrets.RENDER_ADMIN_DEPLOY_HOOK_URL }}
+    steps:
+      - name: Check deploy hook secrets
+        shell: bash
+        run: |
+          missing=0
+          for name in \
+            RENDER_KEYCLOAK_DEPLOY_HOOK_URL \
+            RENDER_API_DEPLOY_HOOK_URL \
+            RENDER_CUSTOMER_DEPLOY_HOOK_URL \
+            RENDER_ADMIN_DEPLOY_HOOK_URL; do
+            if [[ -z "${!name}" ]]; then
+              echo "::error::Missing GitHub Actions secret: ${name}"
+              missing=1
+            fi
+          done
+          exit "${missing}"
+      - name: Deploy verified commit
+        shell: bash
+        env:
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          deploy() {
+            local service="$1"
+            local hook="$2"
+
+            echo "Triggering ${service} for ${COMMIT_SHA}"
+            curl \
+              --fail-with-body \
+              --silent \
+              --show-error \
+              --retry 3 \
+              --get \
+              --data-urlencode "ref=${COMMIT_SHA}" \
+              "${hook}"
+            echo
+          }
+
+          deploy "smart-cinema-keycloak" "${RENDER_KEYCLOAK_DEPLOY_HOOK_URL}"
+          deploy "smart-cinema-api" "${RENDER_API_DEPLOY_HOOK_URL}"
+          deploy "smart-cinema-customer" "${RENDER_CUSTOMER_DEPLOY_HOOK_URL}"
+          deploy "smart-cinema-admin" "${RENDER_ADMIN_DEPLOY_HOOK_URL}"

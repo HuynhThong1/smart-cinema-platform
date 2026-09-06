@@ -5,7 +5,8 @@ services:
     runtime: static
     buildCommand: corepack prepare pnpm@11.10.0 --activate && corepack pnpm --dir frontend install --frozen-lockfile && corepack pnpm --dir frontend build:admin:render
     staticPublishPath: ./frontend/dist/apps/smart-admin/browser
-    autoDeployTrigger: checksPass
+    # GitHub Actions deploys the exact verified commit through Render deploy hooks.
+    autoDeployTrigger: off
     envVars:
       - key: API_URL
         fromService:
@@ -40,7 +41,7 @@ services:
     dockerfilePath: ./frontend/Dockerfile.customer
     dockerContext: ./frontend
     healthCheckPath: /healthz
-    autoDeployTrigger: checksPass
+    autoDeployTrigger: off
     envVars:
       - key: API_INTERNAL_URL
         fromService:
@@ -56,7 +57,7 @@ services:
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
     healthCheckPath: /readyz
-    autoDeployTrigger: checksPass
+    autoDeployTrigger: off
     envVars:
       - key: MONGODB_URI
         sync: false
@@ -99,7 +100,7 @@ services:
     dockerfilePath: ./infra/keycloak/Dockerfile
     dockerContext: ./infra/keycloak
     healthCheckPath: /realms/master
-    autoDeployTrigger: checksPass
+    autoDeployTrigger: off
     envVars:
       - key: KC_HTTP_PORT
         value: "10000"

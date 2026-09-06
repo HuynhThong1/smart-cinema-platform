@@ -29,7 +29,20 @@ Replace the `postgresql://` prefix with `jdbc:postgresql://` and remove `USER:PA
 
 [Deploy the repository on Render](https://render.com/deploy?repo=https://github.com/HuynhThong1/smart-cinema-platform)
 
-## 3. Verify the deployment
+## 3. Configure GitHub deployment
+
+Each Render service has a private deploy hook under **Settings > Deploy Hook**. Add the four URLs as GitHub repository secrets under **Settings > Secrets and variables > Actions**:
+
+```text
+RENDER_KEYCLOAK_DEPLOY_HOOK_URL
+RENDER_API_DEPLOY_HOOK_URL
+RENDER_CUSTOMER_DEPLOY_HOOK_URL
+RENDER_ADMIN_DEPLOY_HOOK_URL
+```
+
+The `Verify` workflow deploys only after both frontend and backend jobs pass on `main`. It sends `github.sha` to every hook, so Render builds the commit that CI verified. Keep Render's own auto-deploy disabled as declared in `render.yaml` to prevent duplicate builds.
+
+## 4. Verify the deployment
 
 Wait until all four services show **Live**. On the free plan, Keycloak can take several minutes to build and the first API deploy might need **Manual Deploy > Deploy latest commit** after Keycloak becomes live.
 
