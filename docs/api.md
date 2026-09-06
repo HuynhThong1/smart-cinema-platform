@@ -48,3 +48,7 @@ Configuration/cinema management requires a global role. User management requires
 ## User administration
 
 System Admins manage login accounts with `GET/POST /admin/users` and `PUT/DELETE /admin/users/{id}`. Creation requires a temporary password of at least 12 characters; Keycloak prompts the user to replace it at first login. Updates can change name, roles, cinema scope and enabled status. Use `enabled: false` to suspend access temporarily. Deletion is permanent, requires confirmation in the admin UI and cannot target the currently signed-in account.
+
+## Manager feedback notifications
+
+See [notification behavior, configuration and UAT](manager-feedback-notifications.md). In-app inbox and Resend email outbox extend the original Phase 1 scope.

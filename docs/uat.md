@@ -34,3 +34,7 @@ Use synthetic data locally. Record browser/device, account role, cinema, test ti
 - Pilot one cinema only after operational sign-off. Record completion rate, scan failures, manager feedback and analytics discrepancies, then resolve findings before expansion.
 
 Local automated checks and browser evidence are recorded in `implementation-status.md`. Physical print/scan tests, production security review and live pilot require cinema participation.
+
+## Manager feedback notifications
+
+See [notification behavior, configuration and UAT](manager-feedback-notifications.md). In-app inbox and Resend email outbox extend the original Phase 1 scope.

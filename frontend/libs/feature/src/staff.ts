@@ -55,7 +55,12 @@ import { AsyncPage, PageState, Pager } from './shared';
                     {{ s.name }}
                   </button>
                 </td>
-                <td>{{ cinemaName(s.cinemaId) }}</td>
+                <td>
+                  {{ cinemaName(s.cinemaId) }}
+                  @if (!s.managerId) {
+                    <p class="negative">Chưa gán quản lý</p>
+                  }
+                </td>
                 <td>
                   <span class="tag" [class.good]="s.status === 'ACTIVE'">{{ s.status }}</span>
                 </td>
@@ -97,6 +102,7 @@ import { AsyncPage, PageState, Pager } from './shared';
           >Rạp *<select
             name="cinema"
             [(ngModel)]="draft.cinemaId"
+            (ngModelChange)="draft.managerId = ''; loadManagers()"
             [disabled]="!auth.global()"
             required
           >
@@ -105,6 +111,30 @@ import { AsyncPage, PageState, Pager } from './shared';
             }
           </select></label
         ><label
+          >Quản lý trực tiếp / Direct manager<select
+            name="manager"
+            [(ngModel)]="draft.managerId"
+            [disabled]="managersLoading"
+          >
+            <option value="">Chưa gán quản lý</option>
+            @for (m of managers(); track m.id) {
+              <option [value]="m.id">{{ m.name }}</option>
+            }
+            @if (draft.managerId && !hasManager()) {
+              <option [value]="draft.managerId">Quản lý đã gán · cần kiểm tra tài khoản</option>
+            }
+          </select></label
+        >
+        @if (managerError()) {
+          <p class="field-error" role="alert">
+            {{ managerError() }}
+            <button type="button" class="text-button" (click)="loadManagers()">Thử lại</button>
+          </p>
+        }
+        @if (!draft.managerId) {
+          <p class="muted">Chưa gửi thông báo cho đến khi gán quản lý trực tiếp.</p>
+        }
+        <label
           >Trạng thái<select name="status" [(ngModel)]="draft.status">
             <option>ACTIVE</option>
             <option>INACTIVE</option>
@@ -122,6 +152,37 @@ import { AsyncPage, PageState, Pager } from './shared';
 })
 export class StaffPage extends AsyncPage {
   data = signal<Page<Staff>>({ items: [], total: 0, page: 1, pageSize: 20 });
+  managers = signal<{ id: string; name: string }[]>([]);
+  managerError = signal('');
+  managersLoading = false;
+  private managerRequest = 0;
+  hasManager() {
+    return this.managers().some((m) => m.id === this.draft.managerId);
+  }
+  async loadManagers() {
+    const request = ++this.managerRequest;
+    this.managersLoading = true;
+    this.managerError.set('');
+    this.managers.set([]);
+    const cinemaId = this.draft.cinemaId || '';
+    // The endpoint rejects an empty cinema with 403, so retrying is pointless
+    // until a cinema is picked — the list may still be loading when this opens.
+    if (!cinemaId) {
+      this.managersLoading = false;
+      this.managerError.set('Chọn rạp để tải danh sách quản lý.');
+      return;
+    }
+    try {
+      const items = await this.api.get<{ id: string; name: string }[]>('/admin/managers', {
+        cinemaId,
+      });
+      if (request === this.managerRequest) this.managers.set(items);
+    } catch {
+      if (request === this.managerRequest) this.managerError.set('Không tải được quản lý của rạp.');
+    } finally {
+      if (request === this.managerRequest) this.managersLoading = false;
+    }
+  }
   cinemas = signal<Cinema[]>([]);
   page = signal(1);
   search = '';
@@ -160,7 +221,9 @@ export class StaffPage extends AsyncPage {
           cinemaId: this.auth.user()?.cinemaId || this.cinemas()[0]?.id || '',
           status: 'ACTIVE',
         };
+    this.draft.managerId ||= '';
     this.dialog = true;
+    void this.loadManagers();
   }
   save() {
     return this.run(async () => {

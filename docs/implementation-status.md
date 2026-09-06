@@ -35,3 +35,7 @@ The fresh Keycloak realm import was also checked with a disposable realm: the se
 Physical A6/A5/sticker printing and scans on real iOS/Android devices, Safari/Firefox coverage, production TLS/proxy/backup/retention review and the one-cinema pilot require the deployment owner and cinema participants. Dashboard staff rows are capped at 100, ranking returns top/bottom 20 plus up to 100 ineligible rows, and UI selector lists currently load the first 100 cinemas/staff. These bounds should be revisited if the pilot dataset exceeds them.
 
 Local infrastructure contains synthetic data and development credentials only. It is evidence for engineering readiness, not production or pilot sign-off.
+
+## Manager feedback notifications
+
+See [notification behavior, configuration and UAT](manager-feedback-notifications.md). In-app inbox and Resend email outbox extend the original Phase 1 scope.

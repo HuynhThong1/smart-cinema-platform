@@ -16,6 +16,7 @@ type Store interface {
 	Count(context.Context, string, bson.M) (int64, error)
 	Insert(context.Context, string, any) error
 	Replace(context.Context, string, string, any) error
+	Update(context.Context, string, bson.M, bson.M) (int64, error)
 	Transaction(context.Context, func(context.Context) error) error
 }
 type Mongo struct{ DB *mongo.Database }
@@ -49,6 +50,13 @@ func (m *Mongo) Replace(ctx context.Context, c, id string, v any) error {
 	}
 	return e
 }
+func (m *Mongo) Update(ctx context.Context, c string, f bson.M, update bson.M) (int64, error) {
+	r, e := m.DB.Collection(c).UpdateMany(ctx, f, update)
+	if e != nil {
+		return 0, e
+	}
+	return r.ModifiedCount, nil
+}
 func (m *Mongo) Transaction(ctx context.Context, fn func(context.Context) error) error {
 	session, e := m.DB.Client().StartSession()
 	if e != nil {
@@ -60,14 +68,16 @@ func (m *Mongo) Transaction(ctx context.Context, fn func(context.Context) error)
 }
 func (m *Mongo) EnsureIndexes(ctx context.Context) error {
 	definitions := map[string][]mongo.IndexModel{
-		"rate_limits":      {{Keys: bson.D{{Key: "expiresAt", Value: 1}}, Options: options.Index().SetExpireAfterSeconds(0)}},
-		"cinemas":          {{Keys: bson.D{{Key: "code", Value: 1}}, Options: options.Index().SetUnique(true)}},
-		"staff":            {{Keys: bson.D{{Key: "staffCode", Value: 1}}, Options: options.Index().SetUnique(true)}, {Keys: bson.D{{Key: "cinemaId", Value: 1}, {Key: "status", Value: 1}}}},
-		"staff_qr_codes":   {{Keys: bson.D{{Key: "publicToken", Value: 1}}, Options: options.Index().SetUnique(true)}, {Keys: bson.D{{Key: "staffId", Value: 1}}, Options: options.Index().SetUnique(true)}},
-		"feedback_reasons": {{Keys: bson.D{{Key: "code", Value: 1}}, Options: options.Index().SetUnique(true)}},
-		"feedbacks":        {},
-		"coaching":         {{Keys: bson.D{{Key: "cinemaId", Value: 1}, {Key: "followUpDate", Value: 1}}}},
-		"audit_logs":       {{Keys: bson.D{{Key: "cinemaId", Value: 1}, {Key: "createdAt", Value: -1}}}},
+		"notifications":       {{Keys: bson.D{{Key: "recipientId", Value: 1}, {Key: "cinemaId", Value: 1}, {Key: "createdAt", Value: -1}}}},
+		"notification_emails": {{Keys: bson.D{{Key: "status", Value: 1}, {Key: "nextAttemptAt", Value: 1}}}},
+		"rate_limits":         {{Keys: bson.D{{Key: "expiresAt", Value: 1}}, Options: options.Index().SetExpireAfterSeconds(0)}},
+		"cinemas":             {{Keys: bson.D{{Key: "code", Value: 1}}, Options: options.Index().SetUnique(true)}},
+		"staff":               {{Keys: bson.D{{Key: "staffCode", Value: 1}}, Options: options.Index().SetUnique(true)}, {Keys: bson.D{{Key: "cinemaId", Value: 1}, {Key: "status", Value: 1}}}, {Keys: bson.D{{Key: "managerId", Value: 1}}}},
+		"staff_qr_codes":      {{Keys: bson.D{{Key: "publicToken", Value: 1}}, Options: options.Index().SetUnique(true)}, {Keys: bson.D{{Key: "staffId", Value: 1}}, Options: options.Index().SetUnique(true)}},
+		"feedback_reasons":    {{Keys: bson.D{{Key: "code", Value: 1}}, Options: options.Index().SetUnique(true)}},
+		"feedbacks":           {},
+		"coaching":            {{Keys: bson.D{{Key: "cinemaId", Value: 1}, {Key: "followUpDate", Value: 1}}}},
+		"audit_logs":          {{Keys: bson.D{{Key: "cinemaId", Value: 1}, {Key: "createdAt", Value: -1}}}},
 	}
 	for _, key := range []string{"staff.id", "cinema.id", "customer.phone", "rating.value", "reasons.code"} {
 		definitions["feedbacks"] = append(definitions["feedbacks"], mongo.IndexModel{Keys: bson.D{{Key: key, Value: 1}, {Key: "createdAt", Value: -1}}})

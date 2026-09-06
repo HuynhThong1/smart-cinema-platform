@@ -32,6 +32,8 @@ Cover authorization, cinema scope, validation, snapshots, QR lifecycle and persi
 
 ## Commit & Pull Request Guidelines
 
+Before implementation or bug fixes, switch off `main` to a dedicated branch: `feat/<description>` for features or `fix/<description>` for bugs.
+
 Follow Commitizen: `type(scope): concise description`, such as `feat(qr): add batch download`. Keep commits focused. PRs should explain behavior, link relevant issues, list verification and include screenshots for UI changes.
 
 ## Security & Configuration

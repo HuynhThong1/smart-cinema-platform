@@ -85,6 +85,7 @@ func (s *Server) saveUser(c *gin.Context) {
 		}
 		return
 	}
+	s.detachManager(c.Request.Context(), result)
 	if s.mutate(c, "UPDATE_USER", result.ID, u.CinemaID, func(context.Context) error { return nil }) {
 		c.JSON(200, result)
 	}
@@ -114,6 +115,7 @@ func (s *Server) deleteUser(c *gin.Context) {
 		}
 		return
 	}
+	s.detachManager(c.Request.Context(), auth.User{ID: id})
 	if s.mutate(c, "DELETE_USER", id, "", func(context.Context) error { return nil }) {
 		c.Status(204)
 	}
