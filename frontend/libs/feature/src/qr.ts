@@ -147,9 +147,19 @@ import { AsyncPage, PageState, Pager } from './shared';
         <div>
           <h4>Mẫu in tại POS</h4>
           <p>QR tối thiểu 35 mm, tương phản cao, nền trắng và khoảng trống ít nhất 4 module.</p>
-          <div class="actions">
-            <span class="tag">A6 card</span><span class="tag">A5 poster</span
-            ><span class="tag">80×80 sticker</span>
+          <div class="chips" role="radiogroup" aria-label="Khổ in">
+            @for (size of printSizes; track size.value) {
+              <button
+                type="button"
+                class="chip"
+                role="radio"
+                [class.selected]="printSize() === size.value"
+                [attr.aria-checked]="printSize() === size.value"
+                (click)="printSize.set(size.value)"
+              >
+                {{ size.label }}
+              </button>
+            }
           </div>
           <div class="actions section">
             <button class="primary" (click)="download('pdf')">↓ PDF</button
@@ -200,6 +210,12 @@ export class QRPage extends AsyncPage {
   search = '';
   cinemaId = '';
   printVisible = false;
+  printSize = signal('a6');
+  printSizes = [
+    { value: 'a6', label: 'A6 card' },
+    { value: 'a5', label: 'A5 poster' },
+    { value: 'sticker', label: '80×80 sticker' },
+  ];
   dialog = false;
   action = '';
   ngOnInit() {
@@ -284,22 +300,21 @@ export class QRPage extends AsyncPage {
     });
   }
   download(format: string) {
-    return this.run(async () =>
-      download(
-        await this.api.blob('/admin/staff/' + this.selected()!.id + '/qr/download', { format }),
-        'qr.' + format,
-      ),
-    );
+    return this.run(async () => {
+      const file = await this.api.namedBlob(
+        '/admin/staff/' + this.selected()!.id + '/qr/download',
+        { format, size: this.printSize() },
+      );
+      download(file.blob, file.name);
+    });
   }
   package() {
-    return this.run(async () =>
-      download(
-        await this.api.blob('/admin/staff/qr/package', {
-          cinemaId: this.cinemaId,
-        }),
-        'staff-qr.zip',
-      ),
-    );
+    return this.run(async () => {
+      const file = await this.api.namedBlob('/admin/staff/qr/package', {
+        cinemaId: this.cinemaId,
+      });
+      download(file.blob, file.name);
+    });
   }
   print() {
     window.print();

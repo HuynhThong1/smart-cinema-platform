@@ -264,17 +264,33 @@ func TestQRDownloadsAndBatchPreservesExisting(t *testing.T) {
 	if out["publicToken"] != token {
 		t.Fatal("batch changed token")
 	}
-	for _, format := range []string{"png", "svg", "pdf"} {
-		req := httptest.NewRequest("GET", "/api/v1/admin/staff/cinema-gnd-staff-1/qr/download?format="+format, nil)
+	for _, tc := range []struct{ query, suffix string }{
+		{"format=png", "_png.png"},
+		{"format=svg", "_svg.svg"},
+		{"format=pdf", "_a6.pdf"},
+		{"format=pdf&size=a5", "_a5.pdf"},
+		{"format=pdf&size=sticker", "_sticker.pdf"},
+	} {
+		req := httptest.NewRequest("GET", "/api/v1/admin/staff/cinema-gnd-staff-1/qr/download?"+tc.query, nil)
 		req.Header.Set("Authorization", "Bearer manager")
 		w := httptest.NewRecorder()
 		f.http.ServeHTTP(w, req)
 		if w.Code != 200 || w.Body.Len() < 100 {
-			t.Fatalf("%s download failed %d %s", format, w.Code, w.Body.String())
+			t.Fatalf("%s download failed %d %s", tc.query, w.Code, w.Body.String())
 		}
-		if format == "pdf" && !strings.HasPrefix(w.Body.String(), "%PDF-") {
-			t.Fatal("invalid PDF")
+		if strings.HasSuffix(tc.suffix, ".pdf") && !strings.HasPrefix(w.Body.String(), "%PDF-") {
+			t.Fatalf("%s is not a PDF", tc.query)
 		}
+		if disposition := w.Header().Get("Content-Disposition"); !strings.HasSuffix(disposition, tc.suffix+`"`) {
+			t.Fatalf("%s named the file %q", tc.query, disposition)
+		}
+	}
+	req := httptest.NewRequest("GET", "/api/v1/admin/staff/cinema-gnd-staff-1/qr/download?format=pdf&size=a3", nil)
+	req.Header.Set("Authorization", "Bearer manager")
+	w := httptest.NewRecorder()
+	f.http.ServeHTTP(w, req)
+	if w.Code != 400 {
+		t.Fatalf("unknown print size returned %d", w.Code)
 	}
 }
 

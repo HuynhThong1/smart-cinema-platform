@@ -12,10 +12,14 @@ import (
 	qrcode "github.com/skip2/go-qrcode"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"golang.org/x/text/runes"
+	"golang.org/x/text/transform"
+	"golang.org/x/text/unicode/norm"
 	"smartcinema/internal/auth"
 	"smartcinema/internal/domain"
 	"strings"
 	"time"
+	"unicode"
 )
 
 func (s *Server) qrResponse(q domain.QR) gin.H {
@@ -159,8 +163,73 @@ func qrSVG(q *qrcode.QRCode) []byte {
 //go:embed assets/*
 var printAssets embed.FS
 
-func qrPDF(png []byte) ([]byte, error) {
-	pdf := gofpdf.New("P", "mm", "A6", "")
+// printLayout places the card contents in millimetres for one paper size. The
+// values are explicit per size rather than scaled from A6, because an 80mm
+// sticker cannot fit the same proportions as a 148mm card.
+type printLayout struct {
+	format          string // gofpdf page name; empty means custom
+	page            gofpdf.SizeType
+	margin          float64
+	logoY, logoW    float64
+	qrY, qrSize     float64
+	textY           float64
+	titlePt, bodyPt float64
+	lineH           float64
+	english, note   bool
+}
+
+// The logo asset is a square canvas whose artwork occupies roughly the middle
+// 10%-45% band, so qrY must clear logoY+0.45*logoW or the QR clips the mark.
+var printLayouts = map[string]printLayout{
+	"a6":      {format: "A6", margin: 10, logoY: 12, logoW: 45, qrY: 33, qrSize: 61, textY: 99, titlePt: 13, bodyPt: 10, lineH: 7, english: true, note: true},
+	"a5":      {format: "A5", margin: 14, logoY: 16, logoW: 64, qrY: 48, qrSize: 86, textY: 142, titlePt: 18, bodyPt: 14, lineH: 10, english: true, note: true},
+	"sticker": {page: gofpdf.SizeType{Wd: 80, Ht: 80}, margin: 5, logoY: 1, logoW: 30, qrY: 16, qrSize: 44, textY: 61, titlePt: 8, bodyPt: 6.5, lineH: 4.3, english: false, note: true},
+}
+
+var deaccent = transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC)
+
+// slug renders a Vietnamese name as ASCII so the filename survives every OS and
+// unzip tool, and so Content-Disposition needs no encoding.
+func slug(value string) string {
+	value = strings.NewReplacer("đ", "d", "Đ", "D").Replace(value)
+	if folded, _, e := transform.String(deaccent, value); e == nil {
+		value = folded
+	}
+	var b strings.Builder
+	for _, r := range value {
+		switch {
+		case r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9':
+			b.WriteRune(r)
+		case b.Len() > 0 && !strings.HasSuffix(b.String(), "-"):
+			b.WriteRune('-')
+		}
+	}
+	return strings.Trim(b.String(), "-")
+}
+
+// exportName is empCode_empFullname_type, where type is the paper size for a
+// print template and the file format otherwise.
+func exportName(st domain.Staff, kind, extension string) string {
+	parts := []string{}
+	for _, part := range []string{slug(st.StaffCode), slug(st.Name), kind} {
+		if part != "" {
+			parts = append(parts, part)
+		}
+	}
+	return strings.Join(parts, "_") + "." + extension
+}
+
+func qrPDF(png []byte, size string) ([]byte, error) {
+	layout, ok := printLayouts[size]
+	if !ok {
+		layout = printLayouts["a6"]
+	}
+	var pdf *gofpdf.Fpdf
+	if layout.format != "" {
+		pdf = gofpdf.New("P", "mm", layout.format, "")
+	} else {
+		pdf = gofpdf.NewCustom(&gofpdf.InitType{UnitStr: "mm", Size: layout.page})
+	}
 	font, err := printAssets.ReadFile("assets/SourceSerif4-Regular.ttf")
 	if err != nil {
 		return nil, err
@@ -170,20 +239,28 @@ func qrPDF(png []byte) ([]byte, error) {
 		return nil, err
 	}
 	pdf.AddUTF8FontFromBytes("SourceSerif", "", font)
+	pdf.SetMargins(layout.margin, layout.margin, layout.margin)
+	pdf.SetAutoPageBreak(false, 0)
 	pdf.AddPage()
+	width, _ := pdf.GetPageSize()
+	text := width - 2*layout.margin
 	pdf.RegisterImageOptionsReader("logo", gofpdf.ImageOptions{ImageType: "PNG"}, bytes.NewReader(logo))
-	pdf.ImageOptions("logo", 30, 12, 45, 0, false, gofpdf.ImageOptions{ImageType: "PNG"}, 0, "")
+	pdf.ImageOptions("logo", (width-layout.logoW)/2, layout.logoY, layout.logoW, 0, false, gofpdf.ImageOptions{ImageType: "PNG"}, 0, "")
 	pdf.RegisterImageOptionsReader("qr", gofpdf.ImageOptions{ImageType: "PNG"}, bytes.NewReader(png))
-	pdf.ImageOptions("qr", 22, 33, 61, 61, false, gofpdf.ImageOptions{ImageType: "PNG"}, 0, "")
-	pdf.SetY(99)
-	pdf.SetFont("SourceSerif", "", 13)
+	pdf.ImageOptions("qr", (width-layout.qrSize)/2, layout.qrY, layout.qrSize, layout.qrSize, false, gofpdf.ImageOptions{ImageType: "PNG"}, 0, "")
+	pdf.SetY(layout.textY)
+	pdf.SetFont("SourceSerif", "", layout.titlePt)
 	pdf.SetTextColor(31, 41, 55)
-	pdf.CellFormat(85, 7, "QUÉT MÃ ĐỂ ĐÁNH GIÁ", "", 1, "C", false, 0, "")
-	pdf.CellFormat(85, 7, "TRẢI NGHIỆM CỦA BẠN", "", 1, "C", false, 0, "")
-	pdf.SetFont("SourceSerif", "", 10)
-	pdf.CellFormat(85, 7, "Scan to rate your experience", "", 1, "C", false, 0, "")
-	pdf.SetTextColor(3, 78, 162)
-	pdf.CellFormat(85, 7, "Chỉ mất 15–30 giây", "", 1, "C", false, 0, "")
+	pdf.CellFormat(text, layout.lineH, "QUÉT MÃ ĐỂ ĐÁNH GIÁ", "", 1, "C", false, 0, "")
+	pdf.CellFormat(text, layout.lineH, "TRẢI NGHIỆM CỦA BẠN", "", 1, "C", false, 0, "")
+	pdf.SetFont("SourceSerif", "", layout.bodyPt)
+	if layout.english {
+		pdf.CellFormat(text, layout.lineH, "Scan to rate your experience", "", 1, "C", false, 0, "")
+	}
+	if layout.note {
+		pdf.SetTextColor(3, 78, 162)
+		pdf.CellFormat(text, layout.lineH, "Chỉ mất 15–30 giây", "", 1, "C", false, 0, "")
+	}
 	var b bytes.Buffer
 	err = pdf.Output(&b)
 	return b.Bytes(), err
@@ -204,8 +281,10 @@ func (s *Server) downloadQR(c *gin.Context) {
 		return
 	}
 	format := c.DefaultQuery("format", "png")
+	size := c.DefaultQuery("size", "a6")
 	var content []byte
 	mime := "image/png"
+	kind := format
 	switch format {
 	case "svg":
 		content = qrSVG(code)
@@ -213,10 +292,15 @@ func (s *Server) downloadQR(c *gin.Context) {
 	case "png":
 		content, e = code.PNG(512)
 	case "pdf":
+		if _, ok := printLayouts[size]; !ok {
+			fail(c, 400, "Use a6, a5 or sticker")
+			return
+		}
+		kind = size
 		var png []byte
 		png, e = code.PNG(512)
 		if e == nil {
-			content, e = qrPDF(png)
+			content, e = qrPDF(png, size)
 		}
 		mime = "application/pdf"
 	default:
@@ -227,7 +311,7 @@ func (s *Server) downloadQR(c *gin.Context) {
 		fail(c, 500, "Unable to generate file")
 		return
 	}
-	c.Header("Content-Disposition", `attachment; filename="qr-`+st.ID+`.`+format+`"`)
+	c.Header("Content-Disposition", `attachment; filename="`+exportName(st, kind, format)+`"`)
 	c.Data(200, mime, content)
 }
 func (s *Server) qrPackage(c *gin.Context) {
@@ -267,7 +351,7 @@ func (s *Server) qrPackage(c *gin.Context) {
 			fail(c, 500, "QR export failed")
 			return
 		}
-		w, e := z.Create(st.ID + ".png")
+		w, e := z.Create(exportName(st, "png", "png"))
 		if e != nil {
 			fail(c, 500, "ZIP export failed")
 			return

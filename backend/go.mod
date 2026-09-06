@@ -5,10 +5,13 @@ go 1.26.0
 require (
 	github.com/coreos/go-oidc/v3 v3.17.0
 	github.com/gin-gonic/gin v1.11.0
+	github.com/go-jose/go-jose/v4 v4.1.3
 	github.com/phpdave11/gofpdf v1.4.3
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/xuri/excelize/v2 v2.10.0
 	go.mongodb.org/mongo-driver/v2 v2.4.0
+	golang.org/x/oauth2 v0.28.0
+	golang.org/x/text v0.30.0
 )
 
 require (
@@ -17,7 +20,6 @@ require (
 	github.com/cloudwego/base64x v0.1.6 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
 	github.com/gin-contrib/sse v1.1.0 // indirect
-	github.com/go-jose/go-jose/v4 v4.1.3 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.27.0 // indirect
@@ -50,10 +52,8 @@ require (
 	golang.org/x/crypto v0.43.0 // indirect
 	golang.org/x/mod v0.28.0 // indirect
 	golang.org/x/net v0.46.0 // indirect
-	golang.org/x/oauth2 v0.28.0 // indirect
 	golang.org/x/sync v0.17.0 // indirect
 	golang.org/x/sys v0.37.0 // indirect
-	golang.org/x/text v0.30.0 // indirect
 	golang.org/x/tools v0.37.0 // indirect
 	google.golang.org/protobuf v1.36.9 // indirect
 )

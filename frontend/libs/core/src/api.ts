@@ -43,6 +43,19 @@ export class Api {
       }),
     );
   }
+  /** Keeps Content-Disposition so the server stays the only source of filenames. */
+  async namedBlob(path: string, params: Record<string, string | number | boolean> = {}) {
+    const response = await firstValueFrom(
+      this.http.get(this.base + path, {
+        params: new HttpParams({ fromObject: params }),
+        responseType: 'blob',
+        observe: 'response',
+      }),
+    );
+    const disposition = response.headers.get('Content-Disposition') || '';
+    const match = /filename="?([^";]+)"?/.exec(disposition);
+    return { blob: response.body as Blob, name: match ? match[1] : 'download' };
+  }
 }
 export function errorMessage(error: unknown): string {
   if (error instanceof HttpErrorResponse) {
