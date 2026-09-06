@@ -2820,7 +2820,7 @@
     },
     "/admin/staff/import/template": {
       "get": {
-        "summary": "Download CSV template",
+        "summary": "Download XLSX template",
         "description": "",
         "operationId": "get_admin_staff_import_template",
         "security": [
@@ -2833,7 +2833,7 @@
           "200": {
             "description": "Success",
             "content": {
-              "text/csv": {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
                 "schema": {
                   "type": "string",
                   "format": "binary"
@@ -2857,7 +2857,7 @@
     "/admin/staff/import": {
       "post": {
         "summary": "Preview or confirm staff import",
-        "description": "Multipart CSV/XLSX, 5 MB, 1000 data rows. Preview never writes. Confirm revalidates every row and imports currently valid rows transactionally. Header: Staff Code, Full Name, Cinema Code.",
+        "description": "Multipart CSV/XLSX, 5 MB, 1000 data rows. Preview never writes. Confirm revalidates every row and imports currently valid rows transactionally. Headers: Staff Code, Full Name, Cinema Code, Manager Username. Optional Manager Username resolves to an active CINEMA_MANAGER in the same cinema and is revalidated on confirmation. Legacy three-column files remain supported. Rows include managerUsername and resolved managerId.",
         "operationId": "post_admin_staff_import",
         "security": [
           {

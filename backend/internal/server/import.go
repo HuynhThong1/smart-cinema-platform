@@ -17,18 +17,56 @@ import (
 )
 
 type importRow struct {
-	Row        int    `json:"row"`
-	StaffCode  string `json:"staffCode"`
-	Name       string `json:"name"`
-	CinemaCode string `json:"cinemaCode"`
-	CinemaID   string `json:"cinemaId"`
-	Error      string `json:"error"`
+	Row             int    `json:"row"`
+	StaffCode       string `json:"staffCode"`
+	Name            string `json:"name"`
+	CinemaCode      string `json:"cinemaCode"`
+	CinemaID        string `json:"cinemaId"`
+	ManagerUsername string `json:"managerUsername"`
+	ManagerID       string `json:"managerId"`
+	Error           string `json:"error"`
 }
 
 func (s *Server) importTemplate(c *gin.Context) {
-	c.Header("Content-Disposition", `attachment; filename="staff-template.csv"`)
-	c.Data(200, "text/csv; charset=utf-8", []byte("\xef\xbb\xbfStaff Code,Full Name,Cinema Code\nEXAMPLE001,Example Staff,GND\n"))
+	book := excelize.NewFile()
+	defer book.Close()
+	sheet := book.GetSheetName(0)
+	if err := book.SetSheetRow(sheet, "A1", &[]string{"Staff Code", "Full Name", "Cinema Code", "Manager Username"}); err != nil {
+		fail(c, 500, "Unable to create template")
+		return
+	}
+	_ = book.SetColWidth(sheet, "A", "D", 26)
+	_ = book.SetColWidth(sheet, "B", "B", 36)
+	_ = book.SetPanes(sheet, &excelize.Panes{Freeze: true, YSplit: 1, TopLeftCell: "A2", ActivePane: "bottomLeft"})
+	style, err := book.NewStyle(&excelize.Style{NumFmt: 49})
+	if err != nil {
+		fail(c, 500, "Unable to create template")
+		return
+	}
+	_ = book.SetColStyle(sheet, "A:D", style)
+	_, _ = book.NewSheet("Hướng dẫn")
+	notes := []string{
+		"Nhập nhân viên tại Sheet1 từ dòng 2; giữ nguyên tên các cột.",
+		"Staff Code: mã nhân viên duy nhất, 2–50 ký tự.",
+		"Full Name: họ tên nhân viên, 2–100 ký tự.",
+		"Cinema Code: mã rạp đang hoạt động và thuộc phạm vi được quản lý.",
+		"Manager Username: tên đăng nhập chính xác của quản lý trực tiếp đang hoạt động, cùng rạp.",
+		"Có thể để trống Manager Username; nhân viên chưa được gán sẽ chưa gửi thông báo cho quản lý.",
+		"Tối đa 1.000 nhân viên. Kiểm tra preview rồi xác nhận để lưu các dòng hợp lệ.",
+	}
+	for i, note := range notes {
+		_ = book.SetCellStr("Hướng dẫn", fmt.Sprintf("A%d", i+1), note)
+	}
+	_ = book.SetColWidth("Hướng dẫn", "A", "A", 120)
+	buf, err := book.WriteToBuffer()
+	if err != nil {
+		fail(c, 500, "Unable to create template")
+		return
+	}
+	c.Header("Content-Disposition", `attachment; filename="staff-template.xlsx"`)
+	c.Data(200, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", buf.Bytes())
 }
+
 func (s *Server) importStaff(c *gin.Context) {
 	fh, e := c.FormFile("file")
 	if e != nil {
@@ -74,6 +112,11 @@ func (s *Server) importStaff(c *gin.Context) {
 		fail(c, 422, "Headers must be Staff Code, Full Name, Cinema Code")
 		return
 	}
+	if len(rows[0]) > 4 || (len(rows[0]) == 4 && strings.TrimSpace(rows[0][3]) != "Manager Username") {
+		fail(c, 422, "Fourth header must be Manager Username")
+		return
+	}
+	managers := map[string][]auth.User{}
 	result := []importRow{}
 	valid := 0
 	seen := map[string]bool{}
@@ -84,6 +127,9 @@ func (s *Server) importStaff(c *gin.Context) {
 			v.StaffCode = strings.ToUpper(strings.TrimSpace(row[0]))
 			v.Name = strings.TrimSpace(row[1])
 			v.CinemaCode = strings.ToUpper(strings.TrimSpace(row[2]))
+		}
+		if len(row) > 3 {
+			v.ManagerUsername = strings.TrimSpace(row[3])
 		}
 		switch {
 		case len(v.StaffCode) < 2 || len(v.StaffCode) > 50:
@@ -113,8 +159,36 @@ func (s *Server) importStaff(c *gin.Context) {
 				v.Error = "Không có quyền truy cập rạp"
 			} else {
 				v.CinemaID = ci.ID
-				valid++
+
 			}
+		}
+		if v.Error == "" && v.ManagerUsername != "" {
+			if s.Users == nil {
+				fail(c, 503, "Dịch vụ quản lý tài khoản chưa được cấu hình")
+				return
+			}
+			candidates, ok := managers[v.CinemaID]
+			if !ok {
+				var err error
+				candidates, err = s.Users.Managers(c.Request.Context(), v.CinemaID)
+				if err != nil {
+					fail(c, 502, "Không xác minh được quản lý trực tiếp")
+					return
+				}
+				managers[v.CinemaID] = candidates
+			}
+			for _, manager := range candidates {
+				if manager.Username == v.ManagerUsername {
+					v.ManagerID = manager.ID
+					break
+				}
+			}
+			if v.ManagerID == "" {
+				v.Error = "Quản lý không tồn tại, bị khoá hoặc không thuộc rạp này"
+			}
+		}
+		if v.Error == "" {
+			valid++
 		}
 		result = append(result, v)
 	}
@@ -129,7 +203,7 @@ func (s *Server) importStaff(c *gin.Context) {
 					continue
 				}
 				now := time.Now().UTC()
-				st := domain.Staff{ID: domain.ID(), StaffCode: row.StaffCode, Name: row.Name, CinemaID: row.CinemaID, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now}
+				st := domain.Staff{ID: domain.ID(), StaffCode: row.StaffCode, Name: row.Name, CinemaID: row.CinemaID, ManagerID: row.ManagerID, Status: "ACTIVE", CreatedAt: now, UpdatedAt: now}
 				if err := s.Store.Insert(ctx, "staff", st); err != nil {
 					return err
 				}
