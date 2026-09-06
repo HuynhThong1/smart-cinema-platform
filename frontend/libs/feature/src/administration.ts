@@ -1,11 +1,11 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Cinema, Audit, Page, localDate } from '@cinema/core';
-import { Overlay } from '@cinema/ui';
+import { Overlay, RowLink } from '@cinema/ui';
 import { AsyncPage, PageState, Pager } from './shared';
 @Component({
   selector: 'cinema-cinemas',
-  imports: [FormsModule, Overlay, PageState, Pager],
+  imports: [FormsModule, Overlay, RowLink, PageState, Pager],
   template: ` <div class="page-title">
       <div>
         <p class="kicker">Hệ thống / Cinemas</p>
@@ -27,7 +27,7 @@ import { AsyncPage, PageState, Pager } from './shared';
         </thead>
         <tbody>
           @for (c of data().items; track c.id) {
-            <tr>
+            <tr (rowOpen)="edit(c)">
               <td>{{ c.code }}</td>
               <td>{{ c.name }}</td>
               <td>

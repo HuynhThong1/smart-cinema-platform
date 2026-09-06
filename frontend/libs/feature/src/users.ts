@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Cinema, Page } from '@cinema/core';
-import { Overlay } from '@cinema/ui';
+import { Overlay, RowLink } from '@cinema/ui';
 import { AsyncPage, PageState, Pager } from './shared';
 interface User {
   id: string;
@@ -16,7 +16,7 @@ interface User {
 }
 @Component({
   selector: 'cinema-users',
-  imports: [FormsModule, Overlay, PageState, Pager],
+  imports: [FormsModule, Overlay, RowLink, PageState, Pager],
   template: ` <div class="page-title">
       <div>
         <p class="kicker">Hệ thống / Users</p>
@@ -48,7 +48,7 @@ interface User {
         </thead>
         <tbody>
           @for (u of data().items; track u.id) {
-            <tr>
+            <tr (rowOpen)="edit(u)">
               <td>{{ u.username }}</td>
               <td>{{ u.firstName }} {{ u.lastName }}</td>
               <td>
