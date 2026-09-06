@@ -67,7 +67,13 @@ export class Shell {
     global?: boolean;
     items: { path: string; label: string; global?: boolean; admin?: boolean }[];
   }[] = [
-    { title: 'Tổng quan', items: [{ path: '/', label: 'Dashboard' }] },
+    {
+      title: 'Tổng quan',
+      items: [
+        { path: '/', label: 'Menu chức năng' },
+        { path: '/dashboard', label: 'Dashboard' },
+      ],
+    },
     {
       title: 'Feedback',
       items: [
@@ -93,6 +99,13 @@ export class Shell {
     {
       title: 'Coaching',
       items: [{ path: '/coaching', label: 'Coaching cases' }],
+    },
+    {
+      title: 'Thông báo',
+      items: [
+        { path: '/notifications', label: 'Hộp thư thông báo' },
+        { path: '/notification-rules', label: 'Quy tắc & kênh gửi' },
+      ],
     },
     {
       title: 'Cấu hình',
@@ -138,6 +151,6 @@ export class Login {
   template: `<p class="kicker negative">403 · Permission denied</p>
     <h2>Bạn không có quyền xem nội dung này</h2>
     <p>Vui lòng liên hệ quản trị viên nếu cần thay đổi phạm vi truy cập.</p>
-    <a routerLink="/" class="secondary">Về dashboard</a>`,
+    <a routerLink="/dashboard" class="secondary">Về dashboard</a>`,
 })
 export class Forbidden {}

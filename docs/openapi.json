@@ -3061,6 +3061,44 @@
         }
       }
     },
+    "/admin/notifications/read-all": {
+      "put": {
+        "summary": "Mark every unread notification in scope read",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "updated": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/admin/notifications/{id}/read": {
       "put": {
         "summary": "Mark own notification read (idempotent)",

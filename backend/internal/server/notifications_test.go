@@ -176,3 +176,47 @@ func TestManagerChangesDetachStaleStaffLinks(t *testing.T) {
 		t.Fatalf("deleted account still linked: %q", managerID("s-gbt"))
 	}
 }
+
+// read-all must clear only what the caller is allowed to see, so a manager
+// cannot mark another manager's or another cinema's queue read.
+func TestReadAllNotificationsStaysInScope(t *testing.T) {
+	f := setup(t)
+	for _, n := range []domain.Notification{
+		{ID: "mine-1", RecipientID: "m", CinemaID: "cinema-gnd", CreatedAt: time.Now()},
+		{ID: "mine-2", RecipientID: "m", CinemaID: "cinema-gnd", CreatedAt: time.Now()},
+		{ID: "other-manager", RecipientID: "other", CinemaID: "cinema-gnd", CreatedAt: time.Now()},
+		{ID: "other-cinema", RecipientID: "m", CinemaID: "cinema-gbt", CreatedAt: time.Now()},
+	} {
+		if e := f.s.Store.Insert(f.ctx, "notifications", n); e != nil {
+			t.Fatal(e)
+		}
+	}
+	code, out := f.request(t, "PUT", "/api/v1/admin/notifications/read-all", "", nil)
+	mustStatus(t, 401, code, out)
+	code, out = f.request(t, "PUT", "/api/v1/admin/notifications/read-all", "manager", nil)
+	mustStatus(t, 200, code, out)
+	if out["updated"] != float64(2) {
+		t.Fatalf("updated %v want 2", out["updated"])
+	}
+	code, out = f.request(t, "GET", "/api/v1/admin/notifications/unread-count", "manager", nil)
+	mustStatus(t, 200, code, out)
+	if out["count"] != float64(0) {
+		t.Fatal(out)
+	}
+	// A second call is a no-op rather than an error.
+	code, out = f.request(t, "PUT", "/api/v1/admin/notifications/read-all", "manager", nil)
+	mustStatus(t, 200, code, out)
+	if out["updated"] != float64(0) {
+		t.Fatalf("updated %v want 0", out["updated"])
+	}
+	// Records outside the caller's scope are untouched.
+	for _, id := range []string{"other-manager", "other-cinema"} {
+		var n domain.Notification
+		if e := f.s.Store.Get(f.ctx, "notifications", bson.M{"_id": id}, &n); e != nil {
+			t.Fatal(e)
+		}
+		if n.ReadAt != nil {
+			t.Fatalf("%s was marked read outside scope", id)
+		}
+	}
+}
