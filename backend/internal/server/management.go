@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"smartcinema/internal/auth"
@@ -92,6 +93,26 @@ func (s *Server) saveStaff(c *gin.Context) {
 	if e := s.Store.Get(c.Request.Context(), "cinemas", bson.M{"_id": v.CinemaID, "status": "ACTIVE"}, &ci); e != nil {
 		fail(c, 422, "Active cinema required")
 		return
+	}
+	v.ManagerID = strings.TrimSpace(v.ManagerID)
+	if v.ManagerID != "" {
+		if s.Users == nil {
+			fail(c, 503, "Dịch vụ quản lý tài khoản chưa được cấu hình")
+			return
+		}
+		manager, err := s.Users.Get(c.Request.Context(), v.ManagerID)
+		if errors.Is(err, auth.ErrNotFound) {
+			fail(c, 422, "Tài khoản quản lý không còn tồn tại. Chọn quản lý khác hoặc bỏ gán.")
+			return
+		}
+		if err != nil {
+			fail(c, 502, "Không xác minh được quản lý trực tiếp")
+			return
+		}
+		if !eligibleManager(manager, v.CinemaID) {
+			fail(c, 422, "Chọn quản lý đang hoạt động cùng rạp")
+			return
+		}
 	}
 	v.UpdatedAt = time.Now().UTC()
 	v.ID = c.Param("id")

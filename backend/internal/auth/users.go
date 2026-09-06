@@ -14,6 +14,10 @@ import (
 	"time"
 )
 
+// ErrNotFound reports that the identity service has no such record, so callers
+// can tell a deleted account apart from an upstream outage.
+var ErrNotFound = errors.New("identity record not found")
+
 type User struct {
 	ID                string              `json:"id,omitempty"`
 	Username          string              `json:"username"`
@@ -61,6 +65,9 @@ func (a *UserAdmin) request(ctx context.Context, method, path string, body, out 
 		return nil, e
 	}
 	defer res.Body.Close()
+	if res.StatusCode == http.StatusNotFound {
+		return nil, ErrNotFound
+	}
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
 		return nil, fmt.Errorf("identity service returned %d", res.StatusCode)
 	}
@@ -167,4 +174,50 @@ func (a *UserAdmin) Save(ctx context.Context, u User) (User, error) {
 func (a *UserAdmin) Delete(ctx context.Context, id string) error {
 	_, e := a.request(ctx, "DELETE", "/users/"+url.PathEscape(id), nil, nil)
 	return e
+}
+
+// Get resolves current role and scope, including inherited realm roles.
+func (a *UserAdmin) Get(ctx context.Context, id string) (User, error) {
+	var u User
+	path := "/users/" + url.PathEscape(id)
+	if _, err := a.request(ctx, "GET", path, nil, &u); err != nil {
+		return u, err
+	}
+	var roles []realmRole
+	if _, err := a.request(ctx, "GET", path+"/role-mappings/realm/composite", nil, &roles); err != nil {
+		return u, err
+	}
+	for _, role := range roles {
+		if role.Name == "CINEMA_MANAGER" {
+			u.Role = role.Name
+		}
+	}
+	if ids := u.Attributes["cinema_id"]; len(ids) > 0 {
+		u.CinemaID = ids[0]
+	}
+	u.Attributes = nil
+	return u, nil
+}
+
+// Managers pages through role members so the selector does not silently omit users.
+func (a *UserAdmin) Managers(ctx context.Context, cinemaID string) ([]User, error) {
+	out := []User{}
+	// Bounded so an identity service that keeps returning full pages for an
+	// out-of-range offset cannot hold the request handler open forever.
+	for first := 0; first < 100*50; first += 100 {
+		var batch []User
+		path := fmt.Sprintf("/roles/CINEMA_MANAGER/users?briefRepresentation=false&first=%d&max=100", first)
+		if _, err := a.request(ctx, "GET", path, nil, &batch); err != nil {
+			return nil, err
+		}
+		for _, u := range batch {
+			if ids := u.Attributes["cinema_id"]; u.Enabled && len(ids) > 0 && ids[0] == cinemaID {
+				out = append(out, User{ID: u.ID, FirstName: u.FirstName, LastName: u.LastName})
+			}
+		}
+		if len(batch) < 100 {
+			return out, nil
+		}
+	}
+	return nil, errors.New("identity service returned too many manager pages")
 }

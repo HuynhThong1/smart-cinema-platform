@@ -25,6 +25,11 @@ export const appConfig: ApplicationConfig = {
               import('../../../../libs/feature/src/dashboard').then((m) => m.DashboardPage),
           },
           {
+            path: 'notifications',
+            loadComponent: () =>
+              import('../../../../libs/feature/src/notifications').then((m) => m.NotificationsPage),
+          },
+          {
             path: 'feedback',
             loadComponent: () =>
               import('../../../../libs/feature/src/feedback').then((m) => m.FeedbackList),

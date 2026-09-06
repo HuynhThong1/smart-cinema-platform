@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
 	"smartcinema/internal/auth"
+	"smartcinema/internal/notification"
 	"smartcinema/internal/repository"
 	"smartcinema/internal/server"
 	"strings"
@@ -109,12 +111,27 @@ func main() {
 		slog.Error("OIDC initialization failed", "error", e)
 		os.Exit(1)
 	}
-	s := &server.Server{Users: auth.NewUserAdmin(issuer, env("KEYCLOAK_SERVICE_CLIENT", "smart-cinema-service"), os.Getenv("KEYCLOAK_SERVICE_SECRET")), TrustedProxies: strings.Split(env("TRUSTED_PROXIES", "127.0.0.1,::1"), ","), Store: store, PublicURL: strings.TrimRight(env("PUBLIC_URL", "http://localhost:4201"), "/"), IPHashSecret: secret}
+	emailEnabled := os.Getenv("NOTIFICATION_EMAIL_ENABLED") == "true"
+	s := &server.Server{EmailEnabled: emailEnabled, Users: auth.NewUserAdmin(issuer, env("KEYCLOAK_SERVICE_CLIENT", "smart-cinema-service"), os.Getenv("KEYCLOAK_SERVICE_SECRET")), TrustedProxies: strings.Split(env("TRUSTED_PROXIES", "127.0.0.1,::1"), ","), Store: store, PublicURL: strings.TrimRight(env("PUBLIC_URL", "http://localhost:4201"), "/"), IPHashSecret: secret}
 	seedCtx, cancelSeed := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancelSeed()
 	if e = s.Seed(seedCtx, os.Getenv("SEED_DEVELOPMENT") == "true"); e != nil {
 		slog.Error("Database seed failed", "error", e)
 		os.Exit(1)
+	}
+	workerCtx, stopWorker := context.WithCancel(context.Background())
+	defer stopWorker()
+	if emailEnabled {
+		sender := notification.Resend{Key: os.Getenv("RESEND_API_KEY"), From: os.Getenv("NOTIFICATION_EMAIL_FROM"), AdminURL: env("ADMIN_URL", "http://localhost:4200")}
+		err := sender.Validate()
+		if err == nil && s.Users == nil {
+			err = errors.New("KEYCLOAK_SERVICE_SECRET required to resolve recipients")
+		}
+		if err != nil {
+			slog.Error("Email notifications are enabled but not usable", "error", err)
+			os.Exit(1)
+		}
+		go notification.Run(workerCtx, store, s.Users, sender)
 	}
 	srv := &http.Server{Addr: listenAddress(), Handler: s.Router(verifier, corsOrigins()), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 30 * time.Second, WriteTimeout: 30 * time.Second, IdleTimeout: 60 * time.Second}
 	go func() {
@@ -127,6 +144,7 @@ func main() {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 	<-stop
+	stopWorker()
 	shutdown, done := context.WithTimeout(context.Background(), 10*time.Second)
 	defer done()
 	_ = srv.Shutdown(shutdown)

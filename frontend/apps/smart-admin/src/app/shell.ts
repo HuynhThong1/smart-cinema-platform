@@ -1,9 +1,10 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { NotificationBell } from '../../../../libs/feature/src/notifications';
 import { Auth } from '@cinema/core';
 @Component({
   selector: 'cinema-shell',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, NotificationBell],
   template: ` <div class="admin-shell">
     <header class="masthead">
       <div>
@@ -11,7 +12,7 @@ import { Auth } from '@cinema/core';
         <div class="kicker">Galaxy Cinema · Transaction Feedback QR</div>
       </div>
       <div class="actions">
-        <span class="muted">{{ auth.user()?.name }}</span
+        <cinema-notification-bell /><span class="muted">{{ auth.user()?.name }}</span
         ><button class="text-button" (click)="auth.account()">Tài khoản</button
         ><button class="secondary" (click)="auth.logout()">Đăng xuất</button>
       </div>

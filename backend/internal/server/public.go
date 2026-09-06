@@ -194,7 +194,10 @@ func (s *Server) submitFeedback(c *gin.Context) {
 		out.Consent.Accepted = true
 		out.Consent.Version = cfg.ConsentVersion
 		out.Consent.AcceptedAt = now
-		return s.Store.Insert(ctx, "feedbacks", out)
+		if err := s.Store.Insert(ctx, "feedbacks", out); err != nil {
+			return err
+		}
+		return s.queueFeedbackNotification(ctx, st, out)
 	})
 	if errors.Is(e, invalid) {
 		fail(c, 422, "Đánh giá hoặc lý do không hợp lệ. Vui lòng tải lại cấu hình.")

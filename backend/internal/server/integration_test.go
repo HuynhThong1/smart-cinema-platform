@@ -52,7 +52,7 @@ func setup(t *testing.T) fixture {
 		t.Fatal(e)
 	}
 	t.Cleanup(func() { _ = store.DB.Drop(ctx); _ = store.DB.Client().Disconnect(ctx) })
-	s := &Server{Store: store, PublicURL: "http://localhost:4201", IPHashSecret: "integration-only-32-character-secret"}
+	s := &Server{Store: store, PublicURL: "http://localhost:4201", IPHashSecret: "integration-only-32-character-secret", EmailEnabled: true}
 	if e = s.Seed(ctx, true); e != nil {
 		t.Fatal(e)
 	}

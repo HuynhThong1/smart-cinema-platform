@@ -19,3 +19,7 @@ The handoff README takes precedence for final copy and visual details: Source Se
 Admin configuration is loaded from `/app-config.json` before Angular starts. API connection and identity settings use backend environment variables. Customer SSR uses `API_INTERNAL_URL`; browser public API requests use the same-origin proxy. Explicitly configure trusted proxy addresses; never trust arbitrary forwarding headers from the internet.
 
 Future modules (recovery, incident and seat requests) remain outside Phase 1. No deployment to the suggested public domains is performed by local setup.
+
+## Manager feedback notifications
+
+See [notification behavior, configuration and UAT](manager-feedback-notifications.md). In-app inbox and Resend email outbox extend the original Phase 1 scope.

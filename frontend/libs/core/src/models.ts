@@ -18,6 +18,7 @@ export interface Cinema {
   updatedAt: string;
 }
 export interface Staff {
+  managerId?: string;
   id: string;
   staffCode: string;
   name: string;

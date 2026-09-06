@@ -1,7 +1,16 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { Feedback, Page, Staff, Reason, FeedbackConfig, download, localDate } from '@cinema/core';
+import {
+  Feedback,
+  Page,
+  Staff,
+  Reason,
+  FeedbackConfig,
+  download,
+  errorMessage,
+  localDate,
+} from '@cinema/core';
 import { Overlay } from '@cinema/ui';
 import { AsyncPage, Filters, PageState, Pager } from './shared';
 @Component({
@@ -45,6 +54,9 @@ import { AsyncPage, Filters, PageState, Pager } from './shared';
       ><button class="secondary" type="submit">Lọc</button>
     </form>
     <cinema-state [busy]="busy()" [error]="error()" (retry)="load()" />
+    @if (detailError()) {
+      <div class="error-panel" role="alert">{{ detailError() }}</div>
+    }
     @if (!busy()) {
       <div class="table-wrap">
         <table class="table-wide">
@@ -145,6 +157,7 @@ export class FeedbackList extends AsyncPage {
   staff = signal<Staff[]>([]);
   reasons = signal<Reason[]>([]);
   detail = signal<Feedback | null>(null);
+  detailError = signal('');
   drawer = false;
   page = signal(1);
   search = '';
@@ -155,6 +168,8 @@ export class FeedbackList extends AsyncPage {
   params: Record<string, string | boolean> = {};
   localDate = localDate;
   async ngOnInit() {
+    const feedbackId = this.route.snapshot.queryParamMap.get('feedbackId');
+    if (feedbackId) void this.open(feedbackId);
     try {
       this.staff.set((await this.api.get<Page<Staff>>('/admin/staff', { pageSize: 100 })).items);
       this.reasons.set((await this.api.get<FeedbackConfig>('/public/feedback-config')).reasons);
@@ -184,11 +199,17 @@ export class FeedbackList extends AsyncPage {
       if (isCurrent()) this.data.set(result);
     });
   }
-  open(id: string) {
-    return this.run(async () => {
+  // Kept off the shared run() state: the list reloads on its own as soon as the
+  // filters emit, and that newer request would otherwise discard this error and
+  // leave a notification deep link failing silently.
+  async open(id: string) {
+    this.detailError.set('');
+    try {
       this.detail.set(await this.api.get<Feedback>('/admin/feedbacks/' + id));
       this.drawer = true;
-    });
+    } catch (e) {
+      this.detailError.set(errorMessage(e));
+    }
   }
   export() {
     return this.run(async () =>

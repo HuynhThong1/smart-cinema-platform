@@ -11,6 +11,7 @@ type Cinema struct {
 	UpdatedAt time.Time `json:"updatedAt" bson:"updatedAt"`
 }
 type Staff struct {
+	ManagerID string    `json:"managerId" bson:"managerId"`
 	ID        string    `json:"id" bson:"_id"`
 	StaffCode string    `json:"staffCode" bson:"staffCode"`
 	Name      string    `json:"name" bson:"name"`
