@@ -28,6 +28,8 @@ func (testVerifier) Verify(_ context.Context, token string) (auth.Principal, err
 		return auth.Principal{Subject: "m", Name: "manager", Role: "CINEMA_MANAGER", CinemaID: "cinema-gnd"}, nil
 	case "office":
 		return auth.Principal{Subject: "o", Name: "office", Role: "HEAD_OFFICE"}, nil
+	case "admin":
+		return auth.Principal{Subject: "admin-id", Name: "admin", Role: "SYSTEM_ADMIN"}, nil
 	}
 	return auth.Principal{}, errors.New("invalid")
 }

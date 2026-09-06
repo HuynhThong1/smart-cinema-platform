@@ -44,3 +44,7 @@ QR download: `/admin/staff/{id}/qr/download?format=png|svg|pdf`. ZIP: `/admin/st
 Errors use `{error, requestId}` with `X-Request-ID`. Statuses: 400 malformed query/body, 401 invalid session, 403 denied scope/role, 404 missing/unavailable, 409 duplicate code, 413 oversize, 422 invalid input, 429 rate limit, 500 internal failure, 502/503 unavailable dependency. Rate-limited requests include `Retry-After: 60`.
 
 Configuration/cinema management requires a global role. User management requires System Admin and a configured backend Keycloak service client. A user change records request intent and success/failure because MongoDB and Keycloak cannot commit atomically; inspect the account after a failed request before retrying.
+
+## User administration
+
+System Admins manage login accounts with `GET/POST /admin/users` and `PUT/DELETE /admin/users/{id}`. Creation requires a temporary password of at least 12 characters; Keycloak prompts the user to replace it at first login. Updates can change name, roles, cinema scope and enabled status. Use `enabled: false` to suspend access temporarily. Deletion is permanent, requires confirmation in the admin UI and cannot target the currently signed-in account.

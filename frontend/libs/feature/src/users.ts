@@ -57,7 +57,21 @@ interface User {
               <td>{{ cinemaName(u.cinemaId) }}</td>
               <td>{{ u.enabled ? 'Active' : 'Locked' }}</td>
               <td>
-                <button class="text-button" (click)="edit(u)">Sửa</button>
+                <div class="actions">
+                  <button class="text-button" (click)="edit(u)">Sửa</button>
+                  <button
+                    class="text-button negative"
+                    [disabled]="auth.user()?.subject === u.id"
+                    [attr.title]="
+                      auth.user()?.subject === u.id
+                        ? 'Không thể xóa tài khoản đang đăng nhập'
+                        : null
+                    "
+                    (click)="askDelete(u)"
+                  >
+                    Xóa
+                  </button>
+                </div>
               </td>
             </tr>
           }
@@ -115,7 +129,23 @@ interface User {
           ><button class="primary" [disabled]="busy()">Lưu người dùng</button>
         </div>
       </form></cinema-overlay
-    >`,
+    ><cinema-overlay [(open)]="deleteDialog" header="Xóa tài khoản">
+      @if (pendingDelete; as user) {
+        <p>
+          Xóa vĩnh viễn tài khoản <strong>{{ user.username }}</strong> khỏi hệ thống đăng nhập?
+        </p>
+        <p class="english">Thao tác này không thể hoàn tác.</p>
+        @if (error()) {
+          <p class="field-error" role="alert">{{ error() }}</p>
+        }
+        <div class="overlay-actions">
+          <button type="button" class="secondary" (click)="deleteDialog = false">Huỷ</button>
+          <button type="button" class="danger" [disabled]="busy()" (click)="remove()">
+            Xóa tài khoản
+          </button>
+        </div>
+      }
+    </cinema-overlay>`,
 })
 export class UsersPage extends AsyncPage {
   data = signal<Page<User>>({ items: [], total: 0, page: 1, pageSize: 20 });
@@ -123,6 +153,8 @@ export class UsersPage extends AsyncPage {
   page = signal(1);
   search = '';
   dialog = false;
+  deleteDialog = false;
+  pendingDelete?: User;
   draft: Partial<User> = {};
   ngOnInit() {
     void this.load();
@@ -167,6 +199,29 @@ export class UsersPage extends AsyncPage {
       this.draft.temporaryPassword = '';
       this.dialog = false;
       this.notify('Đã lưu người dùng');
+      this.data.set(
+        await this.api.get<Page<User>>('/admin/users', {
+          page: this.page(),
+          search: this.search,
+        }),
+      );
+    });
+  }
+  askDelete(user: User) {
+    if (this.auth.user()?.subject === user.id) return;
+    this.error.set('');
+    this.pendingDelete = user;
+    this.deleteDialog = true;
+  }
+  remove() {
+    return this.run(async () => {
+      const user = this.pendingDelete;
+      if (!user) return;
+      await this.api.delete('/admin/users/' + encodeURIComponent(user.id));
+      if (this.data().items.length === 1 && this.page() > 1) this.page.update((p) => p - 1);
+      this.deleteDialog = false;
+      this.pendingDelete = undefined;
+      this.notify('Đã xóa người dùng');
       this.data.set(
         await this.api.get<Page<User>>('/admin/users', {
           page: this.page(),

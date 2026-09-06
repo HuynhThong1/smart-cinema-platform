@@ -78,6 +78,7 @@ func (s *Server) Router(verifier auth.Verifier, origins []string) *gin.Engine {
 	a.GET("/users", s.listUsers)
 	a.POST("/users", s.saveUser)
 	a.PUT("/users/:id", s.saveUser)
+	a.DELETE("/users/:id", s.deleteUser)
 	a.GET("/me", func(c *gin.Context) { c.JSON(200, auth.Current(c)) })
 	a.GET("/cinemas", s.listCinemas)
 	a.POST("/cinemas", s.saveCinema)

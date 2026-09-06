@@ -163,3 +163,8 @@ func (a *UserAdmin) Save(ctx context.Context, u User) (User, error) {
 	u.TemporaryPassword = ""
 	return u, nil
 }
+
+func (a *UserAdmin) Delete(ctx context.Context, id string) error {
+	_, e := a.request(ctx, "DELETE", "/users/"+url.PathEscape(id), nil, nil)
+	return e
+}

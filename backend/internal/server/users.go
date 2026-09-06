@@ -89,3 +89,32 @@ func (s *Server) saveUser(c *gin.Context) {
 		c.JSON(200, result)
 	}
 }
+
+func (s *Server) deleteUser(c *gin.Context) {
+	if !s.usersReady(c) {
+		return
+	}
+	id := strings.TrimSpace(c.Param("id"))
+	if id == "" {
+		fail(c, 400, "User id required")
+		return
+	}
+	if id == auth.Current(c).Subject {
+		fail(c, 422, "Cannot delete your own account")
+		return
+	}
+	// Record intent before deleting the external Keycloak account.
+	if !s.mutate(c, "DELETE_USER_REQUESTED", id, "", func(context.Context) error { return nil }) {
+		return
+	}
+	if e := s.Users.Delete(c.Request.Context(), id); e != nil {
+		_ = s.mutate(c, "DELETE_USER_FAILED", id, "", func(context.Context) error { return nil })
+		if !c.IsAborted() {
+			fail(c, 502, "Không thể xóa người dùng. Kiểm tra tài khoản trước khi thử lại.")
+		}
+		return
+	}
+	if s.mutate(c, "DELETE_USER", id, "", func(context.Context) error { return nil }) {
+		c.Status(204)
+	}
+}

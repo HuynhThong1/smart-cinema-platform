@@ -1589,6 +1589,41 @@
             }
           }
         }
+      },
+      "delete": {
+        "summary": "Delete User",
+        "description": "Permanently removes a Keycloak account. A System Admin cannot delete their own account.",
+        "operationId": "delete_admin_users_id",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted"
+          },
+          "default": {
+            "description": "Validation, authorization, not found, conflict, rate limit or upstream error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/admin/feedbacks": {
