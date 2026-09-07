@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Dashboard } from '@cinema/core';
 import { AsyncPage, PageState } from './shared';
@@ -24,8 +24,8 @@ export interface AppModule {
 export const MODULES: AppModule[] = [
   {
     code: 'FBQ',
-    title: 'Transaction Feedback QR',
-    english: 'Đánh giá giao dịch qua QR',
+    title: 'Đánh giá giao dịch qua QR',
+    english: 'Transaction Feedback QR',
     description: 'Feedback khách hàng, QR nhân viên, ranking, coaching, cảnh báo.',
     phase: 'Phase 1 · Đang chạy',
     meta: '',
@@ -81,8 +81,7 @@ export const MODULES: AppModule[] = [
     <p class="english">Module launcher — Smart Cinema Platform</p>
     <p class="muted">
       {{ auth.user()?.name }} · {{ roleName() }} ·
-      {{ auth.global() ? 'Toàn hệ thống' : 'Rạp được phân quyền' }} — chỉ hiện các module bạn có
-      quyền truy cập.
+      {{ auth.global() ? 'Toàn hệ thống' : 'Rạp được phân quyền' }}
     </p>
     <cinema-state [message]="message()" />
     <div class="module-grid">
@@ -125,8 +124,8 @@ export const MODULES: AppModule[] = [
     </div>
     <div class="note-block">
       <p class="muted">
-        Phase 1 chỉ mở Transaction Feedback QR. Các module còn lại giữ chỗ trong menu để điều hướng
-        và phân quyền không phải làm lại khi mở rộng — quyền truy cập lấy từ role trong Keycloak.
+        Chọn Đánh giá giao dịch qua QR để bắt đầu. Các chức năng còn lại đang được chuẩn bị và chưa
+        mở sử dụng.
       </p>
     </div>`,
 })

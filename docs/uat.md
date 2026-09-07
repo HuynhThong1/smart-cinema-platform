@@ -47,3 +47,21 @@ See [notification behavior, configuration and UAT](manager-feedback-notification
 - Browser QA at admin width 1366px used a synthetic XLSX with `manager` (same cinema) and `manager2` (other cinema): preview showed one valid row and one row error. Screenshot captured in the task.
 - Confirming with Enter showed “Đang import…” with confirm, error-download and cancel buttons disabled, then “Đã import 1 nhân viên” and one skipped row. Browser console had no errors.
 - Go tests with local MongoDB, Go vet, frontend typecheck, format check and both production builds passed. Customer pages were unchanged; mobile customer QA was not repeated for this admin-only change.
+
+## Revised admin handoff — 2026-09-07 local verification
+
+- Compared the revised handoff README with the original; the original PLAN is unchanged. Applied the utility rail/account dropdown while retaining Galaxy colors and Source Serif 4.
+- Header resolves the assigned cinema name or global cinema total from the scoped cinema API; unavailable metadata retains a generic scope label.
+- Browser screenshots captured in the task at 1366px and 390px: launcher, account dropdown and notification rules. Checked 320px inbox/rules without document horizontal overflow.
+- Account dropdown supports Enter, Tab and Escape; Escape returns focus to its trigger. Mobile navigation expands, then collapses after a route selection. A skip link focuses main content without changing the current route.
+- Empty inbox shows disabled mark-all action; notification/rules copy describes current feedback delivery rather than planned digest, Zalo or quiet-hour features. No browser console errors observed.
+- Frontend typecheck, formatting and both production builds passed. No backend contracts changed. Live password changes were not exercised.
+
+- Follow-up QA: dashboard presets now offer one-click date ranges. Blank and reversed custom dates show inline validation and retain current results; a valid empty date range shows the normal empty-state CTA.
+- Customer SSR verified with an existing local synthetic QR at 390px and 320px: no horizontal overflow or console errors; submitting the blank form displays rating/name/phone/consent errors without creating feedback. Screenshots captured in the task.
+
+## Admin light/dark theme
+
+- Account dropdown includes a keyboard-accessible “Giao diện tối” switch. Default is light; a saved choice is applied before Angular starts and survives reload on the same browser/origin.
+- Theme changes are limited to the admin application; customer does not load the preference script. QR images and print cards retain a white background.
+- Local browser QA verified dark launcher, account menu, staff table and create dialog, reload persistence and Space-key switching back to light and dark. No console errors observed. Typecheck, formatting and both production builds passed.

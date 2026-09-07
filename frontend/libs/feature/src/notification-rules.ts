@@ -1,183 +1,98 @@
-import { Component, inject } from '@angular/core';
-import { Auth } from '@cinema/core';
-
-export interface NotificationRule {
-  code: string;
-  event: string;
-  condition: string;
-  recipients: string;
-  channels: string[];
-  enabled: boolean;
-}
-export interface NotificationChannel {
-  name: string;
-  status: 'Bật' | 'Tắt' | 'Chưa nối';
-  note: string;
-}
-
-/** The rule set the notification service evaluates. Read-only until the rules API ships. */
-export const NOTIFICATION_RULES: NotificationRule[] = [
-  {
-    code: 'NEG_INSTANT',
-    event: 'Feedback tiêu cực',
-    condition: 'rating ≤ 2',
-    recipients: 'Cinema Manager',
-    channels: ['In-app', 'Email'],
-    enabled: true,
-  },
-  {
-    code: 'NEG_BURST',
-    event: 'Chuỗi tiêu cực cùng nhân viên',
-    condition: '≥ 3 feedback ≤ 2★ / 60 phút',
-    recipients: 'Cinema Manager + Head Office',
-    channels: ['In-app', 'Email', 'Zalo OA'],
-    enabled: true,
-  },
-  {
-    code: 'SUSPICIOUS',
-    event: 'Feedback nghi vấn',
-    condition: 'trùng SĐT trong 10 phút',
-    recipients: 'Cinema Manager',
-    channels: ['In-app'],
-    enabled: true,
-  },
-  {
-    code: 'DAILY_DIGEST',
-    event: 'Báo cáo ngày',
-    condition: '08:00 hằng ngày',
-    recipients: 'Cinema Manager + Head Office',
-    channels: ['Email'],
-    enabled: true,
-  },
-  {
-    code: 'WEEKLY_RANK',
-    event: 'Ranking tuần',
-    condition: 'Thứ 2, 09:00',
-    recipients: 'Head Office',
-    channels: ['Email'],
-    enabled: true,
-  },
-  {
-    code: 'COACH_DUE',
-    event: 'Coaching đến hạn',
-    condition: 'trước hạn 2 ngày',
-    recipients: 'Người tạo case',
-    channels: ['In-app', 'Email'],
-    enabled: true,
-  },
-  {
-    code: 'QR_EVENT',
-    event: 'QR tạo mới / thu hồi',
-    condition: 'mọi thay đổi QR',
-    recipients: 'System Admin',
-    channels: ['In-app'],
-    enabled: false,
-  },
-];
-
-/**
- * Channel status reflects what the platform can actually deliver today, not the
- * target state: In-app and Email are wired, Zalo OA and SMS are not. Showing an
- * unwired channel as `Bật` would promise delivery the service silently drops.
- */
-export const NOTIFICATION_CHANNELS: NotificationChannel[] = [
-  { name: 'In-app', status: 'Bật', note: 'Mặc định, không tắt được' },
-  { name: 'Email', status: 'Bật', note: 'SMTP Head Office' },
-  { name: 'Zalo OA', status: 'Chưa nối', note: 'Chỉ cảnh báo NEG_BURST · chờ tích hợp' },
-  { name: 'SMS', status: 'Tắt', note: 'Dự kiến phase 2' },
-];
+import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'cinema-notification-rules',
-  template: `<p class="kicker">Notifications</p>
+  imports: [RouterLink],
+  template: `<p class="kicker">Thông báo</p>
     <h2>Quy tắc &amp; kênh gửi</h2>
-    <p class="english">Ai nhận cái gì, qua kênh nào, khi nào</p>
+    <p class="english">Notification delivery</p>
     <div class="notice">
-      @if (auth.global()) {
-        <p>
-          Quy tắc áp dụng cho toàn hệ thống. Bản này hiển thị cấu hình đang chạy — chỉnh sửa sẽ mở
-          khi API quy tắc sẵn sàng.
-        </p>
-      } @else {
-        <p>
-          Vai trò Cinema Manager chỉ xem được quy tắc áp dụng cho rạp mình. Chỉnh sửa thuộc Head
-          Office.
-        </p>
-      }
+      <p>
+        Thông báo feedback được gửi đến quản lý trực tiếp của nhân viên. Trang này giải thích cách
+        nhận thông báo; hiện chưa hỗ trợ chỉnh sửa quy tắc.
+      </p>
+      <a routerLink="/staff">Kiểm tra quản lý đã gán cho nhân viên</a>
     </div>
-    <div class="table-wrap">
-      <table class="table-wide">
-        <thead>
-          <tr>
-            <th>Mã</th>
-            <th>Sự kiện</th>
-            <th>Điều kiện</th>
-            <th>Người nhận</th>
-            <th>Kênh</th>
-            <th>Trạng thái</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (r of rules; track r.code) {
-            <tr>
-              <td>
-                <code>{{ r.code }}</code>
-              </td>
-              <td>{{ r.event }}</td>
-              <td class="muted">{{ r.condition }}</td>
-              <td>{{ r.recipients }}</td>
-              <td>{{ r.channels.join(' · ') }}</td>
-              <td>
-                <span class="tag" [class.good]="r.enabled">{{ r.enabled ? 'Bật' : 'Tắt' }}</span>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-    <div class="columns">
-      <section>
-        <h4>Kênh gửi</h4>
-        <p class="english">Channels · phase 1</p>
+    <section class="section" aria-labelledby="feedback-delivery">
+      <h3 id="feedback-delivery">Khi có feedback mới</h3>
+      <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>Kênh</th>
-              <th>Trạng thái</th>
-              <th>Ghi chú</th>
+              <th>Sự kiện</th>
+              <th>Người nhận</th>
+              <th>Cách hiển thị</th>
             </tr>
           </thead>
           <tbody>
-            @for (c of channels; track c.name) {
-              <tr>
-                <td>{{ c.name }}</td>
-                <td>
-                  <span class="tag" [class.good]="c.status === 'Bật'">{{ c.status }}</span>
-                </td>
-                <td class="muted">{{ c.note }}</td>
-              </tr>
-            }
+            <tr>
+              <td>Khách gửi đánh giá</td>
+              <td>Quản lý trực tiếp đã gán</td>
+              <td>Thông báo trong hộp thư cá nhân</td>
+            </tr>
+            <tr>
+              <td>Đánh giá 1–2 điểm</td>
+              <td>Quản lý trực tiếp đã gán</td>
+              <td>Nhãn “Cần xem sớm” nếu không bị gắn cờ nghi vấn</td>
+            </tr>
+            <tr>
+              <td>Feedback bị gắn cờ nghi vấn</td>
+              <td>Quản lý trực tiếp đã gán</td>
+              <td>Thông báo có nội dung nghi vấn để kiểm tra</td>
+            </tr>
           </tbody>
         </table>
+      </div>
+      <p class="muted section">
+        Nhân viên chưa được gán quản lý vẫn nhận đánh giá nhưng chưa phát thông báo. Thông báo đã
+        gửi giữ nguyên người nhận khi thay đổi quản lý.
+      </p>
+    </section>
+    <div class="columns">
+      <section>
+        <h3>Kênh nhận thông báo</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Kênh</th>
+                <th>Khả dụng</th>
+                <th>Điều kiện</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Trong ứng dụng</td>
+                <td><span class="tag good">Đã hỗ trợ</span></td>
+                <td>Đăng nhập để xem hộp thư; cập nhật mỗi 15 giây khi mở ứng dụng.</td>
+              </tr>
+              <tr>
+                <td>Email</td>
+                <td><span class="tag">Theo cấu hình</span></td>
+                <td>Cần được quản trị viên bật và tài khoản quản lý có email hợp lệ.</td>
+              </tr>
+              <tr>
+                <td>Zalo OA / SMS</td>
+                <td><span class="tag">Chưa hỗ trợ</span></td>
+                <td>Chưa gửi qua các kênh này.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </section>
       <section>
-        <h4>Chống dội &amp; giờ yên lặng</h4>
-        <p class="english">Throttling · enforced server-side</p>
+        <h3>Chức năng chưa mở</h3>
         <p>
-          Giờ yên lặng 23:00–07:00: cảnh báo không đẩy Email/Zalo mà gộp vào digest sáng hôm sau.
+          Báo cáo ngày/tuần, nhắc coaching, sự kiện QR và cảnh báo chuỗi feedback chưa được phát tự
+          động.
         </p>
-        <p>Chống dội: tối đa 1 cảnh báo cùng loại / nhân viên / 30 phút.</p>
         <p class="muted">
-          <small
-            >Cả hai quy tắc chạy ở backend, không phụ thuộc màn hình này — tắt trình duyệt không làm
-            mất cảnh báo.</small
-          >
+          Giờ yên lặng và giới hạn số cảnh báo theo nhân viên chưa áp dụng. Nếu chưa nhận email,
+          liên hệ quản trị viên để kiểm tra cấu hình gửi.
         </p>
+        <a class="secondary" routerLink="/notifications">Mở hộp thư thông báo</a>
       </section>
     </div>`,
 })
-export class NotificationRulesPage {
-  auth = inject(Auth);
-  rules = NOTIFICATION_RULES;
-  channels = NOTIFICATION_CHANNELS;
-}
+export class NotificationRulesPage {}

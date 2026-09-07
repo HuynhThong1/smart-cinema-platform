@@ -48,6 +48,9 @@ export class Auth {
       redirectUri: window.location.origin + '/login',
     });
   }
+  changePassword() {
+    return this.keycloak.login({ action: 'UPDATE_PASSWORD', redirectUri: window.location.href });
+  }
   account() {
     return this.keycloak.accountManagement();
   }

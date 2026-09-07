@@ -64,7 +64,7 @@ export class NotificationCounter {
   selector: 'cinema-notification-bell',
   imports: [RouterLink],
   template: `<a
-    class="secondary"
+    class="notification-link"
     routerLink="/notifications"
     [attr.aria-label]="
       counter.count() === null
@@ -73,7 +73,7 @@ export class NotificationCounter {
     "
     >Thông báo
     @if (counter.count()) {
-      <span class="tag bell-count" aria-hidden="true">{{ counter.count() }}</span>
+      <sup class="bell-count" aria-hidden="true">{{ counter.count() }}</sup>
     }
   </a>`,
 })
@@ -98,9 +98,9 @@ export class NotificationBell {
   imports: [PageState, Pager],
   template: `<div class="page-title">
       <div>
-        <p class="kicker">Notifications</p>
+        <p class="kicker">Thông báo</p>
         <h2>Hộp thư thông báo</h2>
-        <p class="english">Cảnh báo realtime · báo cáo định kỳ · sự kiện hệ thống</p>
+        <p class="english">Feedback mới dành cho bạn / Your feedback notifications</p>
       </div>
       <button class="secondary" (click)="load()" [disabled]="busy()">Làm mới</button>
     </div>
@@ -124,7 +124,9 @@ export class NotificationBell {
         Đánh dấu tất cả đã đọc
       </button>
     </div>
-    <p class="muted"><small>Tự cập nhật mỗi 15 giây</small></p>
+    <p class="muted">
+      <small>Tự cập nhật mỗi 15 giây. Bộ lọc loại thông báo áp dụng trên trang đang xem.</small>
+    </p>
     <cinema-state [busy]="busy()" [error]="error()" [message]="message()" (retry)="load()" />
     @if (!busy()) {
       <div class="notif-list">
@@ -142,7 +144,7 @@ export class NotificationBell {
                   class="tag"
                   [class.bad]="kind(n) === 'ALERT'"
                   [class.good]="kind(n) === 'TASK'"
-                  >{{ kind(n) }}</span
+                  >{{ kind(n) === 'ALERT' ? 'Cần xem sớm' : 'Thông tin' }}</span
                 ><span>{{ inboxTime(n.createdAt) }} · {{ ago(n.createdAt) }}</span>
               </p>
               <h3>{{ title(n) }}</h3>
@@ -180,11 +182,10 @@ export class NotificationBell {
       />
     }
     <div class="note-block">
-      <h4>Quy ước</h4>
+      <h4>Theo dõi feedback</h4>
       <p class="muted">
-        ALERT là cảnh báo cần xử lý trong ca · SYSTEM là sự kiện vận hành (import, QR, nghi vấn) ·
-        DIGEST là báo cáo theo lịch · TASK là việc coaching đến hạn. Thông báo giữ 90 ngày, sau đó
-        tự lưu trữ.
+        Thông báo gửi đến quản lý trực tiếp đã được gán cho nhân viên. Đánh dấu đã đọc giúp bạn theo
+        dõi hộp thư; không thay thế việc xử lý feedback hoặc tạo coaching.
       </p>
     </div>`,
 })
