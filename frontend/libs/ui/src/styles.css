@@ -399,6 +399,12 @@ cinema-table td {
 cinema-table tbody tr:hover {
   background: var(--row-hover);
 }
+/* Declared after the hover rule, at equal specificity, so a selected row keeps
+   its highlight while hovered. Uses a token because the row text stays
+   var(--text): a fixed light tint would be white-on-white in dark mode. */
+cinema-table tbody tr.selected {
+  background: var(--soft-blue);
+}
 cinema-table tr.row-link {
   cursor: pointer;
 }

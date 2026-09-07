@@ -81,10 +81,7 @@ import { AsyncPage, PageState, Pager } from './shared';
                 <th>{{ i18n.t('qr.qr') }}</th>
               </tr> </ng-template
             ><ng-template #body let-s
-              ><tr
-                [style.background]="selected()?.id === s.id ? '#eaf1fa' : ''"
-                (rowOpen)="select(s)"
-              >
+              ><tr [class.selected]="selected()?.id === s.id" (rowOpen)="select(s)">
                 <td>{{ s.staffCode }}</td>
                 <td>{{ s.name }}</td>
                 <td>
