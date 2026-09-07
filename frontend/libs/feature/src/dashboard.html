@@ -1,63 +1,77 @@
 <div class="page-title">
   <div>
-    <p class="kicker">{{ auth.global() ? 'Head Office · toàn hệ thống' : 'Cinema Manager' }}</p>
-    <h2>{{ title() }}</h2>
-    <p class="english">Service quality, at a glance</p>
+    <p class="kicker">
+      {{ auth.global() ? i18n.t('dashboard.head_office_all_cinemas') :
+      i18n.t('navigation.cinema_manager') }}
+    </p>
+    <h2>{{ i18n.t(title()) }}</h2>
   </div>
   @if(staffId) {
-  <a class="primary" routerLink="/coaching" [queryParams]="{staffId:staffId,create:'true'}"
-    >Tạo coaching</a
+  <a
+    cinemaButton
+    class="primary"
+    routerLink="/coaching"
+    [queryParams]="{staffId:staffId,create:'true'}"
+    >{{ i18n.t('coaching.create_coaching_43') }}</a
   >
-  } @else { <button class="secondary" (click)="export()">Xuất CSV</button> }
+  } @else {
+  <button type="button" cinemaButton class="secondary" (click)="export()">
+    {{ i18n.t('dashboard.export_csv') }}
+  </button>
+  }
 </div>
 <cinema-filters (changed)="setFilters($event)" />
-<cinema-state [busy]="busy()" [error]="error()" (retry)="load()" />
+<cinema-state [busy]="busy()" [error]="i18n.t(error())" (retry)="load()" />
 @if (!busy() && data(); as d) { @if (d.summary[0]; as s) {
 <div class="kpis">
   <div>
-    <div class="kicker">Tổng feedback</div>
-    <div class="kpi-value positive">{{ s.count | number }}</div>
-    <small>Total feedback</small>
+    <div class="kicker">{{ i18n.t('dashboard.total_feedback') }}</div>
+    <div class="kpi-value positive">{{ s.count | cinemaNumber }}</div>
+    <small>{{ i18n.t('dashboard.total_feedback_98') }}</small>
   </div>
   <div>
-    <div class="kicker">Điểm trung bình</div>
-    <div class="kpi-value" style="color: var(--primary)">{{ s.average | number:'1.2-2' }}</div>
-    <small>Average rating / 5</small>
+    <div class="kicker">{{ i18n.t('dashboard.average_rating') }}</div>
+    <div class="kpi-value" style="color: var(--primary)">
+      {{ s.average | cinemaNumber:'1.2-2' }}
+    </div>
+    <small>{{ i18n.t('dashboard.average_rating_5') }}</small>
   </div>
   <div>
-    <div class="kicker">Tích cực</div>
+    <div class="kicker">{{ i18n.t('dashboard.positive') }}</div>
     <div class="kpi-value positive">{{ percent(s.positive,s.count) }}%</div>
-    <small>Positive · 4–5</small>
+    <small>{{ i18n.t('dashboard.positive_4_5') }}</small>
   </div>
   <div>
-    <div class="kicker">Trung lập</div>
+    <div class="kicker">{{ i18n.t('dashboard.neutral') }}</div>
     <div class="kpi-value">{{ percent(s.neutral,s.count) }}%</div>
-    <small>Neutral · 3</small>
+    <small>{{ i18n.t('dashboard.neutral_3') }}</small>
   </div>
   <div>
-    <div class="kicker">Tiêu cực</div>
+    <div class="kicker">{{ i18n.t('dashboard.negative') }}</div>
     <a
       routerLink="/feedback"
       [queryParams]="{rating:'negative',staffId:staffId}"
       class="kpi-value negative"
       >{{ percent(s.negative,s.count) }}%</a
-    ><small>Negative · 1–2</small>
+    ><small>{{ i18n.t('dashboard.negative_1_2') }}</small>
   </div>
   <div>
-    <div class="kicker">Đủ điều kiện ranking</div>
+    <div class="kicker">{{ i18n.t('dashboard.eligible_for_ranking') }}</div>
     <div class="kpi-value">{{ d.eligible[0]?.count || 0 }}</div>
-    <small>Minimum {{ d.minimumFeedbackForRanking }} feedback</small>
+    <small
+      >{{ i18n.t('dashboard.minimum_p0_feedback', {p0: (d.minimumFeedbackForRanking)}) }}</small
+    >
   </div>
 </div>
 <div class="split">
   <section>
-    <h4>Xu hướng feedback</h4>
-    <p class="english">Volume & average rating</p>
+    <h4>{{ i18n.t('dashboard.feedback_trend') }}</h4>
+
     <svg
       class="chart"
       viewBox="0 0 500 190"
       role="img"
-      aria-label="Biểu đồ số feedback và điểm trung bình"
+      [attr.aria-label]="i18n.t('dashboard.feedback_volume_and_average_rating_chart')"
     >
       <line x1="15" y1="160" x2="485" y2="160" stroke="var(--border)" />
       <polyline [attr.points]="trendPoints()" fill="none" stroke="var(--blue)" stroke-width="2" />
@@ -68,22 +82,26 @@
       </text>
       @if (coachingMarker(); as x) {
       <line [attr.x1]="x" y1="15" [attr.x2]="x" y2="160" stroke="#DC2626" stroke-dasharray="4 3" />
-      <text [attr.x]="x" y="12" fill="#DC2626" font-size="10">Coaching</text>
+      <text [attr.x]="x" y="12" fill="#DC2626" font-size="10">
+        {{ i18n.t('coaching.coaching') }}
+      </text>
       }
     </svg>
     <div class="actions">
-      <span class="english positive">● Feedback</span
-      ><span class="english" style="color: var(--primary)">● Điểm trung bình / 5</span>
+      <span class="english positive">{{ i18n.t('dashboard.feedback') }}</span
+      ><span class="english" style="color: var(--primary)"
+        >{{ i18n.t('dashboard.average_rating_5_113') }}</span
+      >
     </div>
   </section>
   <section>
-    <h4>Phân bố đánh giá</h4>
-    <p class="english">Rating distribution</p>
+    <h4>{{ i18n.t('dashboard.rating_distribution') }}</h4>
+
     @for (row of d.distribution; track row._id) {
     <div class="bar-row">
       <span
-        >{{ row._id }} · {{ row._id >= 4 ? 'Hài lòng' : row._id === 3 ? 'Bình thường' : 'Chưa tốt'
-        }}</span
+        >{{ row._id }} · {{ row._id >= 4 ? i18n.t('dashboard.satisfied') : row._id === 3 ?
+        i18n.t('dashboard.neutral_117') : i18n.t('dashboard.needs_improvement') }}</span
       >
       <div class="bar-track">
         <div
@@ -100,12 +118,15 @@
 <div class="split section">
   @for(type of ['POSITIVE','NEGATIVE']; track type) {
   <section>
-    <h4>{{ type === 'POSITIVE' ? 'Điều khách hài lòng' : 'Cần cải thiện' }}</h4>
-    <p class="english">{{ type === 'POSITIVE' ? 'Positive reasons' : 'Negative reasons' }}</p>
+    <h4>
+      {{ type === 'POSITIVE' ? i18n.t('dashboard.what_customers_liked') :
+      i18n.t('dashboard.needs_improvement_120') }}
+    </h4>
+
     @for(row of d.reasons; track row._id) { @if(row.type === type) {
     <div class="reason-row">
       <div class="actions">
-        <span>{{ row.label }}</span><span class="spacer"></span><span>{{ row.count }}</span>
+        <span>{{ i18n.label(row) }}</span><span class="spacer"></span><span>{{ row.count }}</span>
       </div>
       <div class="bar-track">
         <div
@@ -121,134 +142,132 @@
 </div>
 @if (route.snapshot.routeConfig?.path === 'analytics') {
 <section class="section">
-  <h4>Feedback theo giờ</h4>
-  <p class="english">Asia/Ho_Chi_Minh</p>
+  <h4>{{ i18n.t('dashboard.feedback_by_hour') }}</h4>
+
   <div class="table-wrap">
-    <table>
-      <thead>
+    <cinema-table [rows]="d.hours" [columns]="2"
+      ><ng-template #header>
         <tr>
-          <th>Giờ</th>
-          <th>Feedback</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for(row of d.hours; track row._id) {
-        <tr>
+          <th>{{ i18n.t('dashboard.hour') }}</th>
+          <th>{{ i18n.t('dashboard.feedback_124') }}</th>
+        </tr> </ng-template
+      ><ng-template #body let-row
+        ><tr>
           <td>{{ row._id }}:00</td>
           <td>{{ row.count }}</td>
-        </tr>
-        }
-      </tbody>
-    </table>
+        </tr></ng-template
+      ></cinema-table
+    >
   </div>
 </section>
 } @if (auth.global() && !staffId) {
 <section class="section">
-  <h4>So sánh rạp</h4>
+  <h4>{{ i18n.t('dashboard.cinema_comparison') }}</h4>
   <div class="table-wrap">
-    <table>
-      <thead>
+    <cinema-table [rows]="d.cinemas" [columns]="4"
+      ><ng-template #header>
         <tr>
-          <th>Rạp</th>
-          <th>Feedback</th>
-          <th>Điểm TB</th>
-          <th>Tiêu cực</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for(row of d.cinemas; track row._id) {
-        <tr>
+          <th>{{ i18n.t('dashboard.cinema') }}</th>
+          <th>{{ i18n.t('dashboard.feedback_124') }}</th>
+          <th>{{ i18n.t('dashboard.avg_rating') }}</th>
+          <th>{{ i18n.t('dashboard.negative') }}</th>
+        </tr> </ng-template
+      ><ng-template #body let-row
+        ><tr>
           <td>
             <a routerLink="/feedback" [queryParams]="{cinemaId:row._id}">{{ row.unit.name }}</a>
           </td>
           <td>{{ row.count }}</td>
-          <td>{{ row.average | number:'1.2-2' }}</td>
+          <td>{{ row.average | cinemaNumber:'1.2-2' }}</td>
           <td class="negative">{{ percent(row.negative,row.count) }}%</td>
-        </tr>
-        }
-      </tbody>
-    </table>
+        </tr></ng-template
+      ></cinema-table
+    >
   </div>
 </section>
 }
 <section class="section">
-  <h4>{{ staffId ? 'Tổng quan nhân viên' : 'Hiệu suất nhân viên' }}</h4>
+  <h4>
+    {{ staffId ? i18n.t('dashboard.staff_overview') : i18n.t('dashboard.staff_performance') }}
+  </h4>
   <div class="table-wrap">
-    <table>
-      <thead>
+    <cinema-table [rows]="d.staff" [columns]="7"
+      ><ng-template #header>
         <tr>
-          <th>Nhân viên</th>
-          <th>Rạp</th>
-          <th>Feedback</th>
-          <th>Điểm</th>
-          <th>Tích cực</th>
-          <th>Tiêu cực</th>
+          <th>{{ i18n.t('coaching.staff') }}</th>
+          <th>{{ i18n.t('dashboard.cinema') }}</th>
+          <th>{{ i18n.t('dashboard.feedback_124') }}</th>
+          <th>{{ i18n.t('dashboard.rating') }}</th>
+          <th>{{ i18n.t('dashboard.positive') }}</th>
+          <th>{{ i18n.t('dashboard.negative') }}</th>
           <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        @for(row of d.staff; track row._id) {
-        <tr>
+        </tr> </ng-template
+      ><ng-template #body let-row
+        ><tr>
           <td><strong>{{ row.unit.code }}</strong><small>{{ row.unit.name }}</small></td>
           <td>{{ row.cinema?.name }}</td>
           <td>{{ row.count }}</td>
-          <td>{{ row.average | number:'1.2-2' }}</td>
+          <td>{{ row.average | cinemaNumber:'1.2-2' }}</td>
           <td>{{ percent(row.positive,row.count) }}%</td>
           <td class="negative">{{ percent(row.negative,row.count) }}%</td>
           <td>
-            <a [routerLink]="['/staff',row._id,'performance']">Chi tiết</a>
+            <a [routerLink]="['/staff',row._id,'performance']">{{ i18n.t('dashboard.details') }}</a>
           </td>
-        </tr>
-        }
-      </tbody>
-    </table>
+        </tr></ng-template
+      ></cinema-table
+    >
   </div>
 </section>
 } @else {
-<div class="empty">
-  <h3>Chưa có feedback nào</h3>
-  <p class="muted">Mở rộng khoảng ngày hoặc tạo QR để bắt đầu ghi nhận trải nghiệm của khách.</p>
-  <a routerLink="/qr" class="primary">Đến quản lý QR</a>
-</div>
+<cinema-empty class="empty">
+  <h3>{{ i18n.t('dashboard.no_feedback_yet') }}</h3>
+  <p class="muted">
+    {{ i18n.t('dashboard.expand_the_date_range_or_create_a_qr_code_to_start_collecting_cus') }}
+  </p>
+  <a cinemaButton routerLink="/qr" class="primary">{{ i18n.t('dashboard.manage_qr_codes') }}</a>
+</cinema-empty>
 } @if (staffId) {
 <section class="section">
-  <h4>Lịch sử coaching</h4>
+  <h4>{{ i18n.t('dashboard.coaching_history') }}</h4>
   @for(c of coaching();track c.id) {
   <p>
     <a routerLink="/coaching" [queryParams]="{staffId:staffId}">{{ c.topic }}</a>
-    · {{ c.followUpDate }} <span class="tag">{{ c.status }}</span>
+    · {{ c.followUpDate }}
+    <cinema-badge class="tag">{{ i18n.t('common.status.' + c.status) }}</cinema-badge>
   </p>
   } @empty {
-  <p class="muted">Chưa có coaching.</p>
+  <p class="muted">{{ i18n.t('dashboard.no_coaching_yet') }}</p>
   }
 </section>
 <a routerLink="/feedback" [queryParams]="{staffId:staffId,rating:'negative'}"
-  >Xem feedback tiêu cực của nhân viên</a
+  >{{ i18n.t('dashboard.view_this_staff_member_s_negative_feedback') }}</a
 >
 } } @if (staffId && data()?.latestCoaching; as c) {
 <section class="section">
-  <h4>Trước và sau coaching</h4>
-  <p class="english">{{ c.topic }} · {{ c.followUpDate }} · Theo khoảng ngày đang chọn</p>
-  <table>
-    <thead>
+  <h4>{{ i18n.t('dashboard.before_and_after_coaching') }}</h4>
+  <p class="muted">
+    {{i18n.t('dashboard.p0_p1_within_the_selected_date_range',{p0:c.topic,p1:c.followUpDate})}}
+  </p>
+
+  <cinema-table [rows]="[true]" [columns]="3"
+    ><ng-template #header>
       <tr>
-        <th>Giai đoạn</th>
-        <th>Feedback</th>
-        <th>Điểm trung bình</th>
-      </tr>
-    </thead>
-    <tbody>
+        <th>{{ i18n.t('dashboard.period') }}</th>
+        <th>{{ i18n.t('dashboard.feedback_124') }}</th>
+        <th>{{ i18n.t('dashboard.average_rating') }}</th>
+      </tr> </ng-template
+    ><ng-template #body>
       <tr>
-        <td>Trước coaching</td>
+        <td>{{ i18n.t('dashboard.before_coaching') }}</td>
         <td>{{ data()?.beforeCoaching?.[0]?.count || 0 }}</td>
-        <td>{{ data()?.beforeCoaching?.[0]?.average | number:'1.2-2' }}</td>
+        <td>{{ data()?.beforeCoaching?.[0]?.average | cinemaNumber:'1.2-2' }}</td>
       </tr>
       <tr>
-        <td>Sau coaching</td>
+        <td>{{ i18n.t('dashboard.after_coaching') }}</td>
         <td>{{ data()?.afterCoaching?.[0]?.count || 0 }}</td>
-        <td>{{ data()?.afterCoaching?.[0]?.average | number:'1.2-2' }}</td>
+        <td>{{ data()?.afterCoaching?.[0]?.average | cinemaNumber:'1.2-2' }}</td>
       </tr>
-    </tbody>
-  </table>
+    </ng-template></cinema-table
+  >
 </section>
 }

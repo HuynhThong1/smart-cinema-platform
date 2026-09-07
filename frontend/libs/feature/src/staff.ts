@@ -1,101 +1,153 @@
+import {
+  CinemaBadge,
+  CinemaField,
+  CinemaButton,
+  CinemaInput,
+  CinemaOption,
+  CinemaSelect,
+  CinemaTable,
+  Overlay,
+  RowLink,
+} from '@cinema/ui';
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Cinema, Staff, Page, localDate } from '@cinema/core';
-import { Overlay, RowLink } from '@cinema/ui';
+import { Cinema, Staff, Page } from '@cinema/core';
 import { AsyncPage, PageState, Pager } from './shared';
 @Component({
   selector: 'cinema-staff',
-  imports: [FormsModule, RouterLink, Overlay, RowLink, PageState, Pager],
+  imports: [
+    CinemaBadge,
+    CinemaField,
+    CinemaButton,
+    CinemaInput,
+    CinemaSelect,
+    CinemaOption,
+    CinemaTable,
+    FormsModule,
+    RouterLink,
+    Overlay,
+    RowLink,
+    PageState,
+    Pager,
+  ],
   template: ` <div class="page-title">
       <div>
-        <p class="kicker">Nhân viên</p>
-        <h2>Danh sách nhân viên</h2>
-        <p class="english">Your cinema service team</p>
+        <p class="kicker">{{ i18n.t('coaching.staff') }}</p>
+        <h2>{{ i18n.t('staff.staff_list') }}</h2>
       </div>
       <div class="actions">
-        <a class="secondary" routerLink="/staff/import">Import Excel/CSV</a
-        ><button class="primary" (click)="edit()">+ Thêm nhân viên</button>
+        <a cinemaButton class="secondary" routerLink="/staff/import">{{
+          i18n.t('staff.import_excel_csv')
+        }}</a
+        ><button type="button" cinemaButton class="primary" (click)="edit()">
+          {{ i18n.t('staff.add_staff') }}
+        </button>
       </div>
     </div>
     <form class="toolbar" (ngSubmit)="page.set(1); load()">
       <input
+        cinemaInput
         name="search"
         [(ngModel)]="search"
-        placeholder="Mã hoặc tên nhân viên"
-        aria-label="Tìm nhân viên"
-      /><select name="status" [(ngModel)]="status" aria-label="Trạng thái">
-        <option value="">Tất cả trạng thái</option>
-        <option value="ACTIVE">Active</option>
-        <option value="INACTIVE">Inactive</option></select
-      ><button class="secondary">Tìm kiếm</button>
+        [placeholder]="i18n.t('staff.staff_code_or_name')"
+        [attr.aria-label]="i18n.t('qr.search_staff')"
+      /><cinema-select
+        name="status"
+        [(ngModel)]="status"
+        [aria-label]="i18n.t('administration.status')"
+      >
+        <cinema-option [value]="''" [label]="i18n.t('staff.all_statuses')" />
+        <cinema-option [value]="'ACTIVE'" [label]="i18n.t('staff.active')" />
+        <cinema-option [value]="'INACTIVE'" [label]="i18n.t('staff.inactive')" /></cinema-select
+      ><button type="submit" cinemaButton class="secondary">{{ i18n.t('staff.search') }}</button>
     </form>
-    <cinema-state [busy]="busy()" [error]="error()" [message]="message()" (retry)="load()" />
+    <cinema-state
+      [busy]="busy()"
+      [error]="i18n.t(error())"
+      [message]="i18n.t(message())"
+      (retry)="load()"
+    />
     @if (!busy()) {
       <div class="table-wrap">
-        <table>
-          <thead>
+        <cinema-table [rows]="data().items" [columns]="6"
+          ><ng-template #header>
             <tr>
-              <th>Mã</th>
-              <th>Họ tên</th>
-              <th>Rạp</th>
-              <th>Trạng thái</th>
-              <th>Cập nhật</th>
-              <th>Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (s of data().items; track s.id) {
-              <tr (rowOpen)="edit(s)">
-                <td>
-                  <strong>{{ s.staffCode }}</strong>
-                </td>
-                <td>{{ s.name }}</td>
-                <td>
-                  {{ cinemaName(s.cinemaId) }}
-                  @if (!s.managerId) {
-                    <p class="negative">Chưa gán quản lý</p>
-                  }
-                </td>
-                <td>
-                  <span class="tag" [class.good]="s.status === 'ACTIVE'">{{ s.status }}</span>
-                </td>
-                <td>{{ localDate(s.updatedAt) }}</td>
-                <td>
-                  <div class="actions">
-                    <a [routerLink]="['/staff', s.id, 'performance']">Hiệu suất</a
-                    ><a routerLink="/qr" [queryParams]="{ staffId: s.id }">QR</a
-                    ><button class="text-button" (click)="edit(s)">Sửa</button>
-                  </div>
-                </td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="6">Chưa có nhân viên. Thêm nhân viên hoặc import danh sách.</td>
-              </tr>
-            }
-          </tbody>
-        </table>
+              <th>{{ i18n.t('administration.code') }}</th>
+              <th>{{ i18n.t('import.full_name') }}</th>
+              <th>{{ i18n.t('dashboard.cinema') }}</th>
+              <th>{{ i18n.t('administration.status') }}</th>
+              <th>{{ i18n.t('staff.updated') }}</th>
+              <th>{{ i18n.t('staff.actions') }}</th>
+            </tr> </ng-template
+          ><ng-template #body let-s
+            ><tr (rowOpen)="edit(s)">
+              <td>
+                <strong>{{ s.staffCode }}</strong>
+              </td>
+              <td>{{ s.name }}</td>
+              <td>
+                {{ cinemaName(s.cinemaId) }}
+                @if (!s.managerId) {
+                  <p class="negative">{{ i18n.t('import.no_manager_assigned') }}</p>
+                }
+              </td>
+              <td>
+                <cinema-badge class="tag" [class.good]="s.status === 'ACTIVE'">{{
+                  i18n.t('common.status.' + s.status)
+                }}</cinema-badge>
+              </td>
+              <td>{{ localDate(s.updatedAt) }}</td>
+              <td>
+                <div class="actions">
+                  <a [routerLink]="['/staff', s.id, 'performance']">{{
+                    i18n.t('staff.performance')
+                  }}</a
+                  ><a routerLink="/qr" [queryParams]="{ staffId: s.id }">{{ i18n.t('qr.qr') }}</a
+                  ><button type="button" cinemaButton class="text-button" (click)="edit(s)">
+                    {{ i18n.t('administration.edit') }}
+                  </button>
+                </div>
+              </td>
+            </tr></ng-template
+          ><ng-template #empty
+            ><tr>
+              <td colspan="6">{{ i18n.t('staff.no_staff_yet_add_staff_or_import_a_list') }}</td>
+            </tr></ng-template
+          ></cinema-table
+        >
       </div>
       <cinema-pager [page]="page()" [total]="data().total" (changed)="page.set($event); load()" />
     }
-    <cinema-overlay [(open)]="dialog" [header]="draft.id ? 'Sửa nhân viên' : 'Thêm nhân viên'"
-      ><form class="form-fields" (ngSubmit)="save()">
-        <label
-          >Mã nhân viên *<input
+    <cinema-overlay
+      [saving]="busy()"
+      [(open)]="dialog"
+      [header]="draft.id ? i18n.t('staff.edit_staff') : i18n.t('staff.add_staff_376')"
+      ><form
+        class="form-fields"
+        #editorForm="ngForm"
+        (ngSubmit)="editorForm.valid && !busy() && save()"
+      >
+        <cinema-field inputId="staff-field-1" [label]="i18n.t('staff.staff_code')"
+          ><input
+            id="staff-field-1"
+            cinemaInput
             name="code"
             [(ngModel)]="draft.staffCode"
             required
-            maxlength="50" /></label
-        ><label
-          >Họ tên *<input
+            maxlength="50" /></cinema-field
+        ><cinema-field inputId="staff-field-2" [label]="i18n.t('staff.full_name')"
+          ><input
+            id="staff-field-2"
+            cinemaInput
             name="name"
             [(ngModel)]="draft.name"
             required
             minlength="2"
-            maxlength="100" /></label
-        ><label
-          >Rạp *<select
+            maxlength="100" /></cinema-field
+        ><cinema-field inputId="staff-field-3" [label]="i18n.t('staff.cinema')"
+          ><cinema-select
+            inputId="staff-field-3"
             name="cinema"
             [(ngModel)]="draft.cinemaId"
             (ngModelChange)="draft.managerId = ''; loadManagers()"
@@ -103,45 +155,62 @@ import { AsyncPage, PageState, Pager } from './shared';
             required
           >
             @for (c of cinemas(); track c.id) {
-              <option [value]="c.id">{{ c.name }}</option>
-            }
-          </select></label
-        ><label
-          >Quản lý trực tiếp / Direct manager<select
+              <cinema-option [value]="c.id" [label]="c.name" />
+            }</cinema-select></cinema-field
+        ><cinema-field inputId="staff-field-4" [label]="i18n.t('staff.direct_manager')"
+          ><cinema-select
+            inputId="staff-field-4"
             name="manager"
             [(ngModel)]="draft.managerId"
             [disabled]="managersLoading"
           >
-            <option value="">Chưa gán quản lý</option>
+            <cinema-option [value]="''" [label]="i18n.t('import.no_manager_assigned')" />
             @for (m of managers(); track m.id) {
-              <option [value]="m.id">{{ m.name }}</option>
+              <cinema-option [value]="m.id" [label]="m.name" />
             }
             @if (draft.managerId && !hasManager()) {
-              <option [value]="draft.managerId">Quản lý đã gán · cần kiểm tra tài khoản</option>
-            }
-          </select></label
-        >
+              <cinema-option
+                [value]="draft.managerId"
+                [label]="i18n.t('staff.assigned_manager_account_needs_review')"
+              />
+            }</cinema-select
+        ></cinema-field>
         @if (managerError()) {
           <p class="field-error" role="alert">
-            {{ managerError() }}
-            <button type="button" class="text-button" (click)="loadManagers()">Thử lại</button>
+            {{ i18n.t(managerError()) }}
+            <button cinemaButton type="button" class="text-button" (click)="loadManagers()">
+              {{ i18n.t('staff.retry') }}
+            </button>
           </p>
         }
         @if (!draft.managerId) {
-          <p class="muted">Chưa gửi thông báo cho đến khi gán quản lý trực tiếp.</p>
+          <p class="muted">
+            {{ i18n.t('staff.notifications_will_not_be_sent_until_a_direct_manager_is_assigned') }}
+          </p>
         }
-        <label
-          >Trạng thái<select name="status" [(ngModel)]="draft.status">
-            <option>ACTIVE</option>
-            <option>INACTIVE</option>
-          </select></label
-        >
+        <cinema-field inputId="staff-field-5" [label]="i18n.t('administration.status')"
+          ><cinema-select inputId="staff-field-5" name="status" [(ngModel)]="draft.status">
+            <cinema-option [value]="'ACTIVE'" [label]="i18n.t('administration.active')" />
+            <cinema-option
+              [value]="'INACTIVE'"
+              [label]="i18n.t('administration.inactive')"
+            /> </cinema-select
+        ></cinema-field>
         @if (error()) {
-          <p class="field-error" role="alert">{{ error() }}</p>
+          <p class="field-error" role="alert">{{ i18n.t(error()) }}</p>
         }
         <div class="overlay-actions">
-          <button type="button" class="secondary" (click)="dialog = false">Huỷ</button
-          ><button class="primary" [disabled]="busy()">Lưu nhân viên</button>
+          <button
+            cinemaButton
+            type="button"
+            class="secondary"
+            [disabled]="busy()"
+            (click)="dialog = false"
+          >
+            {{ i18n.t('administration.cancel') }}</button
+          ><button type="submit" cinemaButton class="primary" [disabled]="busy()">
+            {{ i18n.t('staff.save_staff') }}
+          </button>
         </div>
       </form></cinema-overlay
     >`,
@@ -165,7 +234,7 @@ export class StaffPage extends AsyncPage {
     // until a cinema is picked — the list may still be loading when this opens.
     if (!cinemaId) {
       this.managersLoading = false;
-      this.managerError.set('Chọn rạp để tải danh sách quản lý.');
+      this.managerError.set('staff.select_a_cinema_to_load_managers');
       return;
     }
     try {
@@ -174,7 +243,8 @@ export class StaffPage extends AsyncPage {
       });
       if (request === this.managerRequest) this.managers.set(items);
     } catch {
-      if (request === this.managerRequest) this.managerError.set('Không tải được quản lý của rạp.');
+      if (request === this.managerRequest)
+        this.managerError.set('staff.unable_to_load_managers_for_this_cinema');
     } finally {
       if (request === this.managerRequest) this.managersLoading = false;
     }
@@ -185,7 +255,7 @@ export class StaffPage extends AsyncPage {
   status = '';
   dialog = false;
   draft: Partial<Staff> = {};
-  localDate = localDate;
+  localDate = (value: string) => this.i18n.date(value);
   ngOnInit() {
     void this.load();
     void this.api
@@ -226,7 +296,7 @@ export class StaffPage extends AsyncPage {
       if (this.draft.id) await this.api.put('/admin/staff/' + this.draft.id, this.draft);
       else await this.api.post('/admin/staff', this.draft);
       this.dialog = false;
-      this.notify('Đã lưu nhân viên');
+      this.notify('staff.staff_saved');
       this.data.set(
         await this.api.get<Page<Staff>>('/admin/staff', {
           page: this.page(),

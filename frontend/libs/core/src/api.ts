@@ -1,3 +1,4 @@
+import { translatedMessage } from '@cinema/i18n';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { inject, Injectable, InjectionToken } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
@@ -58,17 +59,55 @@ export class Api {
   }
 }
 export function errorMessage(error: unknown): string {
-  if (error instanceof HttpErrorResponse) {
-    const id = error.error?.requestId || error.headers.get('X-Request-ID');
-    const message =
-      error.status === 401
-        ? 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'
-        : error.status === 403
-          ? 'Bạn không có quyền xem nội dung này.'
-          : error.error?.error || 'Không tải được dữ liệu. Vui lòng thử lại.';
-    return message + (id ? ` · Request ID: ${id}` : '');
-  }
-  return 'Không thể hoàn tất thao tác. Vui lòng thử lại.';
+  if (!(error instanceof HttpErrorResponse)) return 'common.errors.UNKNOWN';
+  const fallback: Record<number, string> = {
+    400: 'VALIDATION',
+    401: 'UNAUTHORIZED',
+    403: 'FORBIDDEN',
+    404: 'NOT_FOUND',
+    409: 'CONFLICT',
+    413: 'FILE_SIZE',
+    422: 'VALIDATION',
+    429: 'RATE_LIMITED',
+    502: 'UNAVAILABLE',
+    503: 'UNAVAILABLE',
+    0: 'UNAVAILABLE',
+  };
+  const supported = new Set([
+    'UNKNOWN',
+    'UNAUTHORIZED',
+    'FORBIDDEN',
+    'NOT_FOUND',
+    'CONFLICT',
+    'VALIDATION',
+    'RATE_LIMITED',
+    'UNAVAILABLE',
+    'SELF_DELETE',
+    'SELF_DEMOTE',
+    'PASSWORD_SHORT',
+    'EMAIL_INVALID',
+    'ACTIVE_CINEMA',
+    'MANAGER_INVALID',
+    'CONFIG_STALE',
+    'FEEDBACK_INVALID',
+    'FILE_SIZE',
+    'IMPORT_ROWS',
+    'IMPORT_HEADERS',
+    'COACHING_CLOSED',
+    'COACHING_TRANSITION',
+    'STAFF_INACTIVE',
+    'SCOPE_TOO_LARGE',
+    'ACCOUNT_UPDATE_UNCERTAIN',
+    'ACCOUNT_DELETE_UNCERTAIN',
+  ]);
+  const code = supported.has(error.error?.code)
+    ? error.error.code
+    : fallback[error.status] || 'UNKNOWN';
+  const message = 'common.errors.' + code;
+  const id = error.error?.requestId || error.headers.get('X-Request-ID');
+  return id
+    ? translatedMessage('common.request_error', { message: translatedMessage(message), id })
+    : message;
 }
 export function download(blob: Blob, name: string) {
   const url = URL.createObjectURL(blob);
@@ -77,11 +116,4 @@ export function download(blob: Blob, name: string) {
   a.download = name;
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-export function localDate(value: string) {
-  return new Intl.DateTimeFormat('vi-VN', {
-    dateStyle: 'short',
-    timeStyle: 'short',
-    timeZone: 'Asia/Ho_Chi_Minh',
-  }).format(new Date(value));
 }

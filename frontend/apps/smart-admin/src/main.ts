@@ -1,3 +1,4 @@
+import { startupError } from '@cinema/i18n';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { mergeApplicationConfig } from '@angular/core';
 import { API_URL, AUTH_CONFIG } from '@cinema/core';
@@ -21,5 +22,5 @@ async function main() {
   );
 }
 main().catch(() => {
-  document.body.textContent = 'Không tải được cấu hình ứng dụng. Vui lòng thử lại.';
+  document.body.textContent = startupError(document.cookie);
 });

@@ -1,14 +1,28 @@
-import { ApplicationConfig, inject, provideAppInitializer } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { provideCinemaUI } from '@cinema/ui';
+import { provideCinemaI18n } from '@cinema/i18n';
+import { ApplicationConfig, inject, isDevMode, provideAppInitializer } from '@angular/core';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideRouter, Router } from '@angular/router';
 import { Auth, authInterceptor, authGuard, globalGuard } from '@cinema/core';
 import { Shell, Login, Forbidden } from './shell';
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideCinemaUI(),
+    ...provideCinemaI18n(),
     provideHttpClient(withInterceptors([authInterceptor])),
-    provideAppInitializer(() => inject(Auth).init()),
+    provideAppInitializer(() => {
+      // The development-only component catalog has no account or API dependencies.
+      if (isDevMode() && inject(DOCUMENT).location.pathname === '/ui-showcase') return;
+      return inject(Auth).init();
+    }),
     provideRouter([
       { path: 'login', component: Login },
+      {
+        path: 'ui-showcase',
+        canMatch: [() => isDevMode()],
+        loadComponent: () => import('../../../../libs/ui/src/showcase').then((m) => m.Showcase),
+      },
       {
         path: '',
         component: Shell,

@@ -1,3 +1,5 @@
+import { I18n, translatedMessage } from '@cinema/i18n';
+import { CinemaButton, LanguageSwitch } from '@cinema/ui';
 import { Component, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { NotificationBell } from '../../../../libs/feature/src/notifications';
@@ -9,16 +11,23 @@ import { Api, Auth, Cinema, Page } from '@cinema/core';
     '(document:click)': 'dismissAccount($event)',
     '(document:keydown.escape)': 'closeAccount(true)',
   },
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, NotificationBell],
+  imports: [
+    LanguageSwitch,
+    CinemaButton,
+    RouterLink,
+    RouterLinkActive,
+    RouterOutlet,
+    NotificationBell,
+  ],
   template: ` <div class="admin-shell">
     <header class="masthead">
       <div>
-        <a routerLink="/" class="masthead-title">SMART CINEMA PLATFORM</a>
-        <div class="kicker">Galaxy Cinema · Transaction Feedback QR</div>
+        <a routerLink="/" class="masthead-title">{{ i18n.t('admin.smart_cinema_platform') }}</a>
+        <div class="kicker">{{ i18n.t('admin.galaxy_cinema_transaction_feedback_qr') }}</div>
       </div>
-      <div class="utility-rail" aria-label="Tiện ích tài khoản">
-        <span class="utility-scope">{{ scopeName() }}</span>
-        <cinema-notification-bell />
+      <div class="utility-rail" [attr.aria-label]="i18n.t('admin.account_utilities')">
+        <span class="utility-scope">{{ i18n.t(scopeName()) }}</span>
+        <cinema-language /><cinema-notification-bell />
         <details class="account-menu" #accountMenu>
           <summary aria-controls="account-actions">
             <span class="account-identity"
@@ -28,50 +37,59 @@ import { Api, Auth, Cinema, Page } from '@cinema/core';
             <span class="account-caret" aria-hidden="true">▾</span>
           </summary>
           <div id="account-actions" class="account-actions">
-            <button type="button" (click)="closeAccount(); auth.account()">
-              Tài khoản của tôi
+            <button cinemaButton type="button" (click)="closeAccount(); auth.account()">
+              {{ i18n.t('admin.my_account') }}
             </button>
-            <button type="button" (click)="closeAccount(); auth.changePassword()">
-              Đổi mật khẩu
+            <button cinemaButton type="button" (click)="closeAccount(); auth.changePassword()">
+              {{ i18n.t('admin.change_password') }}
             </button>
             <button
+              cinemaButton
               type="button"
               class="theme-toggle"
               role="switch"
-              aria-label="Giao diện tối"
+              [attr.aria-label]="i18n.t('admin.dark_mode')"
               [attr.aria-checked]="theme.dark()"
               (click)="theme.toggle()"
             >
-              <span>Giao diện tối</span
+              <span>{{ i18n.t('admin.dark_mode') }}</span
               ><span class="theme-switch" aria-hidden="true"><span></span></span>
             </button>
-            <button type="button" class="account-logout" (click)="closeAccount(); auth.logout()">
-              Đăng xuất
+            <button
+              cinemaButton
+              type="button"
+              class="account-logout"
+              (click)="closeAccount(); auth.logout()"
+            >
+              {{ i18n.t('admin.sign_out') }}
             </button>
           </div>
         </details>
       </div>
     </header>
-    <a class="skip-link" href="#admin-content" (click)="focusContent($event)">Đến nội dung chính</a>
+    <a class="skip-link" href="#admin-content" (click)="focusContent($event)">{{
+      i18n.t('admin.skip_to_main_content')
+    }}</a>
     <button
+      cinemaButton
       type="button"
       class="secondary mobile-nav-toggle"
       [attr.aria-expanded]="navOpen()"
       aria-controls="admin-navigation"
       (click)="navOpen.set(!navOpen())"
     >
-      {{ navOpen() ? 'Đóng menu' : 'Menu điều hướng' }}
+      {{ navOpen() ? i18n.t('admin.close_menu') : i18n.t('admin.navigation_menu') }}
     </button>
     <div class="admin-layout">
       <aside class="sidebar" id="admin-navigation" [class.mobile-open]="navOpen()">
-        <div class="kicker">Phạm vi quản trị</div>
+        <div class="kicker">{{ i18n.t('admin.administration_scope') }}</div>
         <strong>{{ roleName() }}</strong>
-        <p class="english">{{ scopeName() }}</p>
-        <nav aria-label="Điều hướng chính">
+
+        <nav [attr.aria-label]="i18n.t('admin.main_navigation')">
           @for (group of groups; track group.title) {
             @if (!group.global || auth.global()) {
               <div class="nav-group">
-                <h3>{{ group.title }}</h3>
+                <h3>{{ i18n.t(group.title) }}</h3>
                 @for (item of group.items; track item.path) {
                   @if (
                     (!item.global || auth.global()) &&
@@ -83,7 +101,7 @@ import { Api, Auth, Cinema, Page } from '@cinema/core';
                       ariaCurrentWhenActive="page"
                       routerLinkActive="active"
                       [routerLinkActiveOptions]="{ exact: true }"
-                      >{{ item.label }}</a
+                      >{{ i18n.t(item.label) }}</a
                     >
                   }
                 }
@@ -97,6 +115,7 @@ import { Api, Auth, Cinema, Page } from '@cinema/core';
   </div>`,
 })
 export class Shell {
+  i18n = inject(I18n);
   theme = inject(Theme);
   auth = inject(Auth);
   private api = inject(Api);
@@ -107,14 +126,14 @@ export class Shell {
     this.mainContent()?.nativeElement.focus();
   }
   navOpen = signal(false);
-  scopeName = signal(this.auth.global() ? 'Toàn hệ thống' : 'Rạp được phân quyền');
+  scopeName = signal(this.auth.global() ? 'modules.all_cinemas' : 'modules.assigned_cinema');
   async ngOnInit() {
     try {
       const page = await this.api.get<Page<Cinema>>('/admin/cinemas', { pageSize: 1 });
       this.scopeName.set(
         this.auth.global()
-          ? 'Toàn hệ thống · ' + page.total + ' rạp'
-          : page.items[0]?.name || 'Rạp được phân quyền',
+          ? translatedMessage('messages.scope', { count: page.total })
+          : page.items[0]?.name || 'modules.assigned_cinema',
       );
     } catch {
       /* Keep a truthful scope label when cinema details are unavailable. */
@@ -131,11 +150,7 @@ export class Shell {
     if (menu && !menu.contains(event.target as Node)) this.closeAccount();
   }
   roleName() {
-    return {
-      SYSTEM_ADMIN: 'System Admin',
-      HEAD_OFFICE: 'Head Office',
-      CINEMA_MANAGER: 'Cinema Manager',
-    }[this.auth.user()?.role || 'CINEMA_MANAGER'];
+    return this.i18n.t('common.status.' + (this.auth.user()?.role || 'CINEMA_MANAGER'));
   }
   groups: {
     title: string;
@@ -143,89 +158,100 @@ export class Shell {
     items: { path: string; label: string; global?: boolean; admin?: boolean }[];
   }[] = [
     {
-      title: 'Tổng quan',
+      title: 'admin.overview',
       items: [
-        { path: '/', label: 'Menu chức năng' },
-        { path: '/dashboard', label: 'Dashboard' },
+        { path: '/', label: 'admin.modules' },
+        { path: '/dashboard', label: 'navigation.dashboard' },
       ],
     },
     {
-      title: 'Feedback',
+      title: 'navigation.feedback',
       items: [
-        { path: '/feedback', label: 'Tất cả feedback' },
-        { path: '/analytics', label: 'Phân tích' },
+        { path: '/feedback', label: 'feedback.all_feedback' },
+        { path: '/analytics', label: 'admin.analytics' },
       ],
     },
     {
-      title: 'Nhân viên',
+      title: 'coaching.staff',
       items: [
-        { path: '/staff', label: 'Danh sách nhân viên' },
-        { path: '/staff/import', label: 'Import Excel / CSV' },
-        { path: '/qr', label: 'Quản lý QR' },
+        { path: '/staff', label: 'staff.staff_list' },
+        { path: '/staff/import', label: 'navigation.import' },
+        { path: '/qr', label: 'qr.qr_management' },
       ],
     },
     {
-      title: 'Hiệu suất',
+      title: 'staff.performance',
       items: [
-        { path: '/ranking/staff', label: 'Ranking nhân viên' },
-        { path: '/ranking/cinema', label: 'Ranking rạp', global: true },
+        { path: '/ranking/staff', label: 'admin.staff_ranking' },
+        { path: '/ranking/cinema', label: 'admin.cinema_ranking', global: true },
       ],
     },
     {
-      title: 'Coaching',
-      items: [{ path: '/coaching', label: 'Coaching cases' }],
+      title: 'navigation.coaching',
+      items: [{ path: '/coaching', label: 'navigation.coaching_cases' }],
     },
     {
-      title: 'Thông báo',
+      title: 'notification_rules.notifications',
       items: [
-        { path: '/notifications', label: 'Hộp thư thông báo' },
-        { path: '/notification-rules', label: 'Quy tắc & kênh gửi' },
+        { path: '/notifications', label: 'notifications.notification_inbox' },
+        { path: '/notification-rules', label: 'notification_rules.rules_delivery_channels' },
       ],
     },
     {
-      title: 'Cấu hình',
+      title: 'admin.configuration',
       global: true,
       items: [
-        { path: '/rating', label: 'Rating' },
-        { path: '/reasons', label: 'Lý do feedback' },
+        { path: '/rating', label: 'navigation.rating' },
+        { path: '/reasons', label: 'config.feedback_reasons' },
       ],
     },
     {
-      title: 'Hệ thống',
+      title: 'notifications.system',
       items: [
-        { path: '/cinemas', label: 'Rạp', global: true },
-        { path: '/users', label: 'Người dùng', admin: true },
-        { path: '/audit', label: 'Audit log' },
+        { path: '/cinemas', label: 'dashboard.cinema', global: true },
+        { path: '/users', label: 'admin.users', admin: true },
+        { path: '/audit', label: 'navigation.audit' },
       ],
     },
   ];
 }
 @Component({
+  imports: [LanguageSwitch, CinemaButton],
   selector: 'cinema-login',
   template: `<main class="login-page">
-    <img src="/galaxy-logo.png" width="150" alt="Galaxy Cinema" />
-    <p class="kicker">Smart Cinema Platform</p>
-    <h1>Đăng nhập quản trị</h1>
-    <p class="english">Sign in to your cinema workspace</p>
-    <p>Sử dụng tài khoản được cấp để quản lý feedback và chất lượng dịch vụ tại rạp.</p>
+    <cinema-language />
+    <img src="/galaxy-logo.png" width="150" [alt]="i18n.t('qr.galaxy_cinema')" />
+    <p class="kicker">{{ i18n.t('admin.smart_cinema_platform_429') }}</p>
+    <h1>{{ i18n.t('admin.admin_sign_in') }}</h1>
+
+    <p>{{ i18n.t('admin.use_your_assigned_account_to_manage_feedback_and_service_quality_') }}</p>
     @if (auth.failed()) {
       <p class="error-panel" role="alert">
-        Không kết nối được dịch vụ đăng nhập. Vui lòng thử lại.
+        {{ i18n.t('admin.unable_to_connect_to_the_sign_in_service_please_retry') }}
       </p>
     }
-    <button class="primary submit" (click)="auth.login()">Đăng nhập</button>
-    <p class="footnote">Quên hoặc đổi mật khẩu tại màn hình đăng nhập.</p>
+    <button type="button" cinemaButton class="primary submit" (click)="auth.login()">
+      {{ i18n.t('admin.sign_in') }}
+    </button>
+    <p class="footnote">
+      {{ i18n.t('admin.reset_or_change_your_password_on_the_sign_in_screen') }}
+    </p>
   </main>`,
 })
 export class Login {
+  i18n = inject(I18n);
   auth = inject(Auth);
 }
 @Component({
   selector: 'cinema-forbidden',
-  imports: [RouterLink],
-  template: `<p class="kicker negative">403 · Permission denied</p>
-    <h2>Bạn không có quyền xem nội dung này</h2>
-    <p>Vui lòng liên hệ quản trị viên nếu cần thay đổi phạm vi truy cập.</p>
-    <a routerLink="/dashboard" class="secondary">Về dashboard</a>`,
+  imports: [CinemaButton, RouterLink],
+  template: `<p class="kicker negative">{{ i18n.t('admin.403_permission_denied') }}</p>
+    <h2>{{ i18n.t('admin.you_do_not_have_permission_to_view_this_content') }}</h2>
+    <p>{{ i18n.t('admin.contact_your_administrator_to_change_your_access_scope') }}</p>
+    <a cinemaButton routerLink="/dashboard" class="secondary">{{
+      i18n.t('admin.back_to_dashboard')
+    }}</a>`,
 })
-export class Forbidden {}
+export class Forbidden {
+  i18n = inject(I18n);
+}

@@ -44,11 +44,13 @@ app.use('/api/v1/public', express.raw({ type: '*/*', limit: '1mb' }), async (req
     res.setHeader('Cache-Control', 'no-store');
     res.send(Buffer.from(await upstream.arrayBuffer()));
   } catch {
-    res.status(503).json({ error: 'Service unavailable' });
+    res.status(503).json({ error: 'Service unavailable', code: 'UNAVAILABLE' });
   }
 });
 app.use(express.static(browser, { maxAge: '1y', index: false, redirect: false }));
 app.use((req, res, next) => {
+  res.setHeader('Cache-Control', 'private, no-store');
+  res.vary('Cookie');
   angular
     .handle(req, { clientIP: req.socket.remoteAddress || '' })
     .then((response) => (response ? writeResponseToNodeResponse(response, res) : next()))

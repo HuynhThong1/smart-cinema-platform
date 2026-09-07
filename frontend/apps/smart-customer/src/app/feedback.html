@@ -1,69 +1,67 @@
 <main class="customer-page">
   <header class="customer-header">
-    <img src="/galaxy-logo.png" width="112" height="34" alt="Galaxy Cinema" /><span class="kicker"
-      >VI / EN</span
-    >
+    <img
+      src="/galaxy-logo.png"
+      width="112"
+      height="34"
+      [alt]="i18n.t('qr.galaxy_cinema')"
+    /><cinema-language />
   </header>
   @switch (screen()) { @case ('form') {
-  <h1>Đánh giá trải nghiệm</h1>
-  <p class="english">Rate your experience</p>
+  <h1>{{ i18n.t('customer.rate_your_experience') }}</h1>
+
   @if (serverTime()) {
   <p class="dateline">{{ localDate(serverTime()) }}</p>
   }
   <form (ngSubmit)="submit()" novalidate>
     <section>
-      <h2 class="question">Trải nghiệm của bạn hôm nay thế nào?</h2>
-      <p class="english">How was your visit today?</p>
+      <h2 class="question">{{ i18n.t('customer.how_was_your_visit_today') }}</h2>
+
       @if (config(); as cfg) {
       <cinema-rating [config]="cfg" [value]="rating()" (changed)="selectRating($event)" />
       } @if (attempted() && !rating()) {
-      <p class="field-error" role="alert">Vui lòng chọn mức đánh giá / Rating is required</p>
+      <p class="field-error" role="alert">{{ i18n.t('customer.please_select_a_rating') }}</p>
       }
     </section>
     @if (rating()) {
     <section>
       <h2 class="question">
-        {{ rating() >= 4 ? 'Điều gì làm bạn hài lòng?' : 'Bạn muốn chia sẻ điều gì?' }}
+        {{ rating() >= 4 ? i18n.t('customer.what_did_you_enjoy') :
+        i18n.t('customer.what_would_you_like_to_share') }}
       </h2>
-      <p class="english">Select all that apply · Các mục có * là bắt buộc</p>
-      <div class="chips">
-        @for (reason of reasonsForRating(); track reason.code) {
-        <button
-          type="button"
-          class="chip"
-          [class.selected]="reasons().includes(reason.code)"
-          [attr.aria-pressed]="reasons().includes(reason.code)"
-          (click)="toggleReason(reason.code)"
-        >
-          {{ reason.label }}{{ reason.required ? ' *' : '' }}
-        </button>
-        }
-      </div>
+
+      <cinema-reasons
+        [options]="reasonOptions()"
+        [value]="reasons()"
+        (toggled)="toggleReason($event)"
+      />
       @if (attempted() && !requiredReasonsValid()) {
-      <p class="field-error" role="alert">Vui lòng chọn lý do bắt buộc.</p>
+      <p class="field-error" role="alert">
+        {{ i18n.t('customer.please_select_the_required_reasons') }}
+      </p>
       }
     </section>
     }
     <div class="form-fields">
-      <label for="full-name">Họ và tên * <small>Full name</small></label
+      <label for="full-name">{{ i18n.t('customer.full_name') }}</label
       ><input
-        pInputText
+        cinemaInput
         id="full-name"
         name="name"
         [(ngModel)]="name"
         autocomplete="name"
-        placeholder="Nguyễn Văn A"
+        [placeholder]="i18n.t('customer.your_full_name')"
         maxlength="100"
         [attr.aria-invalid]="attempted() && !nameValid()"
         aria-describedby="name-error"
       />
       @if (attempted() && !nameValid()) {
       <p id="name-error" class="field-error" role="alert">
-        Vui lòng nhập họ tên từ 2–100 ký tự / Name is required
+        {{ i18n.t('customer.please_enter_a_name_of_2_100_characters') }}
       </p>
-      } <label for="phone">Số điện thoại * <small>Phone number</small></label
+      } <label for="phone">{{ i18n.t('customer.phone_number') }}</label
       ><input
-        pInputText
+        cinemaInput
         id="phone"
         name="phone"
         [(ngModel)]="phone"
@@ -77,86 +75,93 @@
       />
       @if (attempted() && !phoneValid()) {
       <p id="phone-error" class="field-error" role="alert">
-        Số điện thoại không đúng định dạng Việt Nam
+        {{ i18n.t('customer.please_enter_a_valid_vietnamese_phone_number') }}
       </p>
-      } <label for="comment">Chia sẻ thêm <small>Anything else</small></label
+      } <label for="comment">{{ i18n.t('customer.anything_else') }}</label
       ><textarea
+        cinemaTextarea
         id="comment"
         name="comment"
         [(ngModel)]="comment"
         rows="3"
         maxlength="2000"
-        placeholder="Không bắt buộc / Optional"
+        [placeholder]="i18n.t('customer.optional')"
       ></textarea>
     </div>
     <div class="consent">
-      <input type="checkbox" id="consent" name="consent" [(ngModel)]="consent" /><label
-        for="consent"
-        >Tôi đồng ý cho rạp sử dụng thông tin trên để ghi nhận và cải thiện chất lượng dịch
-        vụ.</label
+      <cinema-checkbox inputId="consent" name="consent" [(ngModel)]="consent" /><label for="consent"
+        >{{ i18n.t('customer.i_agree_to_the_cinema_using_this_information_to_record_and_improv')
+        }}</label
       >
     </div>
-    <button class="text-button privacy-link" type="button" (click)="screen.set('privacy')">
-      Chính sách bảo mật
+    <button
+      cinemaButton
+      class="text-button privacy-link"
+      type="button"
+      (click)="screen.set('privacy')"
+    >
+      {{ i18n.t('customer.privacy_policy') }}
     </button>
     @if (attempted() && !consent) {
-    <p class="field-error" role="alert">Cần đồng ý để gửi đánh giá / Consent required</p>
+    <p class="field-error" role="alert">
+      {{ i18n.t('customer.your_consent_is_required_to_submit_feedback') }}
+    </p>
     } @if (submitError()) {
-    <p class="error-panel" role="alert">{{ submitError() }}</p>
-    <button type="button" class="text-button" (click)="reload()">
-      Tải lại cấu hình, giữ câu trả lời
+    <p class="error-panel" role="alert">{{ i18n.t(submitError()) }}</p>
+    <button cinemaButton type="button" class="text-button" (click)="reload()">
+      {{ i18n.t('customer.reload_configuration_and_keep_answers') }}
     </button>
     }
-    <button pButton type="submit" class="primary submit" [disabled]="submitting()">
-      {{ submitting() ? 'Đang gửi…' : 'GỬI ĐÁNH GIÁ' }}
+    <button cinemaButton type="submit" class="primary submit" [disabled]="submitting()">
+      {{ submitting() ? i18n.t('customer.sending') : i18n.t('customer.send_feedback') }}
     </button>
-    <p class="footnote">Chỉ mất 15–30 giây <span>· Takes 15–30 seconds</span></p>
+    <p class="footnote">{{ i18n.t('qr.takes_15_30_seconds') }}</p>
   </form>
   } @case ('thanks') {
   <section class="customer-result">
     <span class="success-mark" aria-hidden="true">✓</span>
-    <h1>Cảm ơn bạn!</h1>
-    <p class="english">Thank you — your feedback was recorded</p>
+    <h1>{{ i18n.t('customer.thank_you') }}</h1>
+
     <p>
-      Đánh giá của bạn đã được ghi nhận lúc {{ localDate(recordedAt()) }}. Cảm ơn bạn đã giúp chúng
-      tôi phục vụ tốt hơn.
+      {{ i18n.t('customer.your_feedback_was_recorded_at_p0_thank_you_for_helping_us_serve_y', {p0:
+      (localDate(recordedAt()))}) }}
     </p>
-    <button pButton class="secondary" (click)="reset()">Gửi đánh giá khác / Send another</button>
+    <button type="button" cinemaButton class="secondary" (click)="reset()">
+      {{ i18n.t('customer.send_another') }}
+    </button>
   </section>
   } @case ('privacy') {
-  <button class="text-button" (click)="screen.set('form')">← Quay lại</button>
-  <h1>Chính sách bảo mật</h1>
-  <p class="english">Privacy policy · consent version {{ config()?.consentVersion }}</p>
-  <p>
-    Galaxy Cinema thu thập họ tên, số điện thoại và đánh giá của bạn để ghi nhận trải nghiệm và cải
-    thiện chất lượng dịch vụ.
+  <button type="button" cinemaButton class="text-button" (click)="screen.set('form')">
+    {{ i18n.t('customer.back') }}
+  </button>
+  <h1>{{ i18n.t('customer.privacy_policy') }}</h1>
+  <p class="muted">
+    {{i18n.t('customer.privacy_policy_consent_version_p0',{p0: config()?.consentVersion})}}
   </p>
-  <p>
-    Thông tin này không được dùng để đăng ký tiếp thị. Việc đồng ý gửi feedback không đồng nghĩa với
-    đồng ý nhận quảng cáo.
-  </p>
-  <p>
-    Bạn có thể liên hệ bộ phận chăm sóc khách hàng tại rạp để yêu cầu hỗ trợ hoặc xoá thông tin đã
-    cung cấp.
-  </p>
+
+  <p>{{ i18n.t('customer.galaxy_cinema_collects_your_name_phone_number_and_feedback_to_rec') }}</p>
+  <p>{{ i18n.t('customer.this_information_is_not_used_to_enroll_you_in_marketing_consentin') }}</p>
+  <p>{{ i18n.t('customer.contact_customer_service_at_your_cinema_for_support_or_to_request') }}</p>
   } @case ('loading') {
-  <div aria-busy="true" aria-label="Đang tải biểu mẫu">
-    @for (n of [1,2,3,4,5,6,7]; track n) {
-    <div class="skeleton"></div>
-    }
-    <p class="english">Đang tải biểu mẫu… / Loading</p>
+  <div aria-busy="true" [attr.aria-label]="i18n.t('customer.loading_form')">
+    <cinema-state [busy]="true" />
   </div>
   } @default {
   <section class="customer-result">
     <p class="kicker negative">
-      {{ screen() === 'invalid' ? 'QR không hợp lệ / Invalid QR' : 'Lỗi hệ thống / System error' }}
+      {{ screen() === 'invalid' ? i18n.t('customer.invalid_qr') : i18n.t('customer.system_error') }}
     </p>
-    <h1>{{ screen() === 'invalid' ? 'Mã QR hiện không khả dụng' : 'Không tải được biểu mẫu' }}</h1>
+    <h1>
+      {{ screen() === 'invalid' ? i18n.t('customer.this_qr_code_is_currently_unavailable') :
+      i18n.t('customer.unable_to_load_the_form') }}
+    </h1>
     <p>
-      {{ screen() === 'invalid' ? 'Vui lòng liên hệ nhân viên tại rạp để được hỗ trợ.' : 'Vui lòng
-      kiểm tra kết nối và thử lại.' }}
+      {{ screen() === 'invalid' ? i18n.t('customer.please_contact_cinema_staff_for_assistance') :
+      i18n.t('common.reconnect') }}
     </p>
-    <button pButton class="secondary" (click)="reload()">Thử lại / Retry</button>
+    <button type="button" cinemaButton class="secondary" (click)="reload()">
+      {{ i18n.t('customer.retry') }}
+    </button>
   </section>
   } }
 </main>

@@ -1,3 +1,5 @@
+import { CinemaBadge, CinemaEmpty, CinemaButton } from '@cinema/ui';
+import { I18n, translatedMessage } from '@cinema/i18n';
 import { Component, Injectable, inject, signal, computed, DestroyRef } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { Api, Page } from '@cinema/core';
@@ -11,21 +13,6 @@ export interface FeedbackNotification {
   suspicious: boolean;
   createdAt: string;
   readAt: string | null;
-}
-const INBOX_TIME = new Intl.DateTimeFormat('vi-VN', {
-  day: '2-digit',
-  month: '2-digit',
-  hour: '2-digit',
-  minute: '2-digit',
-  hour12: false,
-  timeZone: 'Asia/Ho_Chi_Minh',
-});
-/** `05/09 21:59` — date first, no year, matching the design's inbox dateline. */
-export function inboxTime(value: string) {
-  const p = Object.fromEntries(
-    INBOX_TIME.formatToParts(new Date(value)).map((x) => [x.type, x.value]),
-  );
-  return `${p['day']}/${p['month']} ${p['hour']}:${p['minute']}`;
 }
 /** Inbox kinds from the design system. ALERT needs action this shift. */
 export type NotificationKind = 'ALERT' | 'SYSTEM' | 'DIGEST' | 'TASK';
@@ -43,6 +30,7 @@ export function notificationKind(n: FeedbackNotification): NotificationKind {
 }
 @Injectable({ providedIn: 'root' })
 export class NotificationCounter {
+  i18n = inject(I18n);
   private api = inject(Api);
   count = signal<number | null>(null);
   private pending = false;
@@ -68,16 +56,17 @@ export class NotificationCounter {
     routerLink="/notifications"
     [attr.aria-label]="
       counter.count() === null
-        ? 'Thông báo · chưa tải được số chưa đọc'
-        : 'Thông báo · ' + counter.count() + ' chưa đọc'
+        ? i18n.t('notifications.notifications_unread_count_unavailable')
+        : i18n.t('messages.bell', { count: counter.count() })
     "
-    >Thông báo
+    >{{ i18n.t('notification_rules.notifications') }}
     @if (counter.count()) {
       <sup class="bell-count" aria-hidden="true">{{ counter.count() }}</sup>
     }
   </a>`,
 })
 export class NotificationBell {
+  i18n = inject(I18n);
   counter = inject(NotificationCounter);
   constructor() {
     void this.counter.refresh();
@@ -95,39 +84,54 @@ export class NotificationBell {
 }
 @Component({
   selector: 'cinema-notifications',
-  imports: [PageState, Pager],
+  imports: [CinemaBadge, CinemaEmpty, CinemaButton, PageState, Pager],
   template: `<div class="page-title">
       <div>
-        <p class="kicker">Thông báo</p>
-        <h2>Hộp thư thông báo</h2>
-        <p class="english">Feedback mới dành cho bạn / Your feedback notifications</p>
+        <p class="kicker">{{ i18n.t('notification_rules.notifications') }}</p>
+        <h2>{{ i18n.t('notifications.notification_inbox') }}</h2>
       </div>
-      <button class="secondary" (click)="load()" [disabled]="busy()">Làm mới</button>
+      <button type="button" cinemaButton class="secondary" (click)="load()" [disabled]="busy()">
+        {{ i18n.t('notifications.refresh') }}
+      </button>
     </div>
-    <div class="pill-row" role="group" aria-label="Lọc thông báo">
+    <div
+      class="pill-row"
+      role="group"
+      [attr.aria-label]="i18n.t('notifications.filter_notifications')"
+    >
       @for (f of filters(); track f.key) {
         <button
+          cinemaButton
           class="pill"
           type="button"
           [attr.aria-pressed]="filter() === f.key"
           (click)="pick(f.key)"
         >
-          {{ f.label }} ({{ f.count }})
+          {{ i18n.t(f.label) }} ({{ f.count }})
         </button>
       }
       <span class="spacer"></span>
       <button
+        type="button"
+        cinemaButton
         class="secondary"
         (click)="markAllRead()"
         [disabled]="busy() || marking() || !unreadCount()"
       >
-        Đánh dấu tất cả đã đọc
+        {{ i18n.t('notifications.mark_all_as_read') }}
       </button>
     </div>
     <p class="muted">
-      <small>Tự cập nhật mỗi 15 giây. Bộ lọc loại thông báo áp dụng trên trang đang xem.</small>
+      <small>{{
+        i18n.t('notifications.updates_every_15_seconds_notification_type_filters_apply_to_the_c')
+      }}</small>
     </p>
-    <cinema-state [busy]="busy()" [error]="error()" [message]="message()" (retry)="load()" />
+    <cinema-state
+      [busy]="busy()"
+      [error]="i18n.t(error())"
+      [message]="i18n.t(message())"
+      (retry)="load()"
+    />
     @if (!busy()) {
       <div class="notif-list">
         @for (n of shown(); track n.id) {
@@ -136,42 +140,56 @@ export class NotificationBell {
               class="notif-dot"
               [class.alert]="kind(n) === 'ALERT'"
               [attr.role]="n.readAt ? null : 'img'"
-              [attr.aria-label]="n.readAt ? null : 'Chưa đọc'"
+              [attr.aria-label]="n.readAt ? null : i18n.t('notifications.unread_270')"
             ></span>
             <div>
               <p class="notif-meta">
-                <span
+                <cinema-badge
                   class="tag"
                   [class.bad]="kind(n) === 'ALERT'"
                   [class.good]="kind(n) === 'TASK'"
-                  >{{ kind(n) === 'ALERT' ? 'Cần xem sớm' : 'Thông tin' }}</span
-                ><span>{{ inboxTime(n.createdAt) }} · {{ ago(n.createdAt) }}</span>
+                  >{{
+                    kind(n) === 'ALERT'
+                      ? i18n.t('notifications.needs_attention')
+                      : i18n.t('notifications.information')
+                  }}</cinema-badge
+                ><span>{{ inboxTime(n.createdAt) }} · {{ i18n.t(ago(n.createdAt)) }}</span>
               </p>
-              <h3>{{ title(n) }}</h3>
-              <p class="notif-body">{{ body(n) }}</p>
+              <h3>{{ i18n.t(title(n)) }}</h3>
+              <p class="notif-body">{{ i18n.t(body(n)) }}</p>
             </div>
             <div class="notif-actions">
-              <a class="secondary" [href]="feedbackUrl(n)" (click)="openFeedback($event, n)"
-                >Xem feedback</a
+              <a
+                cinemaButton
+                class="secondary"
+                [href]="feedbackUrl(n)"
+                (click)="openFeedback($event, n)"
+                >{{ i18n.t('notifications.view_feedback') }}</a
               >
               @if (!n.readAt) {
-                <button class="text-button" (click)="markRead(n)" [disabled]="reading() === n.id">
-                  Đánh dấu đã đọc
+                <button
+                  type="button"
+                  cinemaButton
+                  class="text-button"
+                  (click)="markRead(n)"
+                  [disabled]="reading() === n.id"
+                >
+                  {{ i18n.t('notifications.mark_as_read') }}
                 </button>
               }
             </div>
           </article>
         } @empty {
-          <div class="empty">
-            <h4>Không có thông báo</h4>
+          <cinema-empty class="empty">
+            <h4>{{ i18n.t('notifications.no_notifications') }}</h4>
             <p class="muted">
               {{
                 filter() === 'unread'
-                  ? 'Bạn đã đọc hết thông báo.'
-                  : 'Chưa có thông báo nào trong bộ lọc này.'
+                  ? i18n.t('notifications.you_re_all_caught_up')
+                  : i18n.t('notifications.no_notifications_match_this_filter')
               }}
             </p>
-          </div>
+          </cinema-empty>
         }
       </div>
       <cinema-pager
@@ -182,10 +200,11 @@ export class NotificationBell {
       />
     }
     <div class="note-block">
-      <h4>Theo dõi feedback</h4>
+      <h4>{{ i18n.t('notifications.track_feedback') }}</h4>
       <p class="muted">
-        Thông báo gửi đến quản lý trực tiếp đã được gán cho nhân viên. Đánh dấu đã đọc giúp bạn theo
-        dõi hộp thư; không thay thế việc xử lý feedback hoặc tạo coaching.
+        {{
+          i18n.t('notifications.notifications_go_to_the_staff_member_s_assigned_direct_manager_ma')
+        }}
       </p>
     </div>`,
 })
@@ -197,7 +216,7 @@ export class NotificationsPage extends AsyncPage {
   reading = signal('');
   marking = signal(false);
   filter = signal<'all' | 'unread' | NotificationKind>('all');
-  inboxTime = inboxTime;
+  inboxTime = (value: string) => this.i18n.date(value);
   kind = notificationKind;
   private polling = false;
   private revision = 0;
@@ -217,14 +236,14 @@ export class NotificationsPage extends AsyncPage {
     const items = this.items();
     const count = (k: NotificationKind) => items.filter((n) => notificationKind(n) === k).length;
     const kinds: { key: NotificationKind; label: string }[] = [
-      { key: 'ALERT', label: 'Cảnh báo' },
-      { key: 'SYSTEM', label: 'Hệ thống' },
-      { key: 'DIGEST', label: 'Báo cáo' },
-      { key: 'TASK', label: 'Việc cần làm' },
+      { key: 'ALERT', label: 'notifications.alerts' },
+      { key: 'SYSTEM', label: 'notifications.system' },
+      { key: 'DIGEST', label: 'notifications.reports' },
+      { key: 'TASK', label: 'notifications.tasks' },
     ];
     return [
-      { key: 'all' as const, label: 'Tất cả', count: this.totalAll() },
-      { key: 'unread' as const, label: 'Chưa đọc', count: this.unreadCount() },
+      { key: 'all' as const, label: 'coaching.all', count: this.totalAll() },
+      { key: 'unread' as const, label: 'notifications.unread_270', count: this.unreadCount() },
       // A kind the platform does not emit yet would sit at a permanent zero, so
       // it is left out rather than shipped as a control that can never do anything.
       ...kinds.map((k) => ({ ...k, count: count(k.key) })).filter((k) => k.count > 0),
@@ -245,27 +264,29 @@ export class NotificationsPage extends AsyncPage {
     void this.load();
   }
   title(n: FeedbackNotification) {
-    if (n.suspicious) return 'Phát hiện feedback nghi vấn';
+    if (n.suspicious) return 'notifications.suspicious_feedback_detected';
     return n.rating <= 2
-      ? `Feedback ${n.rating}★ mới — ${n.staffName}`
-      : `Feedback mới — ${n.staffName}`;
+      ? translatedMessage('messages.notification_title', { rating: n.rating, name: n.staffName })
+      : translatedMessage('messages.notification_title', { rating: n.rating, name: n.staffName });
   }
   body(n: FeedbackNotification) {
     if (n.suspicious)
-      return 'Đã gắn cờ nghi vấn và loại khỏi ranking cho tới khi được kiểm tra lại.';
+      return 'notifications.flagged_as_suspicious_and_excluded_from_ranking_pending_review';
     return n.rating <= 2
-      ? `Khách chấm ${n.rating}/5 cho ${n.staffName}. Cần xem và xử lý trong ca.`
-      : `Khách chấm ${n.rating}/5 cho ${n.staffName}.`;
+      ? translatedMessage('messages.notification_urgent', { rating: n.rating, name: n.staffName })
+      : translatedMessage('messages.notification_body', { rating: n.rating, name: n.staffName });
   }
   /** Relative time in Vietnamese, matching the design's `2 phút trước` line. */
   ago(value: string) {
     const minutes = Math.round((Date.now() - new Date(value).getTime()) / 60000);
-    if (minutes < 1) return 'vừa xong';
-    if (minutes < 60) return `${minutes} phút trước`;
+    if (minutes < 1) return 'notifications.just_now';
+    if (minutes < 60) return translatedMessage('messages.minutes_ago', { count: minutes });
     const hours = Math.round(minutes / 60);
-    if (hours < 24) return `${hours} giờ trước`;
+    if (hours < 24) return translatedMessage('messages.hours_ago', { count: hours });
     const days = Math.round(hours / 24);
-    return days === 1 ? 'Hôm qua' : `${days} ngày trước`;
+    return days === 1
+      ? 'notifications.yesterday'
+      : translatedMessage('messages.days_ago', { count: days });
   }
   pick(key: 'all' | 'unread' | NotificationKind) {
     const wasUnread = this.filter() === 'unread';
@@ -312,7 +333,7 @@ export class NotificationsPage extends AsyncPage {
       }
     } catch {
       if (revision === this.revision)
-        this.error.set('Không cập nhật được thông báo. Vui lòng thử lại.');
+        this.error.set('notifications.unable_to_update_notifications_please_retry');
     } finally {
       this.polling = false;
     }
@@ -333,7 +354,7 @@ export class NotificationsPage extends AsyncPage {
       await this.api.put('/admin/notifications/' + n.id + '/read', {});
       return true;
     } catch {
-      this.error.set('Không đánh dấu được thông báo. Vui lòng thử lại.');
+      this.error.set('notifications.unable_to_mark_notifications_please_retry');
       return false;
     } finally {
       this.reading.set('');
@@ -352,10 +373,10 @@ export class NotificationsPage extends AsyncPage {
         '/admin/notifications/read-all',
         {},
       );
-      this.notify(`Đã đánh dấu ${updated} thông báo là đã đọc`);
+      this.notify(translatedMessage('messages.marked_read', { count: updated }));
       await this.load();
     } catch {
-      this.error.set('Không đánh dấu được thông báo. Vui lòng thử lại.');
+      this.error.set('notifications.unable_to_mark_notifications_please_retry');
     } finally {
       this.marking.set(false);
     }

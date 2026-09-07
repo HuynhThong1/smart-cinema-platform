@@ -3,7 +3,10 @@
     "target": "ES2022",
     "module": "preserve",
     "moduleResolution": "bundler",
-    "lib": ["ES2022", "DOM"],
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
     "strict": true,
     "experimentalDecorators": true,
     "skipLibCheck": true,
@@ -12,8 +15,15 @@
     "useDefineForClassFields": false,
     "baseUrl": ".",
     "paths": {
-      "@cinema/core": ["libs/core/src/index.ts"],
-      "@cinema/ui": ["libs/ui/src/index.ts"]
+      "@cinema/core": [
+        "libs/core/src/index.ts"
+      ],
+      "@cinema/ui": [
+        "libs/ui/src/index.ts"
+      ],
+      "@cinema/i18n": [
+        "libs/i18n/src/index.ts"
+      ]
     }
   },
   "angularCompilerOptions": {

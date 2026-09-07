@@ -1,116 +1,191 @@
+import {
+  CinemaBadge,
+  CinemaField,
+  CinemaButton,
+  CinemaCheckbox,
+  CinemaDate,
+  CinemaInput,
+  CinemaOption,
+  CinemaSelect,
+  CinemaTable,
+  CinemaTextarea,
+  Overlay,
+  RowLink,
+} from '@cinema/ui';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Coaching, Staff, Page } from '@cinema/core';
-import { Overlay, RowLink } from '@cinema/ui';
 import { AsyncPage, PageState, Pager } from './shared';
 @Component({
   selector: 'cinema-coaching',
-  imports: [FormsModule, Overlay, RowLink, PageState, Pager],
+  imports: [
+    CinemaBadge,
+    CinemaField,
+    CinemaButton,
+    CinemaInput,
+    CinemaTextarea,
+    CinemaSelect,
+    CinemaOption,
+    CinemaCheckbox,
+    CinemaDate,
+    CinemaTable,
+    FormsModule,
+    Overlay,
+    RowLink,
+    PageState,
+    Pager,
+  ],
   template: ` <div class="page-title">
       <div>
-        <p class="kicker">Coaching</p>
-        <h2>Coaching cases</h2>
-        <p class="english">From customer feedback to better service</p>
+        <p class="kicker">{{ i18n.t('coaching.coaching') }}</p>
+        <h2>{{ i18n.t('coaching.coaching_cases') }}</h2>
       </div>
-      <button class="primary" (click)="edit()">+ Tạo coaching</button>
+      <button type="button" cinemaButton class="primary" (click)="edit()">
+        {{ i18n.t('coaching.create_coaching') }}
+      </button>
     </div>
-    <div class="status-strip">OPEN → IN_PROGRESS → COMPLETED · CANCELLED</div>
+    <div class="status-strip">{{ i18n.t('coaching.open_in_progress_completed_cancelled') }}</div>
     <div class="toolbar">
-      <select aria-label="Trạng thái coaching" [(ngModel)]="status" (change)="page.set(1); load()">
-        <option value="">Tất cả</option>
-        <option>OPEN</option>
-        <option>IN_PROGRESS</option>
-        <option>COMPLETED</option>
-        <option>CANCELLED</option></select
+      <cinema-select
+        [aria-label]="i18n.t('coaching.coaching_status')"
+        [(ngModel)]="status"
+        (change)="page.set(1); load()"
+      >
+        <cinema-option [value]="''" [label]="i18n.t('coaching.all')" />
+        <cinema-option [value]="'OPEN'" [label]="i18n.t('coaching.open')" />
+        <cinema-option [value]="'IN_PROGRESS'" [label]="i18n.t('coaching.in_progress')" />
+        <cinema-option [value]="'COMPLETED'" [label]="i18n.t('coaching.completed')" />
+        <cinema-option
+          [value]="'CANCELLED'"
+          [label]="i18n.t('coaching.cancelled')" /></cinema-select
       ><label class="checkbox-label"
-        ><input type="checkbox" [(ngModel)]="followUp" (change)="page.set(1); load()" />Đến hạn
-        follow-up</label
+        ><cinema-checkbox [(ngModel)]="followUp" (change)="page.set(1); load()" />{{
+          i18n.t('coaching.follow_up_due')
+        }}</label
       >
     </div>
-    <cinema-state [busy]="busy()" [error]="error()" [message]="message()" (retry)="load()" />
+    <cinema-state
+      [busy]="busy()"
+      [error]="i18n.t(error())"
+      [message]="i18n.t(message())"
+      (retry)="load()"
+    />
     <div class="table-wrap">
-      <table>
-        <thead>
+      <cinema-table [rows]="data().items" [columns]="6"
+        ><ng-template #header>
           <tr>
-            <th>Nhân viên</th>
-            <th>Chủ đề</th>
-            <th>Hành động</th>
-            <th>Follow-up</th>
-            <th>Trạng thái</th>
-            <th>Người tạo</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (c of data().items; track c.id) {
-            <tr (rowOpen)="edit(c)">
-              <td>{{ staffName(c.staffId) }}</td>
-              <td>{{ c.topic }}</td>
-              <td>{{ c.action }}</td>
-              <td>{{ c.followUpDate }}</td>
-              <td>
-                <span class="tag" [class.good]="c.status === 'COMPLETED'">{{ c.status }}</span>
-              </td>
-              <td>{{ c.createdBy }}</td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="6">Chưa có coaching phù hợp.</td>
-            </tr>
-          }
-        </tbody>
-      </table>
+            <th>{{ i18n.t('coaching.staff') }}</th>
+            <th>{{ i18n.t('coaching.topic') }}</th>
+            <th>{{ i18n.t('administration.action') }}</th>
+            <th>{{ i18n.t('coaching.follow_up') }}</th>
+            <th>{{ i18n.t('administration.status') }}</th>
+            <th>{{ i18n.t('coaching.created_by') }}</th>
+          </tr> </ng-template
+        ><ng-template #body let-c
+          ><tr (rowOpen)="edit(c)">
+            <td>{{ staffName(c.staffId) }}</td>
+            <td>{{ c.topic }}</td>
+            <td>{{ c.action }}</td>
+            <td>{{ c.followUpDate }}</td>
+            <td>
+              <cinema-badge class="tag" [class.good]="c.status === 'COMPLETED'">{{
+                i18n.t('common.status.' + c.status)
+              }}</cinema-badge>
+            </td>
+            <td>{{ c.createdBy }}</td>
+          </tr></ng-template
+        ><ng-template #empty
+          ><tr>
+            <td colspan="6">{{ i18n.t('coaching.no_matching_coaching_cases') }}</td>
+          </tr></ng-template
+        ></cinema-table
+      >
     </div>
     <cinema-pager [page]="page()" [total]="data().total" (changed)="page.set($event); load()" />
-    <cinema-overlay [(open)]="dialog" [header]="draft.id ? 'Chi tiết coaching' : 'Tạo coaching'"
-      ><form class="form-fields" (ngSubmit)="save()">
-        <label
-          >Nhân viên *<select
+    <cinema-overlay
+      [saving]="busy()"
+      [(open)]="dialog"
+      [header]="
+        draft.id ? i18n.t('coaching.coaching_details') : i18n.t('coaching.create_coaching_43')
+      "
+      ><form
+        class="form-fields"
+        #editorForm="ngForm"
+        (ngSubmit)="editorForm.valid && !busy() && save()"
+      >
+        <cinema-field inputId="coaching-field-1" [label]="i18n.t('coaching.staff_44')"
+          ><cinema-select
+            inputId="coaching-field-1"
             name="staff"
             [(ngModel)]="draft.staffId"
             [disabled]="!!draft.id"
             required
           >
             @for (s of staff(); track s.id) {
-              <option [value]="s.id">{{ s.staffCode }} · {{ s.name }}</option>
-            }
-          </select></label
-        ><label
-          >Chủ đề *<input
+              <cinema-option [value]="s.id" [label]="s.staffCode + ' · ' + s.name" />
+            }</cinema-select></cinema-field
+        ><cinema-field inputId="coaching-field-2" [label]="i18n.t('coaching.topic_45')"
+          ><input
+            id="coaching-field-2"
+            cinemaInput
             name="topic"
             [(ngModel)]="draft.topic"
             required
             minlength="2"
-            maxlength="200" /></label
-        ><label
-          >Hành động *<textarea
+            maxlength="200" /></cinema-field
+        ><cinema-field inputId="coaching-field-3" [label]="i18n.t('coaching.action')">
+          <textarea
+            id="coaching-field-3"
+            cinemaTextarea
             name="action"
             [(ngModel)]="draft.action"
             required
             minlength="2"
             maxlength="2000"
-          ></textarea></label
-        ><label
-          >Ghi chú<textarea name="note" [(ngModel)]="draft.note" maxlength="4000"></textarea></label
-        ><label
-          >Ngày follow-up *<input type="date" name="date" [(ngModel)]="draft.followUpDate" required
-        /></label>
+          ></textarea></cinema-field
+        ><cinema-field inputId="coaching-field-4" [label]="i18n.t('coaching.notes')">
+          <textarea
+            id="coaching-field-4"
+            cinemaTextarea
+            name="note"
+            [(ngModel)]="draft.note"
+            maxlength="4000"
+          ></textarea></cinema-field
+        ><cinema-field inputId="coaching-field-5" [label]="i18n.t('coaching.follow_up_date')"
+          ><cinema-date
+            inputId="coaching-field-5"
+            name="date"
+            [(ngModel)]="draft.followUpDate"
+            required
+        /></cinema-field>
         @if (draft.id) {
-          <label
-            >Trạng thái<select name="status" [(ngModel)]="draft.status">
-              <option>OPEN</option>
-              <option>IN_PROGRESS</option>
-              <option>COMPLETED</option>
-              <option>CANCELLED</option>
-            </select></label
-          >
+          <cinema-field inputId="coaching-field-6" [label]="i18n.t('administration.status')"
+            ><cinema-select inputId="coaching-field-6" name="status" [(ngModel)]="draft.status">
+              <cinema-option [value]="'OPEN'" [label]="i18n.t('coaching.open')" />
+              <cinema-option [value]="'IN_PROGRESS'" [label]="i18n.t('coaching.in_progress')" />
+              <cinema-option [value]="'COMPLETED'" [label]="i18n.t('coaching.completed')" />
+              <cinema-option
+                [value]="'CANCELLED'"
+                [label]="i18n.t('coaching.cancelled')"
+              /> </cinema-select
+          ></cinema-field>
         }
         @if (error()) {
-          <p class="field-error" role="alert">{{ error() }}</p>
+          <p class="field-error" role="alert">{{ i18n.t(error()) }}</p>
         }
         <div class="overlay-actions">
-          <button type="button" class="secondary" (click)="dialog = false">Huỷ</button
-          ><button class="primary" [disabled]="busy()">Lưu coaching</button>
+          <button
+            cinemaButton
+            type="button"
+            class="secondary"
+            [disabled]="busy()"
+            (click)="dialog = false"
+          >
+            {{ i18n.t('administration.cancel') }}</button
+          ><button type="submit" cinemaButton class="primary" [disabled]="busy()">
+            {{ i18n.t('coaching.save_coaching') }}
+          </button>
         </div>
       </form></cinema-overlay
     >`,
@@ -171,7 +246,7 @@ export class CoachingPage extends AsyncPage {
       if (this.draft.id) await this.api.put('/admin/coaching/' + this.draft.id, this.draft);
       else await this.api.post('/admin/coaching', this.draft);
       this.dialog = false;
-      this.notify('Đã lưu coaching');
+      this.notify('coaching.coaching_saved');
       this.data.set(await this.api.get<Page<Coaching>>('/admin/coaching', this.query()));
     });
   }

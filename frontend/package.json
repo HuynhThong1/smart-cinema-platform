@@ -9,7 +9,10 @@
     "build:admin:render": "node scripts/write-admin-config.mjs && nx build smart-admin --configuration=production",
     "typecheck": "tsc --noEmit -p apps/smart-admin/tsconfig.app.json && tsc --noEmit -p apps/smart-customer/tsconfig.app.json",
     "format": "prettier --write \"apps/**/*.{ts,html,json}\" \"libs/**/*.{ts,html,css}\"",
-    "format:check": "prettier --check \"apps/**/*.{ts,html,json}\" \"libs/**/*.{ts,html,css}\""
+    "format:check": "prettier --check \"apps/**/*.{ts,html,json}\" \"libs/**/*.{ts,html,css}\"",
+    "check:ui": "node scripts/check-ui.mjs",
+    "test:unit": "node --test tests/*.test.cjs",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@angular/common": "21.2.22",
@@ -21,6 +24,7 @@
     "@angular/router": "21.2.22",
     "@angular/ssr": "21.2.22",
     "@fontsource/source-serif-4": "^5.3.0",
+    "@jsverse/transloco": "^8.4.0",
     "@phosphor-icons/web": "^2.1.2",
     "@primeuix/themes": "^2.0.0",
     "express": "^5.1.0",
