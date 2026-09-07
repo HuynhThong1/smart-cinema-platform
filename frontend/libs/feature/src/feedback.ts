@@ -1,3 +1,14 @@
+import {
+  CinemaBadge,
+  CinemaButton,
+  CinemaCheckbox,
+  CinemaInput,
+  CinemaOption,
+  CinemaSelect,
+  CinemaTable,
+  Overlay,
+  RowLink,
+} from '@cinema/ui';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -9,20 +20,34 @@ import {
   FeedbackConfig,
   download,
   errorMessage,
-  localDate,
 } from '@cinema/core';
-import { Overlay, RowLink } from '@cinema/ui';
 import { AsyncPage, Filters, PageState, Pager } from './shared';
 @Component({
   selector: 'cinema-feedback-list',
-  imports: [FormsModule, RouterLink, Overlay, RowLink, Filters, PageState, Pager],
+  imports: [
+    CinemaBadge,
+    CinemaButton,
+    CinemaInput,
+    CinemaSelect,
+    CinemaOption,
+    CinemaCheckbox,
+    CinemaTable,
+    FormsModule,
+    RouterLink,
+    Overlay,
+    RowLink,
+    Filters,
+    PageState,
+    Pager,
+  ],
   template: ` <div class="page-title">
       <div>
-        <p class="kicker">Feedback</p>
-        <h2>Tất cả feedback</h2>
-        <p class="english">Every customer experience, recorded</p>
+        <p class="kicker">{{ i18n.t('dashboard.feedback_124') }}</p>
+        <h2>{{ i18n.t('feedback.all_feedback') }}</h2>
       </div>
-      <button class="secondary" (click)="export()" [disabled]="busy()">Xuất CSV</button>
+      <button type="button" cinemaButton class="secondary" (click)="export()" [disabled]="busy()">
+        {{ i18n.t('dashboard.export_csv') }}
+      </button>
     </div>
     <cinema-filters
       [initialCinemaId]="route.snapshot.queryParamMap.get('cinemaId') || ''"
@@ -30,118 +55,127 @@ import { AsyncPage, Filters, PageState, Pager } from './shared';
     />
     <form class="toolbar" (ngSubmit)="page.set(1); load()">
       <input
-        aria-label="Tìm khách hàng"
+        cinemaInput
+        [attr.aria-label]="i18n.t('feedback.search_customers')"
         name="search"
         [(ngModel)]="search"
-        placeholder="Tên hoặc số điện thoại"
-      /><select aria-label="Điểm đánh giá" name="rating" [(ngModel)]="rating">
-        <option value="">Tất cả đánh giá</option>
-        <option value="negative">1–2 · Tiêu cực</option>
-        <option value="neutral">3 · Trung lập</option>
-        <option value="positive">4–5 · Tích cực</option></select
-      ><select aria-label="Nhân viên" name="staff" [(ngModel)]="staffId">
-        <option value="">Tất cả nhân viên</option>
+        [placeholder]="i18n.t('feedback.name_or_phone_number')"
+      /><cinema-select [aria-label]="i18n.t('feedback.rating')" name="rating" [(ngModel)]="rating">
+        <cinema-option [value]="''" [label]="i18n.t('feedback.all_ratings')" />
+        <cinema-option [value]="'negative'" [label]="i18n.t('feedback.1_2_negative')" />
+        <cinema-option [value]="'neutral'" [label]="i18n.t('feedback.3_neutral')" />
+        <cinema-option
+          [value]="'positive'"
+          [label]="i18n.t('feedback.4_5_positive')" /></cinema-select
+      ><cinema-select [aria-label]="i18n.t('coaching.staff')" name="staff" [(ngModel)]="staffId">
+        <cinema-option [value]="''" [label]="i18n.t('feedback.all_staff')" />
         @for (s of staff(); track s.id) {
-          <option [value]="s.id">{{ s.staffCode }} · {{ s.name }}</option>
-        }</select
-      ><select aria-label="Lý do" name="reason" [(ngModel)]="reason">
-        <option value="">Tất cả lý do</option>
+          <cinema-option [value]="s.id" [label]="s.staffCode + ' · ' + s.name" />
+        }</cinema-select
+      ><cinema-select [aria-label]="i18n.t('feedback.reason')" name="reason" [(ngModel)]="reason">
+        <cinema-option [value]="''" [label]="i18n.t('feedback.all_reasons')" />
         @for (r of reasons(); track r.code) {
-          <option [value]="r.code">{{ r.label }}</option>
-        }</select
+          <cinema-option [value]="r.code" [label]="i18n.label(r)" />
+        }</cinema-select
       ><label class="checkbox-label"
-        ><input type="checkbox" name="suspicious" [(ngModel)]="suspicious" />Chỉ nghi vấn</label
-      ><button class="secondary" type="submit">Lọc</button>
+        ><cinema-checkbox name="suspicious" [(ngModel)]="suspicious" />{{
+          i18n.t('feedback.suspicious_only')
+        }}</label
+      ><button cinemaButton class="secondary" type="submit">{{ i18n.t('feedback.filter') }}</button>
     </form>
-    <cinema-state [busy]="busy()" [error]="error()" (retry)="load()" />
+    <cinema-state [busy]="busy()" [error]="i18n.t(error())" (retry)="load()" />
     @if (detailError()) {
       <div class="error-panel" role="alert">{{ detailError() }}</div>
     }
     @if (!busy()) {
       <div class="table-wrap">
-        <table class="table-wide">
-          <thead>
+        <cinema-table [rows]="data().items" [columns]="8"
+          ><ng-template #header>
             <tr>
-              <th>Thời gian</th>
-              <th>Điểm</th>
-              <th>Khách hàng</th>
-              <th>Điện thoại</th>
-              <th>Nhân viên</th>
-              <th>Rạp</th>
-              <th>Lý do</th>
-              <th>Cờ</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (f of data().items; track f.id) {
-              <tr (rowOpen)="open(f.id)">
-                <td>{{ localDate(f.createdAt) }}</td>
-                <td>
-                  <span
-                    class="tag"
-                    [class.bad]="f.rating.value < 3"
-                    [class.good]="f.rating.value > 3"
-                    >{{ f.rating.value }} · {{ f.rating.label }}</span
-                  >
-                </td>
-                <td>{{ f.customer.name }}</td>
-                <td>{{ f.customer.phone }}</td>
-                <td>{{ f.staff.code }}</td>
-                <td>{{ f.cinema.name }}</td>
-                <td>
-                  @for (r of f.reasons; track r.code) {
-                    <span>{{ r.label }} · </span>
-                  }
-                </td>
-                <td>{{ f.metadata.suspicious ? '⚑' : '' }}</td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="8">Không có feedback phù hợp với bộ lọc.</td>
-              </tr>
-            }
-          </tbody>
-        </table>
+              <th>{{ i18n.t('administration.time') }}</th>
+              <th>{{ i18n.t('dashboard.rating') }}</th>
+              <th>{{ i18n.t('feedback.customer') }}</th>
+              <th>{{ i18n.t('feedback.phone') }}</th>
+              <th>{{ i18n.t('coaching.staff') }}</th>
+              <th>{{ i18n.t('dashboard.cinema') }}</th>
+              <th>{{ i18n.t('feedback.reason') }}</th>
+              <th>{{ i18n.t('feedback.flag') }}</th>
+            </tr> </ng-template
+          ><ng-template #body let-f
+            ><tr (rowOpen)="open(f.id)">
+              <td>{{ localDate(f.createdAt) }}</td>
+              <td>
+                <cinema-badge
+                  class="tag"
+                  [class.bad]="f.rating.value < 3"
+                  [class.good]="f.rating.value > 3"
+                  >{{ f.rating.value }} · {{ i18n.label(f.rating) }}</cinema-badge
+                >
+              </td>
+              <td>{{ f.customer.name }}</td>
+              <td>{{ f.customer.phone }}</td>
+              <td>{{ f.staff.code }}</td>
+              <td>{{ f.cinema.name }}</td>
+              <td>
+                @for (r of f.reasons; track r.code) {
+                  <span>{{ i18n.label(r) }} · </span>
+                }
+              </td>
+              <td>{{ f.metadata.suspicious ? '⚑' : '' }}</td>
+            </tr></ng-template
+          ><ng-template #empty
+            ><tr>
+              <td colspan="8">{{ i18n.t('feedback.no_feedback_matches_these_filters') }}</td>
+            </tr></ng-template
+          ></cinema-table
+        >
       </div>
       <cinema-pager [total]="data().total" [page]="page()" (changed)="page.set($event); load()" />
     }
-    <cinema-overlay [(open)]="drawer" variant="drawer" header="Chi tiết feedback">
+    <cinema-overlay
+      [saving]="busy()"
+      [(open)]="drawer"
+      variant="drawer"
+      [header]="i18n.t('feedback.feedback_details')"
+    >
       @if (detail(); as f) {
         <p class="english">{{ localDate(f.createdAt) }}</p>
-        <h3>{{ f.rating.value }} / 5 · {{ f.rating.label }}</h3>
+        <h3>{{ f.rating.value }} / 5 · {{ i18n.label(f.rating) }}</h3>
         @if (f.metadata.suspicious) {
-          <p class="tag bad">Feedback nghi vấn</p>
+          <p class="tag bad">{{ i18n.t('feedback.suspicious_feedback') }}</p>
         }
         <dl>
-          <dt>Khách hàng</dt>
+          <dt>{{ i18n.t('feedback.customer') }}</dt>
           <dd>{{ f.customer.name }}<br />{{ f.customer.phone }}</dd>
-          <dt>Nhân viên</dt>
+          <dt>{{ i18n.t('coaching.staff') }}</dt>
           <dd>{{ f.staff.code }} · {{ f.staff.name }}</dd>
-          <dt>Rạp</dt>
+          <dt>{{ i18n.t('dashboard.cinema') }}</dt>
           <dd>{{ f.cinema.name }}</dd>
-          <dt>Lý do</dt>
+          <dt>{{ i18n.t('feedback.reason') }}</dt>
           <dd>
             <div class="chips">
               @for (r of f.reasons; track r.code) {
-                <span class="tag">{{ r.label }}</span>
+                <cinema-badge class="tag">{{ i18n.label(r) }}</cinema-badge>
               }
             </div>
           </dd>
-          <dt>Bình luận</dt>
+          <dt>{{ i18n.t('feedback.comment') }}</dt>
           <dd>
-            <em>{{ f.comment || 'Không có bình luận' }}</em>
+            <em>{{ f.comment || i18n.t('feedback.no_comment') }}</em>
           </dd>
-          <dt>Đồng ý bảo mật</dt>
+          <dt>{{ i18n.t('feedback.privacy_consent') }}</dt>
           <dd>{{ f.consent.version }} · {{ localDate(f.consent.acceptedAt) }}</dd>
         </dl>
         <div class="overlay-actions">
-          <a class="secondary" [routerLink]="['/staff', f.staff.id, 'performance']"
-            >Hiệu suất nhân viên</a
+          <a cinemaButton class="secondary" [routerLink]="['/staff', f.staff.id, 'performance']">{{
+            i18n.t('dashboard.staff_performance')
+          }}</a
           ><a
+            cinemaButton
             class="primary"
             routerLink="/coaching"
             [queryParams]="{ staffId: f.staff.id, create: 'true' }"
-            >Tạo coaching</a
+            >{{ i18n.t('coaching.create_coaching_43') }}</a
           >
         </div>
       }
@@ -162,7 +196,7 @@ export class FeedbackList extends AsyncPage {
   reason = '';
   suspicious = false;
   params: Record<string, string | boolean> = {};
-  localDate = localDate;
+  localDate = (value: string) => this.i18n.date(value);
   async ngOnInit() {
     const feedbackId = this.route.snapshot.queryParamMap.get('feedbackId');
     if (feedbackId) void this.open(feedbackId);

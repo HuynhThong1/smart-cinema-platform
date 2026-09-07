@@ -1,98 +1,154 @@
-import { Component } from '@angular/core';
+import { CinemaBadge, CinemaButton, CinemaTable } from '@cinema/ui';
+import { I18n } from '@cinema/i18n';
+import { inject, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'cinema-notification-rules',
-  imports: [RouterLink],
-  template: `<p class="kicker">Thông báo</p>
-    <h2>Quy tắc &amp; kênh gửi</h2>
-    <p class="english">Notification delivery</p>
+  imports: [CinemaBadge, CinemaButton, CinemaTable, RouterLink],
+  template: `<p class="kicker">{{ i18n.t('notification_rules.notifications') }}</p>
+    <h2>{{ i18n.t('notification_rules.rules_delivery_channels') }}</h2>
+
     <div class="notice">
       <p>
-        Thông báo feedback được gửi đến quản lý trực tiếp của nhân viên. Trang này giải thích cách
-        nhận thông báo; hiện chưa hỗ trợ chỉnh sửa quy tắc.
+        {{
+          i18n.t(
+            'notification_rules.feedback_notifications_are_sent_to_the_staff_member_s_direct_mana'
+          )
+        }}
       </p>
-      <a routerLink="/staff">Kiểm tra quản lý đã gán cho nhân viên</a>
+      <a routerLink="/staff">{{ i18n.t('notification_rules.check_staff_manager_assignments') }}</a>
     </div>
     <section class="section" aria-labelledby="feedback-delivery">
-      <h3 id="feedback-delivery">Khi có feedback mới</h3>
+      <h3 id="feedback-delivery">{{ i18n.t('notification_rules.when_new_feedback_arrives') }}</h3>
       <div class="table-wrap">
-        <table>
-          <thead>
+        <cinema-table [rows]="[true]" [columns]="3"
+          ><ng-template #header>
             <tr>
-              <th>Sự kiện</th>
-              <th>Người nhận</th>
-              <th>Cách hiển thị</th>
-            </tr>
-          </thead>
-          <tbody>
+              <th>{{ i18n.t('notification_rules.event') }}</th>
+              <th>{{ i18n.t('notification_rules.recipient') }}</th>
+              <th>{{ i18n.t('notification_rules.display') }}</th>
+            </tr> </ng-template
+          ><ng-template #body>
             <tr>
-              <td>Khách gửi đánh giá</td>
-              <td>Quản lý trực tiếp đã gán</td>
-              <td>Thông báo trong hộp thư cá nhân</td>
-            </tr>
-            <tr>
-              <td>Đánh giá 1–2 điểm</td>
-              <td>Quản lý trực tiếp đã gán</td>
-              <td>Nhãn “Cần xem sớm” nếu không bị gắn cờ nghi vấn</td>
+              <td>{{ i18n.t('notification_rules.customer_submits_feedback') }}</td>
+              <td>{{ i18n.t('notification_rules.assigned_direct_manager') }}</td>
+              <td>{{ i18n.t('notification_rules.notification_in_personal_inbox') }}</td>
             </tr>
             <tr>
-              <td>Feedback bị gắn cờ nghi vấn</td>
-              <td>Quản lý trực tiếp đã gán</td>
-              <td>Thông báo có nội dung nghi vấn để kiểm tra</td>
+              <td>{{ i18n.t('notification_rules.rating_of_1_2') }}</td>
+              <td>{{ i18n.t('notification_rules.assigned_direct_manager') }}</td>
+              <td>
+                {{
+                  i18n.t('notification_rules.needs_attention_label_unless_flagged_as_suspicious')
+                }}
+              </td>
             </tr>
-          </tbody>
-        </table>
+            <tr>
+              <td>{{ i18n.t('notification_rules.feedback_flagged_as_suspicious') }}</td>
+              <td>{{ i18n.t('notification_rules.assigned_direct_manager') }}</td>
+              <td>
+                {{
+                  i18n.t(
+                    'notification_rules.notification_identifying_suspicious_feedback_for_review'
+                  )
+                }}
+              </td>
+            </tr>
+          </ng-template></cinema-table
+        >
       </div>
       <p class="muted section">
-        Nhân viên chưa được gán quản lý vẫn nhận đánh giá nhưng chưa phát thông báo. Thông báo đã
-        gửi giữ nguyên người nhận khi thay đổi quản lý.
+        {{
+          i18n.t(
+            'notification_rules.staff_without_an_assigned_manager_can_still_receive_feedback_but_'
+          )
+        }}
       </p>
     </section>
     <div class="columns">
       <section>
-        <h3>Kênh nhận thông báo</h3>
+        <h3>{{ i18n.t('notification_rules.notification_channels') }}</h3>
         <div class="table-wrap">
-          <table>
-            <thead>
+          <cinema-table [rows]="[true]" [columns]="3"
+            ><ng-template #header>
               <tr>
-                <th>Kênh</th>
-                <th>Khả dụng</th>
-                <th>Điều kiện</th>
-              </tr>
-            </thead>
-            <tbody>
+                <th>{{ i18n.t('notification_rules.channel') }}</th>
+                <th>{{ i18n.t('notification_rules.availability') }}</th>
+                <th>{{ i18n.t('notification_rules.requirements') }}</th>
+              </tr> </ng-template
+            ><ng-template #body>
               <tr>
-                <td>Trong ứng dụng</td>
-                <td><span class="tag good">Đã hỗ trợ</span></td>
-                <td>Đăng nhập để xem hộp thư; cập nhật mỗi 15 giây khi mở ứng dụng.</td>
+                <td>{{ i18n.t('notification_rules.in_app') }}</td>
+                <td>
+                  <cinema-badge class="tag good">{{
+                    i18n.t('notification_rules.supported')
+                  }}</cinema-badge>
+                </td>
+                <td>
+                  {{
+                    i18n.t(
+                      'notification_rules.sign_in_to_view_your_inbox_updates_every_15_seconds_while_the_app'
+                    )
+                  }}
+                </td>
               </tr>
               <tr>
-                <td>Email</td>
-                <td><span class="tag">Theo cấu hình</span></td>
-                <td>Cần được quản trị viên bật và tài khoản quản lý có email hợp lệ.</td>
+                <td>{{ i18n.t('notification_rules.email') }}</td>
+                <td>
+                  <cinema-badge class="tag">{{
+                    i18n.t('notification_rules.configuration_dependent')
+                  }}</cinema-badge>
+                </td>
+                <td>
+                  {{
+                    i18n.t(
+                      'notification_rules.an_administrator_must_enable_delivery_and_the_manager_must_have_a'
+                    )
+                  }}
+                </td>
               </tr>
               <tr>
-                <td>Zalo OA / SMS</td>
-                <td><span class="tag">Chưa hỗ trợ</span></td>
-                <td>Chưa gửi qua các kênh này.</td>
+                <td>{{ i18n.t('notification_rules.zalo_oa_sms') }}</td>
+                <td>
+                  <cinema-badge class="tag">{{
+                    i18n.t('notification_rules.not_supported')
+                  }}</cinema-badge>
+                </td>
+                <td>
+                  {{
+                    i18n.t(
+                      'notification_rules.delivery_through_these_channels_is_not_yet_available'
+                    )
+                  }}
+                </td>
               </tr>
-            </tbody>
-          </table>
+            </ng-template></cinema-table
+          >
         </div>
       </section>
       <section>
-        <h3>Chức năng chưa mở</h3>
+        <h3>{{ i18n.t('notification_rules.upcoming_features') }}</h3>
         <p>
-          Báo cáo ngày/tuần, nhắc coaching, sự kiện QR và cảnh báo chuỗi feedback chưa được phát tự
-          động.
+          {{
+            i18n.t(
+              'notification_rules.daily_weekly_reports_coaching_reminders_qr_events_and_consecutive'
+            )
+          }}
         </p>
         <p class="muted">
-          Giờ yên lặng và giới hạn số cảnh báo theo nhân viên chưa áp dụng. Nếu chưa nhận email,
-          liên hệ quản trị viên để kiểm tra cấu hình gửi.
+          {{
+            i18n.t(
+              'notification_rules.quiet_hours_and_per_staff_alert_limits_are_not_yet_applied_if_ema'
+            )
+          }}
         </p>
-        <a class="secondary" routerLink="/notifications">Mở hộp thư thông báo</a>
+        <a cinemaButton class="secondary" routerLink="/notifications">{{
+          i18n.t('notification_rules.open_notifications')
+        }}</a>
       </section>
     </div>`,
 })
-export class NotificationRulesPage {}
+export class NotificationRulesPage {
+  i18n = inject(I18n);
+}

@@ -1,11 +1,19 @@
+import { I18n } from '@cinema/i18n';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, ResolveFn } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
-import { Api, FeedbackConfig, localDate } from '@cinema/core';
-import { RatingControl } from '@cinema/ui';
+import { Api, FeedbackConfig, errorMessage } from '@cinema/core';
+import {
+  ReasonChips,
+  RatingControl,
+  PageState,
+  CinemaButton,
+  CinemaInput,
+  CinemaTextarea,
+  CinemaCheckbox,
+  LanguageSwitch,
+} from '@cinema/ui';
 interface Initial {
   config?: FeedbackConfig;
   serverTime?: string;
@@ -29,10 +37,21 @@ export const feedbackResolver: ResolveFn<Initial> = async (route) => {
 };
 @Component({
   selector: 'cinema-feedback',
-  imports: [FormsModule, ButtonModule, InputTextModule, RatingControl],
+  imports: [
+    FormsModule,
+    CinemaButton,
+    CinemaInput,
+    CinemaTextarea,
+    CinemaCheckbox,
+    LanguageSwitch,
+    ReasonChips,
+    RatingControl,
+    PageState,
+  ],
   templateUrl: './feedback.html',
 })
 export class FeedbackPage {
+  i18n = inject(I18n);
   private route = inject(ActivatedRoute);
   private api = inject(Api);
   initial = this.route.snapshot.data['initial'] as Initial | undefined;
@@ -49,13 +68,20 @@ export class FeedbackPage {
   submitting = signal(false);
   submitError = signal('');
   recordedAt = signal('');
-  localDate = localDate;
+  localDate = (value: string) => this.i18n.date(value);
   reasonsForRating() {
     return (
       this.config()?.reasons.filter(
         (r) => r.status === 'ACTIVE' && r.ratings.includes(this.rating()),
       ) || []
     );
+  }
+  reasonOptions() {
+    return this.reasonsForRating().map((r) => ({
+      code: r.code,
+      label: this.i18n.label(r),
+      required: r.required,
+    }));
   }
   selectRating(value: number) {
     this.rating.set(value);
@@ -132,8 +158,8 @@ export class FeedbackPage {
       else
         this.submitError.set(
           e instanceof HttpErrorResponse && (e.status === 422 || e.status === 429)
-            ? e.error?.error
-            : 'Không gửi được đánh giá. Câu trả lời của bạn vẫn được giữ lại. Vui lòng thử lại.',
+            ? errorMessage(e)
+            : 'customer.unable_to_send_feedback_your_answers_have_been_preserved_please_r',
         );
     } finally {
       this.submitting.set(false);

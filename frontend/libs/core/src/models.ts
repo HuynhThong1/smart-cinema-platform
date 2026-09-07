@@ -116,7 +116,7 @@ export interface Dashboard {
   distribution: { _id: number; count: number }[];
   trend: Metric[];
   hours: { _id: number; count: number }[];
-  reasons: { _id: string; label: string; type: string; count: number }[];
+  reasons: { _id: string; label: string; english?: string; type: string; count: number }[];
   staff: Metric[];
   cinemas: Metric[];
   eligible: { count: number }[];
@@ -136,6 +136,7 @@ export interface ImportRow {
   managerUsername: string;
   managerId: string;
   error: string;
+  errorCode?: string;
 }
 export interface ImportResult {
   rows: ImportRow[];

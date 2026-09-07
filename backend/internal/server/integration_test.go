@@ -318,3 +318,36 @@ func TestConcurrentSubmissionsAreRecordedAndFlagged(t *testing.T) {
 		t.Fatalf("expected 3 flagged, got %d (%v)", flagged, e)
 	}
 }
+
+func TestAnalyticsUsesBilingualFeedbackSnapshots(t *testing.T) {
+	f := setup(t)
+	// Configuration edits must not change labels on historical feedback.
+	_, err := f.s.Store.(*repository.Mongo).DB.Collection("feedback_reasons").UpdateMany(f.ctx, bson.M{}, bson.M{"$set": bson.M{"english": "Current configuration only"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	status, out := f.request(t, "GET", "/api/v1/admin/dashboard", "manager", nil)
+	mustStatus(t, 200, status, out)
+	reasons, ok := out["reasons"].([]any)
+	if !ok || len(reasons) == 0 {
+		t.Fatal("expected seeded reason analytics")
+	}
+	for _, item := range reasons {
+		reason := item.(map[string]any)
+		if reason["english"] == nil || reason["english"] == "" || reason["english"] == "Current configuration only" {
+			t.Fatalf("expected stored English snapshot: %#v", reason)
+		}
+	}
+	// Legacy feedback without an English field remains queryable with its Vietnamese label.
+	_, err = f.s.Store.(*repository.Mongo).DB.Collection("feedbacks").UpdateMany(f.ctx, bson.M{}, bson.M{"$unset": bson.M{"reasons.$[].english": ""}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	status, out = f.request(t, "GET", "/api/v1/admin/dashboard", "manager", nil)
+	mustStatus(t, 200, status, out)
+	for _, item := range out["reasons"].([]any) {
+		if item.(map[string]any)["label"] == "" {
+			t.Fatal("legacy Vietnamese label was lost")
+		}
+	}
+}

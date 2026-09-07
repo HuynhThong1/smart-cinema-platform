@@ -1,3 +1,5 @@
+import { CinemaBadge, CinemaButton } from '@cinema/ui';
+import { translatedMessage } from '@cinema/i18n';
 import { Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Dashboard } from '@cinema/core';
@@ -6,7 +8,6 @@ import { AsyncPage, PageState } from './shared';
 export interface AppModule {
   code: string;
   title: string;
-  english: string;
   description: string;
   phase: string;
   meta: string;
@@ -24,99 +25,101 @@ export interface AppModule {
 export const MODULES: AppModule[] = [
   {
     code: 'FBQ',
-    title: 'Đánh giá giao dịch qua QR',
-    english: 'Transaction Feedback QR',
-    description: 'Feedback khách hàng, QR nhân viên, ranking, coaching, cảnh báo.',
-    phase: 'Phase 1 · Đang chạy',
+    title: 'modules.transaction_feedback_qr',
+    description: 'modules.customer_feedback_staff_qr_codes_ranking_coaching_and_alerts',
+    phase: 'modules.phase_1_live',
     meta: '',
     route: '/dashboard',
   },
   {
     code: 'BOX',
-    title: 'Bán vé & Suất chiếu',
-    english: 'Box office & showtimes',
-    description: 'Lịch chiếu, sơ đồ ghế, đơn vé và hoàn vé.',
-    phase: 'Phase 2',
-    meta: 'Dự kiến Q4/2026',
+    title: 'modules.box_office_showtimes',
+    description: 'modules.showtimes_seating_plans_ticket_orders_and_refunds',
+    phase: 'navigation.phase2',
+    meta: 'modules.expected_q4_2026',
   },
   {
     code: 'FNB',
-    title: 'F&B & Combo',
-    english: 'Concession',
-    description: 'Menu bắp nước, combo, tồn kho quầy.',
-    phase: 'Phase 2',
-    meta: 'Dự kiến Q4/2026',
+    title: 'navigation.concession',
+    description: 'modules.concession_menu_combos_and_counter_inventory',
+    phase: 'navigation.phase2',
+    meta: 'modules.expected_q4_2026',
   },
   {
     code: 'CRM',
-    title: 'Khách hàng thân thiết',
-    english: 'Loyalty & CRM',
-    description: 'Hạng thành viên, điểm tích luỹ, chiến dịch ưu đãi.',
-    phase: 'Phase 3',
-    meta: 'Đang khảo sát',
+    title: 'modules.loyalty_crm',
+    description: 'modules.membership_tiers_loyalty_points_and_promotional_campaigns',
+    phase: 'navigation.phase3',
+    meta: 'modules.under_research',
   },
   {
     code: 'WFM',
-    title: 'Ca làm & Chấm công',
-    english: 'Workforce',
-    description: 'Xếp ca, chấm công, liên kết hiệu suất nhân viên.',
-    phase: 'Phase 3',
-    meta: 'Đang khảo sát',
+    title: 'modules.workforce_attendance',
+    description: 'modules.shift_scheduling_attendance_and_staff_performance_integration',
+    phase: 'navigation.phase3',
+    meta: 'modules.under_research',
   },
   {
     code: 'OPS',
-    title: 'Vận hành rạp',
-    english: 'Cinema operations',
-    description: 'Checklist mở/đóng rạp, sự cố thiết bị, bảo trì.',
-    phase: 'Phase 3',
-    meta: 'Đang khảo sát',
+    title: 'modules.cinema_operations',
+    description: 'modules.opening_closing_checklists_equipment_incidents_and_maintenance',
+    phase: 'navigation.phase3',
+    meta: 'modules.under_research',
   },
 ];
 
 @Component({
   selector: 'cinema-modules',
-  imports: [RouterLink, PageState],
-  template: `<p class="kicker">Sau đăng nhập</p>
-    <h2>Chọn chức năng</h2>
-    <p class="english">Module launcher — Smart Cinema Platform</p>
+  imports: [CinemaBadge, CinemaButton, RouterLink, PageState],
+  template: `<p class="kicker">{{ i18n.t('modules.after_sign_in') }}</p>
+    <h2>{{ i18n.t('modules.choose_a_module') }}</h2>
+
     <p class="muted">
       {{ auth.user()?.name }} · {{ roleName() }} ·
-      {{ auth.global() ? 'Toàn hệ thống' : 'Rạp được phân quyền' }}
+      {{ auth.global() ? i18n.t('modules.all_cinemas') : i18n.t('modules.assigned_cinema') }}
     </p>
-    <cinema-state [message]="message()" />
+    <cinema-state [message]="i18n.t(message())" />
     <div class="module-grid">
       @for (m of modules; track m.code) {
         @if (m.route) {
           <a class="module-card" [routerLink]="m.route">
             <span class="module-head"
               ><span class="kicker">{{ m.code }}</span
-              ><span class="tag good">{{ m.phase }}</span></span
+              ><cinema-badge class="tag good">{{ i18n.t(m.phase) }}</cinema-badge></span
             >
-            <h3>{{ m.title }}</h3>
-            <p class="english">{{ m.english }}</p>
-            <p class="module-desc">{{ m.description }}</p>
+            <h3>{{ i18n.t(m.title) }}</h3>
+
+            <p class="module-desc">{{ i18n.t(m.description) }}</p>
             <span class="module-meta"
-              ><span>{{ todayLabel() }}</span
-              ><span class="module-action" aria-hidden="true">Vào chức năng →</span></span
+              ><span>{{ i18n.t(todayLabel()) }}</span
+              ><span class="module-action" aria-hidden="true">{{
+                i18n.t('modules.open_module')
+              }}</span></span
             >
           </a>
         } @else {
           <button
+            cinemaButton
             type="button"
             class="module-card locked"
-            [attr.aria-label]="m.title + ' — ' + m.phase + ', chưa mở trong bản này'"
+            [attr.aria-label]="
+              i18n.t(m.title) +
+              ' — ' +
+              i18n.t(m.phase) +
+              i18n.t('modules.not_available_in_this_release')
+            "
             (click)="locked(m)"
           >
             <span class="module-head"
               ><span class="kicker">{{ m.code }}</span
-              ><span class="tag">{{ m.phase }}</span></span
+              ><cinema-badge class="tag">{{ i18n.t(m.phase) }}</cinema-badge></span
             >
-            <h3>{{ m.title }}</h3>
-            <p class="english">{{ m.english }}</p>
-            <p class="module-desc">{{ m.description }}</p>
+            <h3>{{ i18n.t(m.title) }}</h3>
+
+            <p class="module-desc">{{ i18n.t(m.description) }}</p>
             <span class="module-meta"
-              ><span>{{ m.meta }}</span
-              ><span class="module-action">Chưa mở</span></span
+              ><span>{{ i18n.t(m.meta) }}</span
+              ><span class="module-action">{{ i18n.t('modules.coming_soon') }}</span></span
             >
           </button>
         }
@@ -124,23 +127,17 @@ export const MODULES: AppModule[] = [
     </div>
     <div class="note-block">
       <p class="muted">
-        Chọn Đánh giá giao dịch qua QR để bắt đầu. Các chức năng còn lại đang được chuẩn bị và chưa
-        mở sử dụng.
+        {{ i18n.t('modules.select_transaction_feedback_qr_to_get_started_the_other_modules_a') }}
       </p>
     </div>`,
 })
 export class ModuleLauncherPage extends AsyncPage {
   modules = MODULES;
   today = signal<number | null>(null);
-  roleName = () =>
-    ({
-      SYSTEM_ADMIN: 'System Admin',
-      HEAD_OFFICE: 'Head Office',
-      CINEMA_MANAGER: 'Cinema Manager',
-    })[this.auth.user()?.role || 'CINEMA_MANAGER'];
+  roleName = () => this.i18n.t('common.status.' + (this.auth.user()?.role || 'CINEMA_MANAGER'));
   todayLabel() {
     const count = this.today();
-    return count === null ? 'Đang chạy' : count + ' feedback hôm nay';
+    return count === null ? 'modules.live' : translatedMessage('messages.today', { count });
   }
   async ngOnInit() {
     // The live tile carries a real number rather than a decorative one. A failed
@@ -164,6 +161,6 @@ export class ModuleLauncherPage extends AsyncPage {
     }
   }
   locked(m: AppModule) {
-    this.notify('Chức năng thuộc ' + m.phase + ' — chưa mở trong bản này');
+    this.notify(translatedMessage('messages.module_locked', { phase: translatedMessage(m.phase) }));
   }
 }

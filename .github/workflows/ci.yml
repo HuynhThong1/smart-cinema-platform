@@ -18,11 +18,15 @@ jobs:
           cache: pnpm
           cache-dependency-path: frontend/pnpm-lock.yaml
       - run: pnpm --dir frontend install --frozen-lockfile
+      - run: pnpm --dir frontend check:ui
+      - run: pnpm --dir frontend test:unit
       - run: pnpm --dir frontend typecheck
       - run: pnpm --dir frontend format:check
       - run: pnpm --dir frontend build
         env:
           NX_DAEMON: 'false'
+      - run: pnpm --dir frontend exec playwright install --with-deps chromium
+      - run: pnpm --dir frontend test:e2e
   backend:
     runs-on: ubuntu-latest
     steps:

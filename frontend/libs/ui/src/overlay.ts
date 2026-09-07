@@ -1,47 +1,110 @@
-import { Component, ElementRef, effect, input, model, output, viewChild } from '@angular/core';
-/**
- * Modal surface built on the native <dialog> element so the browser supplies the
- * top layer, the focus trap, background inertness and Escape handling. `variant`
- * only changes where the surface sits: 'modal' centres it, 'drawer' anchors it to
- * the trailing edge.
- */
+import {
+  Component,
+  TemplateRef,
+  contentChild,
+  effect,
+  inject,
+  input,
+  model,
+  output,
+} from '@angular/core';
+import { ConfirmationService } from 'primeng/api';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { DialogModule } from 'primeng/dialog';
+import { DrawerModule } from 'primeng/drawer';
+import { DOCUMENT, NgTemplateOutlet } from '@angular/common';
 @Component({
   selector: 'cinema-overlay',
-  template: ` <dialog
-    #surface
-    class="overlay"
-    [class.overlay-drawer]="variant() === 'drawer'"
-    [attr.aria-label]="header()"
-    (close)="open.set(false); closed.emit()"
-    (click)="dismissFromBackdrop($event)"
-  >
-    <header class="overlay-header">
-      <h3>{{ header() }}</h3>
-      <button type="button" class="overlay-close" aria-label="Đóng" (click)="open.set(false)">
-        <i class="ph-duotone ph-x" aria-hidden="true"></i>
-      </button>
-    </header>
-    <div class="overlay-body"><ng-content /></div>
-  </dialog>`,
+  host: { '(keydown.escape)': 'escape($event)' },
+  imports: [DialogModule, DrawerModule, ConfirmDialogModule, NgTemplateOutlet],
+  providers: [ConfirmationService],
+  template: `<ng-template #body><ng-content /></ng-template>
+    @if (variant() === 'confirm') {
+      <p-confirmdialog
+        appendTo="self"
+        [visible]="open()"
+        [header]="header()"
+        [closable]="!saving()"
+        [closeOnEscape]="false"
+        [acceptVisible]="false"
+        [rejectVisible]="false"
+        [style]="{ width: '36rem', maxWidth: 'calc(100vw - 2rem)' }"
+        (onHide)="setOpen(false); afterHide()"
+        ><ng-template #message><ng-container *ngTemplateOutlet="body" /></ng-template>
+        @if (footer()) {
+          <ng-template #footer
+            ><ng-container *ngTemplateOutlet="this.footer() || null"
+          /></ng-template>
+        }
+      </p-confirmdialog>
+    } @else if (variant() === 'drawer') {
+      <p-drawer
+        appendTo="self"
+        [visible]="open()"
+        (visibleChange)="setOpen($event)"
+        [header]="header()"
+        position="right"
+        [closable]="!saving()"
+        [closeOnEscape]="false"
+        [dismissible]="!saving()"
+        styleClass="cinema-drawer"
+        (onHide)="afterHide()"
+        ><ng-container *ngTemplateOutlet="body" />
+        @if (footer()) {
+          <ng-template #footer
+            ><ng-container *ngTemplateOutlet="this.footer() || null"
+          /></ng-template>
+        }
+      </p-drawer>
+    } @else {
+      <p-dialog
+        appendTo="self"
+        [visible]="open()"
+        (visibleChange)="setOpen($event)"
+        [header]="header()"
+        [modal]="true"
+        [closable]="!saving()"
+        [closeOnEscape]="false"
+        [dismissableMask]="!saving()"
+        [draggable]="false"
+        [resizable]="false"
+        [style]="{ width: '40rem', maxWidth: 'calc(100vw - 2rem)' }"
+        (onHide)="afterHide()"
+        ><ng-container *ngTemplateOutlet="body" />
+        @if (footer()) {
+          <ng-template #footer
+            ><ng-container *ngTemplateOutlet="this.footer() || null"
+          /></ng-template>
+        }
+      </p-dialog>
+    }`,
 })
 export class Overlay {
-  open = model(false);
-  header = input('');
-  variant = input<'modal' | 'drawer'>('modal');
-  closed = output<void>();
-  private surface = viewChild.required<ElementRef<HTMLDialogElement>>('surface');
+  private document = inject(DOCUMENT);
+  private returnFocus: HTMLElement | null = null;
   constructor() {
     effect(() => {
-      const el = this.surface().nativeElement;
-      if (this.open()) {
-        if (!el.open) el.showModal();
-      } else if (el.open) {
-        el.close();
-      }
+      if (this.open()) this.returnFocus = this.document.activeElement as HTMLElement | null;
     });
   }
-  /** A click landing on the dialog box itself is a click on the backdrop: children cover the rest. */
-  dismissFromBackdrop(event: MouseEvent) {
-    if (event.target === this.surface().nativeElement) this.open.set(false);
+  afterHide() {
+    if (this.returnFocus?.isConnected) this.returnFocus.focus();
+    this.closed.emit();
+  }
+  footer = contentChild<TemplateRef<unknown>>('footer');
+  open = model(false);
+  header = input('');
+  variant = input<'modal' | 'drawer' | 'confirm'>('modal');
+  saving = input(false);
+  closed = output<void>();
+  // PrimeNG binds its Escape listener only when opening. Own this dynamic saving guard.
+  escape(event: Event) {
+    if (!this.open() || event.defaultPrevented) return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (!this.saving()) this.open.set(false);
+  }
+  setOpen(value: boolean) {
+    if (!this.saving() || value) this.open.set(value);
   }
 }

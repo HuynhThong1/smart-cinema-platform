@@ -1,110 +1,145 @@
+import {
+  CinemaBadge,
+  CinemaField,
+  CinemaButton,
+  CinemaCheckbox,
+  CinemaInput,
+  CinemaNumber,
+  CinemaOption,
+  CinemaSelect,
+  CinemaTable,
+  RatingControl,
+  Overlay,
+  RowLink,
+} from '@cinema/ui';
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FeedbackConfig, Reason } from '@cinema/core';
-import { RatingControl, Overlay, RowLink } from '@cinema/ui';
 import { AsyncPage, PageState } from './shared';
 @Component({
   selector: 'cinema-rating-config',
-  imports: [FormsModule, RatingControl, PageState],
-  template: ` <p class="kicker">Cấu hình / Rating</p>
-    <h2>Cấu hình đánh giá</h2>
-    <p class="english">Change the customer experience without a deployment</p>
-    <cinema-state [busy]="busy()" [error]="error()" [message]="message()" (retry)="load()" />
+  imports: [
+    CinemaField,
+    CinemaButton,
+    CinemaInput,
+    CinemaSelect,
+    CinemaOption,
+    CinemaCheckbox,
+    CinemaNumber,
+    CinemaTable,
+    FormsModule,
+    RatingControl,
+    PageState,
+  ],
+  template: ` <p class="kicker">{{ i18n.t('config.configuration_rating') }}</p>
+    <h2>{{ i18n.t('config.rating_configuration') }}</h2>
+
+    <cinema-state
+      [busy]="busy()"
+      [error]="i18n.t(error())"
+      [message]="i18n.t(message())"
+      (retry)="load()"
+    />
     @if (config(); as cfg) {
       <div class="config-layout section">
-        <form (ngSubmit)="save()">
-          <label
-            >Kiểu hiển thị<select name="type" [(ngModel)]="cfg.ratingType">
-              <option>ICON+TEXT</option>
-              <option>STAR</option>
-              <option>BUTTON</option>
-              <option>TEXT</option>
-            </select></label
-          >
+        <form #editorForm="ngForm" (ngSubmit)="editorForm.valid && !busy() && save()">
+          <cinema-field inputId="config-field-1" [label]="i18n.t('config.display_type')"
+            ><cinema-select inputId="config-field-1" name="type" [(ngModel)]="cfg.ratingType">
+              <cinema-option [value]="'ICON+TEXT'" [label]="i18n.t('config.icon_and_text')" />
+              <cinema-option [value]="'STAR'" [label]="i18n.t('config.stars')" />
+              <cinema-option [value]="'BUTTON'" [label]="i18n.t('config.buttons')" />
+              <cinema-option [value]="'TEXT'" [label]="i18n.t('config.text')" /> </cinema-select
+          ></cinema-field>
           <div class="table-wrap section">
-            <table>
-              <thead>
+            <cinema-table [rows]="cfg.ratingOptions" [columns]="4"
+              ><ng-template #header>
                 <tr>
-                  <th>Giá trị</th>
-                  <th>Nhãn hiển thị</th>
-                  <th>Bật</th>
-                  <th>Thứ tự</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (r of cfg.ratingOptions; track r.value; let i = $index) {
-                  <tr>
-                    <td>{{ r.value }}</td>
-                    <td>
-                      <input
-                        [name]="'label' + r.value"
-                        [(ngModel)]="r.label"
-                        aria-label="Nhãn tiếng Việt"
-                        required
-                        maxlength="100"
-                      /><input
-                        [name]="'english' + r.value"
-                        [(ngModel)]="r.english"
-                        aria-label="Nhãn tiếng Anh"
-                        maxlength="100"
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="checkbox"
-                        [name]="'enabled' + r.value"
-                        [(ngModel)]="r.enabled"
-                        [attr.aria-label]="'Bật mức ' + r.value"
-                      />
-                    </td>
-                    <td>
-                      <div class="actions">
-                        <button
-                          type="button"
-                          class="text-button"
-                          [disabled]="i === 0"
-                          (click)="move(i, -1)"
-                          aria-label="Lên"
-                        >
-                          ↑</button
-                        ><button
-                          type="button"
-                          class="text-button"
-                          [disabled]="i === 4"
-                          (click)="move(i, 1)"
-                          aria-label="Xuống"
-                        >
-                          ↓
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
+                  <th>{{ i18n.t('config.value') }}</th>
+                  <th>{{ i18n.t('config.display_label') }}</th>
+                  <th>{{ i18n.t('config.enabled') }}</th>
+                  <th>{{ i18n.t('config.order') }}</th>
+                </tr> </ng-template
+              ><ng-template #body let-r let-i="index"
+                ><tr>
+                  <td>{{ r.value }}</td>
+                  <td>
+                    <input
+                      cinemaInput
+                      [name]="'label' + r.value"
+                      [(ngModel)]="r.label"
+                      [attr.aria-label]="i18n.t('config.vietnamese_label')"
+                      required
+                      maxlength="100"
+                    /><input
+                      cinemaInput
+                      [name]="'english' + r.value"
+                      [(ngModel)]="r.english"
+                      [attr.aria-label]="i18n.t('config.english_label')"
+                      maxlength="100"
+                    />
+                  </td>
+                  <td>
+                    <cinema-checkbox
+                      [name]="'enabled' + r.value"
+                      [(ngModel)]="r.enabled"
+                      [attr.aria-label]="i18n.t('config.enable_rating') + r.value"
+                    />
+                  </td>
+                  <td>
+                    <div class="actions">
+                      <button
+                        cinemaButton
+                        type="button"
+                        class="text-button"
+                        [disabled]="i === 0"
+                        (click)="move(i, -1)"
+                        [attr.aria-label]="i18n.t('config.move_up')"
+                      >
+                        ↑</button
+                      ><button
+                        cinemaButton
+                        type="button"
+                        class="text-button"
+                        [disabled]="i === 4"
+                        (click)="move(i, 1)"
+                        [attr.aria-label]="i18n.t('config.move_down')"
+                      >
+                        ↓
+                      </button>
+                    </div>
+                  </td>
+                </tr></ng-template
+              ></cinema-table
+            >
           </div>
           <div class="form-fields section">
-            <label
-              >Feedback tối thiểu để ranking<input
-                type="number"
+            <cinema-field
+              inputId="config-field-2"
+              [label]="i18n.t('config.minimum_feedback_for_ranking')"
+              ><cinema-number
+                inputId="config-field-2"
                 name="minimum"
                 [(ngModel)]="cfg.minimumFeedbackForRanking"
-                min="1"
-                max="10000"
-                required /></label
-            ><label
-              >Phiên bản consent<input
+                [min]="1"
+                [max]="10000"
+                required /></cinema-field
+            ><cinema-field inputId="config-field-3" [label]="i18n.t('config.consent_version')"
+              ><input
+                id="config-field-3"
+                cinemaInput
                 name="consent"
                 [(ngModel)]="cfg.consentVersion"
                 required
                 maxlength="50"
-            /></label>
+            /></cinema-field>
           </div>
-          <button class="primary section" [disabled]="busy()">Lưu cấu hình</button>
+          <button type="submit" cinemaButton class="primary section" [disabled]="busy()">
+            {{ i18n.t('config.save_configuration') }}
+          </button>
         </form>
         <aside>
-          <h4>Xem trước</h4>
-          <p class="english">Customer rating control</p>
+          <h4>{{ i18n.t('config.preview') }}</h4>
+
           <cinema-rating [config]="cfg" [value]="preview()" (changed)="preview.set($event)" />
         </aside>
       </div>
@@ -130,110 +165,153 @@ export class RatingPage extends AsyncPage {
   save() {
     return this.run(async () => {
       await this.api.put('/admin/feedback-config', this.config());
-      this.notify('Đã lưu cấu hình đánh giá');
+      this.notify('config.rating_configuration_saved');
     });
   }
 }
 @Component({
   selector: 'cinema-reasons',
-  imports: [FormsModule, Overlay, RowLink, PageState],
+  imports: [
+    CinemaBadge,
+    CinemaField,
+    CinemaButton,
+    CinemaInput,
+    CinemaSelect,
+    CinemaOption,
+    CinemaCheckbox,
+    CinemaNumber,
+    CinemaTable,
+    FormsModule,
+    Overlay,
+    RowLink,
+    PageState,
+  ],
   template: ` <div class="page-title">
       <div>
-        <p class="kicker">Cấu hình / Feedback reasons</p>
-        <h2>Lý do feedback</h2>
-        <p class="english">Relevant reasons for every rating</p>
+        <p class="kicker">{{ i18n.t('config.configuration_feedback_reasons') }}</p>
+        <h2>{{ i18n.t('config.feedback_reasons') }}</h2>
       </div>
-      <button class="primary" (click)="edit()">+ Thêm lý do</button>
+      <button type="button" cinemaButton class="primary" (click)="edit()">
+        {{ i18n.t('config.add_reason') }}
+      </button>
     </div>
-    <cinema-state [busy]="busy()" [error]="error()" [message]="message()" (retry)="load()" />
+    <cinema-state
+      [busy]="busy()"
+      [error]="i18n.t(error())"
+      [message]="i18n.t(message())"
+      (retry)="load()"
+    />
     <div class="table-wrap section">
-      <table>
-        <thead>
+      <cinema-table [rows]="reasons()" [columns]="7"
+        ><ng-template #header>
           <tr>
-            <th>Mã</th>
-            <th>Nhãn</th>
-            <th>Loại</th>
-            <th>Rating</th>
-            <th>Bắt buộc</th>
-            <th>Trạng thái</th>
-            <th>Thứ tự</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (r of reasons(); track r.id) {
-            <tr (rowOpen)="edit(r)">
-              <td>{{ r.code }}</td>
-              <td>
-                {{ r.label }}<small>{{ r.english }}</small>
-              </td>
-              <td>
-                <span
-                  class="tag"
-                  [class.bad]="r.type === 'NEGATIVE'"
-                  [class.good]="r.type === 'POSITIVE'"
-                  >{{ r.type }}</span
-                >
-              </td>
-              <td>{{ r.ratings.join(' · ') }}</td>
-              <td>{{ r.required ? 'Có' : 'Không' }}</td>
-              <td>{{ r.status }}</td>
-              <td>{{ r.order }}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
+            <th>{{ i18n.t('administration.code') }}</th>
+            <th>{{ i18n.t('config.label') }}</th>
+            <th>{{ i18n.t('config.type') }}</th>
+            <th>{{ i18n.t('config.rating') }}</th>
+            <th>{{ i18n.t('config.required') }}</th>
+            <th>{{ i18n.t('administration.status') }}</th>
+            <th>{{ i18n.t('config.order') }}</th>
+          </tr> </ng-template
+        ><ng-template #body let-r
+          ><tr (rowOpen)="edit(r)">
+            <td>{{ r.code }}</td>
+            <td>
+              {{ i18n.label(r) }}
+            </td>
+            <td>
+              <cinema-badge
+                class="tag"
+                [class.bad]="r.type === 'NEGATIVE'"
+                [class.good]="r.type === 'POSITIVE'"
+                >{{ i18n.t('common.status.' + r.type) }}</cinema-badge
+              >
+            </td>
+            <td>{{ r.ratings.join(' · ') }}</td>
+            <td>{{ r.required ? i18n.t('config.yes') : i18n.t('config.no') }}</td>
+            <td>{{ i18n.t('common.status.' + r.status) }}</td>
+            <td>{{ r.order }}</td>
+          </tr></ng-template
+        ></cinema-table
+      >
     </div>
-    <cinema-overlay [(open)]="dialog" header="Lý do feedback"
-      ><form class="form-fields" (ngSubmit)="save()">
-        <label
-          >Mã *<input
+    <cinema-overlay [saving]="busy()" [(open)]="dialog" [header]="i18n.t('config.feedback_reasons')"
+      ><form
+        class="form-fields"
+        #editorForm="ngForm"
+        (ngSubmit)="editorForm.valid && !busy() && save()"
+      >
+        <cinema-field inputId="config-field-1" [label]="i18n.t('config.code')"
+          ><input
+            id="config-field-1"
+            cinemaInput
             name="code"
             [(ngModel)]="draft.code"
             pattern="[A-Z][A-Z0-9_]{1,49}"
-            required /></label
-        ><label
-          >Nhãn tiếng Việt *<input
+            required /></cinema-field
+        ><cinema-field inputId="config-field-2" [label]="i18n.t('config.vietnamese_label_84')"
+          ><input
+            id="config-field-2"
+            cinemaInput
             name="label"
             [(ngModel)]="draft.label"
             required
-            maxlength="100" /></label
-        ><label
-          >Nhãn tiếng Anh<input name="english" [(ngModel)]="draft.english" maxlength="100" /></label
-        ><label
-          >Loại<select name="type" [(ngModel)]="draft.type">
-            <option>POSITIVE</option>
-            <option>NEGATIVE</option>
-            <option>NEUTRAL</option>
-            <option>BOTH</option>
-          </select></label
-        ><label>Áp dụng rating</label>
+            maxlength="100" /></cinema-field
+        ><cinema-field inputId="config-field-3" [label]="i18n.t('config.english_label')"
+          ><input
+            id="config-field-3"
+            cinemaInput
+            name="english"
+            [(ngModel)]="draft.english"
+            maxlength="100" /></cinema-field
+        ><cinema-field inputId="config-field-4" [label]="i18n.t('config.type')"
+          ><cinema-select inputId="config-field-4" name="type" [(ngModel)]="draft.type">
+            <cinema-option [value]="'POSITIVE'" [label]="i18n.t('config.positive')" />
+            <cinema-option [value]="'NEGATIVE'" [label]="i18n.t('config.negative')" />
+            <cinema-option [value]="'NEUTRAL'" [label]="i18n.t('config.neutral')" />
+            <cinema-option
+              [value]="'BOTH'"
+              [label]="i18n.t('config.both')"
+            /> </cinema-select></cinema-field
+        ><label>{{ i18n.t('config.applicable_ratings') }}</label>
         <div class="actions">
           @for (n of [1, 2, 3, 4, 5]; track n) {
             <label class="checkbox-label"
-              ><input
-                type="checkbox"
-                [checked]="draft.ratings?.includes(n)"
-                (change)="toggle(n)"
-              />{{ n }}</label
+              ><cinema-checkbox [checked]="draft.ratings?.includes(n)" (change)="toggle(n)" />{{
+                n
+              }}</label
             >
           }
         </div>
         <label class="checkbox-label"
-          ><input name="required" type="checkbox" [(ngModel)]="draft.required" />Bắt buộc</label
-        ><label
-          >Trạng thái<select name="status" [(ngModel)]="draft.status">
-            <option>ACTIVE</option>
-            <option>DISABLED</option>
-          </select></label
-        ><label
-          >Thứ tự<input type="number" name="order" [(ngModel)]="draft.order" required
-        /></label>
+          ><cinema-checkbox name="required" [(ngModel)]="draft.required" />{{
+            i18n.t('config.required')
+          }}</label
+        ><cinema-field inputId="config-field-5" [label]="i18n.t('administration.status')"
+          ><cinema-select inputId="config-field-5" name="status" [(ngModel)]="draft.status">
+            <cinema-option [value]="'ACTIVE'" [label]="i18n.t('administration.active')" />
+            <cinema-option
+              [value]="'DISABLED'"
+              [label]="i18n.t('config.disabled')"
+            /> </cinema-select></cinema-field
+        ><cinema-field inputId="config-field-6" [label]="i18n.t('config.order')"
+          ><cinema-number inputId="config-field-6" name="order" [(ngModel)]="draft.order" required
+        /></cinema-field>
         @if (error()) {
-          <p class="field-error" role="alert">{{ error() }}</p>
+          <p class="field-error" role="alert">{{ i18n.t(error()) }}</p>
         }
         <div class="overlay-actions">
-          <button type="button" class="secondary" (click)="dialog = false">Huỷ</button
-          ><button class="primary" [disabled]="busy()">Lưu lý do</button>
+          <button
+            cinemaButton
+            type="button"
+            class="secondary"
+            [disabled]="busy()"
+            (click)="dialog = false"
+          >
+            {{ i18n.t('administration.cancel') }}</button
+          ><button type="submit" cinemaButton class="primary" [disabled]="busy()">
+            {{ i18n.t('config.save_reason') }}
+          </button>
         </div>
       </form></cinema-overlay
     >`,
@@ -276,7 +354,7 @@ export class ReasonPage extends AsyncPage {
       else await this.api.post('/admin/feedback-reasons', this.draft);
       this.reasons.set(await this.api.get<Reason[]>('/admin/feedback-reasons'));
       this.dialog = false;
-      this.notify('Đã lưu lý do feedback');
+      this.notify('config.feedback_reason_saved');
     });
   }
 }

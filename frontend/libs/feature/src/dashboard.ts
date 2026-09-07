@@ -1,11 +1,21 @@
+import { CinemaBadge, CinemaEmpty, CinemaButton, CinemaTable } from '@cinema/ui';
 import { Component, inject, signal } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
+import { CinemaNumberPipe } from '@cinema/i18n';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Dashboard, Coaching, Page, download } from '@cinema/core';
 import { AsyncPage, Filters, PageState } from './shared';
 @Component({
   selector: 'cinema-dashboard',
-  imports: [DecimalPipe, RouterLink, Filters, PageState],
+  imports: [
+    CinemaBadge,
+    CinemaEmpty,
+    CinemaButton,
+    CinemaTable,
+    CinemaNumberPipe,
+    RouterLink,
+    Filters,
+    PageState,
+  ],
   templateUrl: './dashboard.html',
 })
 export class DashboardPage extends AsyncPage {
@@ -26,10 +36,10 @@ export class DashboardPage extends AsyncPage {
   }
   title() {
     return this.staffId
-      ? this.data()?.staff[0]?.unit.name || 'Hiệu suất nhân viên'
+      ? this.data()?.staff[0]?.unit.name || 'dashboard.staff_performance'
       : this.auth.global()
-        ? 'Dashboard toàn hệ thống'
-        : 'Dashboard rạp';
+        ? 'dashboard.system_dashboard'
+        : 'dashboard.cinema_dashboard';
   }
   setFilters(p: Record<string, string | boolean>) {
     this.params = { ...p, ...(this.staffId ? { staffId: this.staffId } : {}) };

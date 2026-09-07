@@ -119,7 +119,7 @@ func (s *Server) Router(verifier auth.Verifier, origins []string) *gin.Engine {
 	return r
 }
 func fail(c *gin.Context, status int, msg string) {
-	c.AbortWithStatusJSON(status, gin.H{"error": msg, "requestId": c.GetString("requestId")})
+	c.AbortWithStatusJSON(status, gin.H{"error": msg, "code": errorCode(status, msg), "requestId": c.GetString("requestId")})
 }
 func dbError(c *gin.Context, e error) {
 	if errors.Is(e, mongo.ErrNoDocuments) {

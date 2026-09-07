@@ -156,7 +156,7 @@ func (s *Server) dashboard(c *gin.Context) {
 		"distribution": bson.A{stage("$group", bson.M{"_id": "$rating.value", "count": bson.M{"$sum": 1}}), stage("$sort", bson.D{{Key: "_id", Value: -1}})},
 		"trend":        bson.A{stage("$group", groupMetrics(bson.M{"$dateToString": bson.M{"format": "%Y-%m-%d", "date": "$createdAt", "timezone": "Asia/Ho_Chi_Minh"}})), stage("$sort", bson.D{{Key: "_id", Value: 1}})},
 		"hours":        bson.A{stage("$group", bson.M{"_id": bson.M{"$hour": bson.M{"date": "$createdAt", "timezone": "Asia/Ho_Chi_Minh"}}, "count": bson.M{"$sum": 1}}), stage("$sort", bson.D{{Key: "_id", Value: 1}})},
-		"reasons":      bson.A{stage("$unwind", "$reasons"), stage("$group", bson.M{"_id": "$reasons.code", "label": bson.M{"$last": "$reasons.label"}, "type": bson.M{"$last": "$reasons.type"}, "count": bson.M{"$sum": 1}}), stage("$sort", bson.D{{Key: "count", Value: -1}})},
+		"reasons":      bson.A{stage("$unwind", "$reasons"), stage("$group", bson.M{"_id": "$reasons.code", "label": bson.M{"$last": "$reasons.label"}, "english": bson.M{"$last": bson.M{"$ifNull": bson.A{"$reasons.english", ""}}}, "type": bson.M{"$last": "$reasons.type"}, "count": bson.M{"$sum": 1}}), stage("$sort", bson.D{{Key: "count", Value: -1}})},
 		"staff":        bson.A{stage("$group", staffGroup), stage("$sort", bson.D{{Key: "average", Value: -1}, {Key: "count", Value: -1}}), stage("$limit", 100)},
 		"cinemas":      bson.A{stage("$group", cinemaGroup), stage("$sort", bson.D{{Key: "average", Value: -1}})},
 		"eligible":     bson.A{stage("$group", staffGroup), stage("$match", bson.M{"count": bson.M{"$gte": cfg.MinimumFeedbackForRanking}}), stage("$count", "count")},

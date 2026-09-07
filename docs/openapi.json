@@ -27,12 +27,13 @@
           },
           "requestId": {
             "type": "string"
+          },
+          "code": {
+            "type": "string",
+            "description": "Stable UI localization code. Optional for backward compatibility; clients fall back to HTTP status when absent."
           }
         },
-        "required": [
-          "error",
-          "requestId"
-        ]
+        "required": ["error", "requestId"]
       },
       "Cinema": {
         "type": "object",
@@ -52,10 +53,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "ACTIVE",
-              "INACTIVE"
-            ]
+            "enum": ["ACTIVE", "INACTIVE"]
           },
           "createdAt": {
             "type": "string",
@@ -66,11 +64,7 @@
             "format": "date-time"
           }
         },
-        "required": [
-          "code",
-          "name",
-          "status"
-        ]
+        "required": ["code", "name", "status"]
       },
       "Staff": {
         "type": "object",
@@ -93,10 +87,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "ACTIVE",
-              "INACTIVE"
-            ]
+            "enum": ["ACTIVE", "INACTIVE"]
           },
           "createdAt": {
             "type": "string",
@@ -111,12 +102,7 @@
             "description": "Direct manager Keycloak ID. Active CINEMA_MANAGER in the same cinema; empty means unassigned."
           }
         },
-        "required": [
-          "staffCode",
-          "name",
-          "cinemaId",
-          "status"
-        ]
+        "required": ["staffCode", "name", "cinemaId", "status"]
       },
       "Submission": {
         "type": "object",
@@ -153,9 +139,7 @@
           },
           "consent": {
             "type": "boolean",
-            "enum": [
-              true
-            ]
+            "enum": [true]
           },
           "consentVersion": {
             "type": "string"
@@ -211,12 +195,7 @@
           },
           "type": {
             "type": "string",
-            "enum": [
-              "POSITIVE",
-              "NEGATIVE",
-              "NEUTRAL",
-              "BOTH"
-            ]
+            "enum": ["POSITIVE", "NEGATIVE", "NEUTRAL", "BOTH"]
           },
           "ratings": {
             "type": "array",
@@ -231,22 +210,13 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "ACTIVE",
-              "DISABLED"
-            ]
+            "enum": ["ACTIVE", "DISABLED"]
           },
           "order": {
             "type": "integer"
           }
         },
-        "required": [
-          "code",
-          "label",
-          "type",
-          "ratings",
-          "status"
-        ]
+        "required": ["code", "label", "type", "ratings", "status"]
       },
       "FeedbackConfig": {
         "type": "object",
@@ -256,12 +226,7 @@
           },
           "ratingType": {
             "type": "string",
-            "enum": [
-              "ICON+TEXT",
-              "STAR",
-              "BUTTON",
-              "TEXT"
-            ]
+            "enum": ["ICON+TEXT", "STAR", "BUTTON", "TEXT"]
           },
           "ratingOptions": {
             "type": "array",
@@ -411,22 +376,14 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "OPEN",
-              "IN_PROGRESS",
-              "COMPLETED",
-              "CANCELLED"
-            ]
+            "enum": ["OPEN", "IN_PROGRESS", "COMPLETED", "CANCELLED"]
           },
           "followUpDate": {
             "type": "string",
             "format": "date"
           },
           "completedAt": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "format": "date-time"
           },
           "createdBy": {
@@ -441,12 +398,7 @@
             "format": "date-time"
           }
         },
-        "required": [
-          "staffId",
-          "topic",
-          "action",
-          "followUpDate"
-        ]
+        "required": ["staffId", "topic", "action", "followUpDate"]
       },
       "User": {
         "type": "object",
@@ -469,11 +421,7 @@
           },
           "role": {
             "type": "string",
-            "enum": [
-              "SYSTEM_ADMIN",
-              "HEAD_OFFICE",
-              "CINEMA_MANAGER"
-            ]
+            "enum": ["SYSTEM_ADMIN", "HEAD_OFFICE", "CINEMA_MANAGER"]
           },
           "cinemaId": {
             "type": "string"
@@ -488,13 +436,7 @@
             "description": "Required for create; user must change at first sign-in"
           }
         },
-        "required": [
-          "username",
-          "firstName",
-          "email",
-          "role",
-          "enabled"
-        ]
+        "required": ["username", "firstName", "email", "role", "enabled"]
       },
       "QR": {
         "type": "object",
@@ -510,11 +452,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "ACTIVE",
-              "DISABLED",
-              "NOT_GENERATED"
-            ]
+            "enum": ["ACTIVE", "DISABLED", "NOT_GENERATED"]
           },
           "url": {
             "type": "string",
@@ -2027,7 +1965,33 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "type": "object",
+                  "properties": {
+                    "reasons": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "_id": {
+                            "type": "string"
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "english": {
+                            "type": "string",
+                            "description": "English label from a stored feedback snapshot. May be absent for legacy records; use label as fallback."
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "count": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -2871,7 +2835,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "type": "object",
+                  "properties": {
+                    "rows": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "error": {
+                            "type": "string",
+                            "description": "Legacy validation text, empty for valid rows."
+                          },
+                          "errorCode": {
+                            "type": "string",
+                            "description": "Stable UI localization code for an invalid row. Optional for legacy servers."
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -2903,9 +2885,7 @@
                     "default": false
                   }
                 },
-                "required": [
-                  "file"
-                ]
+                "required": ["file"]
               }
             }
           }
