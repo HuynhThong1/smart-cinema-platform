@@ -1,9 +1,14 @@
-import { Component, inject } from '@angular/core';
+import { Component, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { NotificationBell } from '../../../../libs/feature/src/notifications';
-import { Auth } from '@cinema/core';
+import { Theme } from './theme';
+import { Api, Auth, Cinema, Page } from '@cinema/core';
 @Component({
   selector: 'cinema-shell',
+  host: {
+    '(document:click)': 'dismissAccount($event)',
+    '(document:keydown.escape)': 'closeAccount(true)',
+  },
   imports: [RouterLink, RouterLinkActive, RouterOutlet, NotificationBell],
   template: ` <div class="admin-shell">
     <header class="masthead">
@@ -11,21 +16,57 @@ import { Auth } from '@cinema/core';
         <a routerLink="/" class="masthead-title">SMART CINEMA PLATFORM</a>
         <div class="kicker">Galaxy Cinema · Transaction Feedback QR</div>
       </div>
-      <div class="actions">
-        <cinema-notification-bell /><span class="muted">{{ auth.user()?.name }}</span
-        ><button class="text-button" (click)="auth.account()">Tài khoản</button
-        ><button class="secondary" (click)="auth.logout()">Đăng xuất</button>
+      <div class="utility-rail" aria-label="Tiện ích tài khoản">
+        <span class="utility-scope">{{ scopeName() }}</span>
+        <cinema-notification-bell />
+        <details class="account-menu" #accountMenu>
+          <summary aria-controls="account-actions">
+            <span class="account-identity"
+              ><strong>{{ auth.user()?.name }}</strong
+              ><span class="english">{{ roleName() }}</span></span
+            >
+            <span class="account-caret" aria-hidden="true">▾</span>
+          </summary>
+          <div id="account-actions" class="account-actions">
+            <button type="button" (click)="closeAccount(); auth.account()">
+              Tài khoản của tôi
+            </button>
+            <button type="button" (click)="closeAccount(); auth.changePassword()">
+              Đổi mật khẩu
+            </button>
+            <button
+              type="button"
+              class="theme-toggle"
+              role="switch"
+              aria-label="Giao diện tối"
+              [attr.aria-checked]="theme.dark()"
+              (click)="theme.toggle()"
+            >
+              <span>Giao diện tối</span
+              ><span class="theme-switch" aria-hidden="true"><span></span></span>
+            </button>
+            <button type="button" class="account-logout" (click)="closeAccount(); auth.logout()">
+              Đăng xuất
+            </button>
+          </div>
+        </details>
       </div>
     </header>
+    <a class="skip-link" href="#admin-content" (click)="focusContent($event)">Đến nội dung chính</a>
+    <button
+      type="button"
+      class="secondary mobile-nav-toggle"
+      [attr.aria-expanded]="navOpen()"
+      aria-controls="admin-navigation"
+      (click)="navOpen.set(!navOpen())"
+    >
+      {{ navOpen() ? 'Đóng menu' : 'Menu điều hướng' }}
+    </button>
     <div class="admin-layout">
-      <aside class="sidebar">
+      <aside class="sidebar" id="admin-navigation" [class.mobile-open]="navOpen()">
         <div class="kicker">Phạm vi quản trị</div>
         <strong>{{ roleName() }}</strong>
-        <p class="english">
-          {{
-            auth.global() ? 'Toàn hệ thống / All cinemas' : 'Rạp được phân quyền / Assigned cinema'
-          }}
-        </p>
+        <p class="english">{{ scopeName() }}</p>
         <nav aria-label="Điều hướng chính">
           @for (group of groups; track group.title) {
             @if (!group.global || auth.global()) {
@@ -38,6 +79,8 @@ import { Auth } from '@cinema/core';
                   ) {
                     <a
                       [routerLink]="item.path"
+                      (click)="navOpen.set(false); closeAccount()"
+                      ariaCurrentWhenActive="page"
                       routerLinkActive="active"
                       [routerLinkActiveOptions]="{ exact: true }"
                       >{{ item.label }}</a
@@ -49,12 +92,44 @@ import { Auth } from '@cinema/core';
           }
         </nav>
       </aside>
-      <main><router-outlet /></main>
+      <main id="admin-content" #mainContent tabindex="-1"><router-outlet /></main>
     </div>
   </div>`,
 })
 export class Shell {
+  theme = inject(Theme);
   auth = inject(Auth);
+  private api = inject(Api);
+  accountMenu = viewChild<ElementRef<HTMLDetailsElement>>('accountMenu');
+  mainContent = viewChild<ElementRef<HTMLElement>>('mainContent');
+  focusContent(event: Event) {
+    event.preventDefault();
+    this.mainContent()?.nativeElement.focus();
+  }
+  navOpen = signal(false);
+  scopeName = signal(this.auth.global() ? 'Toàn hệ thống' : 'Rạp được phân quyền');
+  async ngOnInit() {
+    try {
+      const page = await this.api.get<Page<Cinema>>('/admin/cinemas', { pageSize: 1 });
+      this.scopeName.set(
+        this.auth.global()
+          ? 'Toàn hệ thống · ' + page.total + ' rạp'
+          : page.items[0]?.name || 'Rạp được phân quyền',
+      );
+    } catch {
+      /* Keep a truthful scope label when cinema details are unavailable. */
+    }
+  }
+  closeAccount(restoreFocus = false) {
+    const menu = this.accountMenu()?.nativeElement;
+    if (!menu?.open) return;
+    menu.open = false;
+    if (restoreFocus) menu.querySelector('summary')?.focus();
+  }
+  dismissAccount(event: Event) {
+    const menu = this.accountMenu()?.nativeElement;
+    if (menu && !menu.contains(event.target as Node)) this.closeAccount();
+  }
   roleName() {
     return {
       SYSTEM_ADMIN: 'System Admin',

@@ -85,22 +85,29 @@ export class Pager {
   selector: 'cinema-filters',
   imports: [FormsModule],
   template: ` <div class="toolbar">
-    <label
-      >Khoảng thời gian<select
-        aria-label="Khoảng thời gian"
-        [(ngModel)]="range"
-        (ngModelChange)="emit()"
-      >
-        <option value="today">Hôm nay</option>
-        <option value="yesterday">Hôm qua</option>
-        <option value="7">7 ngày</option>
-        <option value="30">30 ngày</option>
-        <option value="custom">Tuỳ chọn</option>
-      </select></label
-    >
+    <div class="date-filter">
+      <span class="filter-label" id="date-range-label">Khoảng thời gian</span>
+      <div class="date-presets" role="group" aria-labelledby="date-range-label">
+        @for (option of ranges; track option.value) {
+          <button
+            type="button"
+            [attr.aria-pressed]="range === option.value"
+            (click)="selectRange(option.value)"
+          >
+            {{ option.label }}
+          </button>
+        }
+      </div>
+    </div>
     @if (range === 'custom') {
-      <label>Từ ngày<input type="date" [(ngModel)]="from" (change)="emit()" /></label
-      ><label>Đến ngày<input type="date" [(ngModel)]="to" (change)="emit()" /></label>
+      <div class="custom-dates">
+        <label>Từ ngày<input type="date" [(ngModel)]="from" [max]="to" /></label>
+        <label>Đến ngày<input type="date" [(ngModel)]="to" [min]="from" /></label>
+        <button type="button" class="secondary" (click)="emit()">Áp dụng</button>
+        @if (rangeError()) {
+          <p class="field-error" role="alert">{{ rangeError() }}</p>
+        }
+      </div>
     }
     @if (auth.global()) {
       <label
@@ -125,6 +132,19 @@ export class Filters {
   changed = output<Record<string, string | boolean>>();
   cinemas = signal<Cinema[]>([]);
   range = '30';
+  rangeError = signal('');
+  ranges = [
+    { value: 'today', label: 'Hôm nay' },
+    { value: 'yesterday', label: 'Hôm qua' },
+    { value: '7', label: '7 ngày' },
+    { value: '30', label: '30 ngày' },
+    { value: 'custom', label: 'Tuỳ chọn' },
+  ];
+  selectRange(value: string) {
+    this.range = value;
+    this.rangeError.set('');
+    if (value !== 'custom') this.emit();
+  }
   from = '';
   to = '';
   cinemaId = '';
@@ -144,6 +164,20 @@ export class Filters {
     }
   }
   emit() {
+    this.rangeError.set('');
+    if (
+      this.range === 'custom' &&
+      (!this.from ||
+        !this.to ||
+        this.from > this.to ||
+        !Number.isFinite(Date.parse(this.from)) ||
+        !Number.isFinite(Date.parse(this.to)))
+    ) {
+      this.rangeError.set(
+        'Chọn đủ ngày bắt đầu và kết thúc; ngày kết thúc phải từ ngày bắt đầu trở đi.',
+      );
+      return;
+    }
     const p: Record<string, string | boolean> = {
       includeSuspicious: this.include,
     };
