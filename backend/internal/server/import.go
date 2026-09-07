@@ -25,6 +25,7 @@ type importRow struct {
 	ManagerUsername string `json:"managerUsername"`
 	ManagerID       string `json:"managerId"`
 	Error           string `json:"error"`
+	ErrorCode       string `json:"errorCode,omitempty"`
 }
 
 func (s *Server) importTemplate(c *gin.Context) {
@@ -189,6 +190,9 @@ func (s *Server) importStaff(c *gin.Context) {
 		}
 		if v.Error == "" {
 			valid++
+		}
+		if v.Error != "" {
+			v.ErrorCode = importErrorCode(v.Error)
 		}
 		result = append(result, v)
 	}
