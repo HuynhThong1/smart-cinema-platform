@@ -105,3 +105,23 @@ validation, not POS ticket authenticity verification.
   [English 390px](../output/playwright/transaction-help-en-390.png).
 - Physical phone camera scans still require UAT; QR format validation does not
   prove that the transaction exists or belongs to the staff/cinema being rated.
+
+## Animated QR scanner
+
+The camera preview has a moving scan line and a square target. A gentle digital
+zoom cycle moves from 1x to 1.8x and returns to the wide view every seven seconds.
+Both preview and decoder use the same crop from the original camera frame, before
+resizing to at most 640px. This retains more detail for small central QR codes;
+it does not control optical zoom or invent additional camera resolution.
+
+Once a supported transaction QR is decoded, the preview centres on its detected
+corners over 320ms, highlights the target in green, and shows the captured ID after
+420ms. Invalid QR codes keep scanning. Leaving the scanner, opening help, hiding
+the page or destroying the component cancels the animation/capture and stops tracks.
+Reduced-motion users get a static target and immediate capture without zoom motion.
+
+Verification: nine unit tests, UI/i18n checks, formatting, TypeScript and both
+production builds passed. Chromium camera simulation at 320/390px decoded actual
+synthetic Galaxy QR images using jsQR, rejected feedback URLs, and verified track
+cleanup and cancellation during the capture animation. Physical phone camera
+performance and autofocus still require device UAT.

@@ -1,4 +1,6 @@
 export const transactionVi = {
+  scanSearching: 'Đặt mã QR vào khung · Tự động phóng gần',
+  scanRead: 'Đã đọc mã giao dịch',
   whichQr: 'Quét mã QR nào?',
   twoCodes: 'VÉ CỦA BẠN CÓ 2 MÃ QR',
   scanNumber: 'Quét mã số',
@@ -47,6 +49,8 @@ export const transactionVi = {
   or: 'hoặc',
 };
 export const transactionEn = {
+  scanSearching: 'Place QR inside the frame · Auto zoom',
+  scanRead: 'Transaction code captured',
   whichQr: 'Which QR should I scan?',
   twoCodes: 'YOUR TICKET HAS 2 QR CODES',
   scanNumber: 'Scan code number',
