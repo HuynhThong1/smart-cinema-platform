@@ -25,19 +25,20 @@ import { CinemaButton, Overlay } from '@cinema/ui';
         <p class="kicker">{{ i18n.t('transaction.twoCodes') }}</p>
         <h2>{{ i18n.t('transaction.scanNumber') }} <strong>1</strong></h2>
         <div class="ticket" aria-hidden="true">
-          <strong>GALAXY CINEMA</strong><br />VE XEM PHIM
+          <strong>{{ i18n.t('transaction.ticketCinema') }}</strong
+          ><br />{{ i18n.t('transaction.ticketType') }}
           <hr />
-          PHIM / MOVIE<br />01/01/2026 · 19:00 · A1
+          {{ i18n.t('transaction.ticketMovie') }}<br />{{ i18n.t('transaction.ticketExample') }}
           <hr />
-          Trans No: 00000001/0001<br />Trans Time: 01/01/2026 18:00
+          {{ i18n.t('transaction.ticketTransaction') }}<br />{{ i18n.t('transaction.ticketTime') }}
           <div class="qr-block correct">
             <span class="number">1</span>
             <div class="fake-qr"><i></i><i></i><i></i></div>
           </div>
           <b>{{ i18n.t('transaction.scanThis') }}</b>
-          <p>Vui long quet ma QRCode nay de vao rap</p>
+          <p>{{ i18n.t('transaction.ticketEntryInstruction') }}</p>
           <hr />
-          Quet QR de chia se cam nhan
+          {{ i18n.t('transaction.ticketFeedbackInstruction') }}
           <div class="qr-block incorrect">
             <span class="number">2</span>
             <div class="fake-qr"><i></i><i></i><i></i></div>

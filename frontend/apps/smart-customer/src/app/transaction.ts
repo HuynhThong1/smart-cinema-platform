@@ -86,7 +86,7 @@ import { parseTransaction, validTransaction } from './transaction-parser';
         <div class="captured">
           <strong>{{ i18n.t('transaction.captured') }}</strong>
           <p>
-            Trans No <strong>{{ value() }}</strong>
+            {{ i18n.t('transaction.transactionNumber') }} <strong>{{ value() }}</strong>
           </p>
           <button cinemaButton type="button" class="text-button" (click)="clear()">
             {{ i18n.t('transaction.change') }}
