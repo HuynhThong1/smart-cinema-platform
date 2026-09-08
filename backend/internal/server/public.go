@@ -15,11 +15,15 @@ import (
 
 func (s *Server) rateLimit() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		bucket := c.Request.Method
+		if strings.HasPrefix(c.Request.URL.Path, "/api/v1/public/transaction/") {
+			bucket = "POST"
+		}
 		max := 120
-		if c.Request.Method == "POST" {
+		if bucket == "POST" {
 			max = 20
 		}
-		ok, e := s.Store.Allow(c.Request.Context(), "ip:"+s.hash(c.ClientIP())+":"+c.Request.Method, max)
+		ok, e := s.Store.Allow(c.Request.Context(), "ip:"+s.hash(c.ClientIP())+":"+bucket, max)
 		if e != nil {
 			fail(c, 503, "Service temporarily unavailable")
 			return
@@ -88,6 +92,9 @@ func (s *Server) validateQR(c *gin.Context) {
 }
 
 type submission struct {
+	TransactionID     string `json:"transactionId"`
+	TransactionSource string `json:"transactionSource"`
+
 	QRToken        string   `json:"qrToken"`
 	Rating         int      `json:"rating"`
 	Reasons        []string `json:"reasons"`
@@ -103,6 +110,7 @@ func (s *Server) submitFeedback(c *gin.Context) {
 	if !decode(c, &in) {
 		return
 	}
+	in.TransactionID, in.TransactionSource = domain.NormalizeTransaction(in.TransactionID, in.TransactionSource)
 	in.Name = strings.TrimSpace(in.Name)
 	phone, e := domain.NormalizePhone(in.Phone)
 	if !domain.ValidName(in.Name) || e != nil || !in.Consent || utf8.RuneCountInString(in.Comment) > 2000 || len(in.Reasons) > 30 {
@@ -182,6 +190,21 @@ func (s *Server) submitFeedback(c *gin.Context) {
 			return e
 		}
 		out = domain.Feedback{ID: domain.ID(), Staff: domain.Snapshot{ID: st.ID, Code: st.StaffCode, Name: st.Name}, Cinema: domain.Snapshot{ID: ci.ID, Code: ci.Code, Name: ci.Name}, Customer: domain.Customer{Name: in.Name, Phone: phone}, Rating: rating, Reasons: reasons, Comment: strings.TrimSpace(in.Comment), CreatedAt: now}
+		out.TransactionID = in.TransactionID
+		out.TransactionSource = in.TransactionSource
+		// No trusted POS resolver is configured. Never trust verification from the client.
+		out.TransactionVerified = false
+		if in.TransactionID != "" {
+			// Serialize transaction dedupe across different staff QR tokens in the same cinema.
+			if _, e = s.Store.Update(ctx, "cinemas", bson.M{"_id": ci.ID}, bson.M{"$inc": bson.M{"feedbackRevision": 1}}); e != nil {
+				return e
+			}
+			repeated, err := s.Store.Count(ctx, "feedbacks", bson.M{"cinema.id": ci.ID, "transactionId": in.TransactionID, "createdAt": bson.M{"$gte": now.Add(-10 * time.Minute)}})
+			if err != nil {
+				return err
+			}
+			duplicates += repeated
+		}
 		out.QR.ID = q.ID
 		out.QR.Token = q.PublicToken
 		out.Metadata.IPHash = s.hash(c.ClientIP())

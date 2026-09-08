@@ -21,7 +21,17 @@ func feedbackFilter(c *gin.Context) (bson.M, bool) {
 	if !dateFilter(c, f) {
 		return nil, false
 	}
-	search(c, f, "customer.name", "customer.phone")
+	search(c, f, "customer.name", "customer.phone", "transactionId")
+	switch c.Query("hasTransaction") {
+	case "true":
+		f["transactionId"] = bson.M{"$exists": true, "$nin": bson.A{"", nil}}
+	case "false":
+		f["$and"] = bson.A{bson.M{"$or": bson.A{bson.M{"transactionId": ""}, bson.M{"transactionId": nil}}}}
+	case "":
+	default:
+		fail(c, 400, "Invalid transaction filter")
+		return nil, false
+	}
 	for _, v := range []struct{ query, field string }{{"staffId", "staff.id"}, {"reason", "reasons.code"}} {
 		if q := c.Query(v.query); q != "" {
 			f[v.field] = q
@@ -116,13 +126,13 @@ func (s *Server) exportFeedback(c *gin.Context) {
 	var b bytes.Buffer
 	b.WriteString("\xef\xbb\xbf")
 	w := csv.NewWriter(&b)
-	_ = w.Write([]string{"Time", "Rating", "Customer", "Phone", "Staff", "Cinema", "Reasons", "Comment", "Suspicious"})
+	_ = w.Write([]string{"Time", "Rating", "Customer", "Phone", "Staff", "Cinema", "Reasons", "Comment", "Suspicious", "Transaction ID", "Transaction source", "Transaction verified"})
 	for _, x := range v {
 		reasons := []string{}
 		for _, r := range x.Reasons {
 			reasons = append(reasons, r.Label)
 		}
-		_ = w.Write([]string{x.CreatedAt.Format(time.RFC3339), strconv.Itoa(x.Rating.Value), safeCSV(x.Customer.Name), maskPhone(x.Customer.Phone), safeCSV(x.Staff.Code), safeCSV(x.Cinema.Name), safeCSV(strings.Join(reasons, "; ")), safeCSV(x.Comment), strconv.FormatBool(x.Metadata.Suspicious)})
+		_ = w.Write([]string{x.CreatedAt.Format(time.RFC3339), strconv.Itoa(x.Rating.Value), safeCSV(x.Customer.Name), maskPhone(x.Customer.Phone), safeCSV(x.Staff.Code), safeCSV(x.Cinema.Name), safeCSV(strings.Join(reasons, "; ")), safeCSV(x.Comment), strconv.FormatBool(x.Metadata.Suspicious), safeCSV(x.TransactionID), safeCSV(x.TransactionSource), strconv.FormatBool(x.TransactionVerified)})
 	}
 	w.Flush()
 	if w.Error() != nil {

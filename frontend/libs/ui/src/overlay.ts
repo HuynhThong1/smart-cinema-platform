@@ -63,6 +63,12 @@ import { DOCUMENT, NgTemplateOutlet } from '@angular/common';
         (visibleChange)="setOpen($event)"
         [header]="header()"
         [modal]="true"
+        [blockScroll]="variant() === 'sheet'"
+        [position]="variant() === 'sheet' ? 'bottom' : 'center'"
+        [closeAriaLabel]="closeLabel()"
+        [maskStyleClass]="variant() === 'sheet' ? 'cinema-sheet-mask' : ''"
+        [styleClass]="variant() === 'sheet' ? 'cinema-bottom-sheet' : ''"
+        [transitionOptions]="variant() === 'sheet' ? '180ms ease-out' : '150ms ease-out'"
         [closable]="!saving()"
         [closeOnEscape]="false"
         [dismissableMask]="!saving()"
@@ -94,7 +100,8 @@ export class Overlay {
   footer = contentChild<TemplateRef<unknown>>('footer');
   open = model(false);
   header = input('');
-  variant = input<'modal' | 'drawer' | 'confirm'>('modal');
+  closeLabel = input<string>();
+  variant = input<'modal' | 'drawer' | 'confirm' | 'sheet'>('modal');
   saving = input(false);
   closed = output<void>();
   // PrimeNG binds its Escape listener only when opening. Own this dynamic saving guard.

@@ -57,7 +57,11 @@ export interface Snapshot {
   code: string;
   name: string;
 }
+export type TransactionSource = 'QR_TICKET' | 'QR_SCAN' | 'MANUAL' | 'NONE';
 export interface Feedback {
+  transactionId?: string;
+  transactionSource?: TransactionSource;
+  transactionVerified?: boolean;
   id: string;
   staff: Snapshot;
   cinema: Snapshot;

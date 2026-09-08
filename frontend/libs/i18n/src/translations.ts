@@ -1,8 +1,10 @@
+import { transactionVi, transactionEn } from './transaction';
 import { primeVi, primeEn } from './prime';
 import { showcaseVi, showcaseEn } from './showcase';
 import { extraVi, extraEn } from './extra';
 import { catalogVi, catalogEn } from './catalog';
 export const vi = {
+  transaction: transactionVi,
   ...catalogVi,
   showcase: showcaseVi,
   ...extraVi,
@@ -71,6 +73,7 @@ export const vi = {
   },
 };
 export const en = {
+  transaction: transactionEn,
   ...catalogEn,
   showcase: showcaseEn,
   ...extraEn,

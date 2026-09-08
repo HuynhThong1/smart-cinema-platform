@@ -71,6 +71,7 @@ func (s *Server) Router(verifier auth.Verifier, origins []string) *gin.Engine {
 	})
 	p := r.Group("/api/v1/public")
 	p.Use(s.rateLimit())
+	p.GET("/transaction/*transactionId", s.publicTransaction)
 	p.GET("/feedback-config", s.publicConfig)
 	p.GET("/feedback/:qrToken", s.validateQR)
 	p.POST("/feedback", s.submitFeedback)

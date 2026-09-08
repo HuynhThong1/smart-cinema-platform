@@ -79,7 +79,7 @@ func (m *Mongo) EnsureIndexes(ctx context.Context) error {
 		"coaching":            {{Keys: bson.D{{Key: "cinemaId", Value: 1}, {Key: "followUpDate", Value: 1}}}},
 		"audit_logs":          {{Keys: bson.D{{Key: "cinemaId", Value: 1}, {Key: "createdAt", Value: -1}}}},
 	}
-	for _, key := range []string{"staff.id", "cinema.id", "customer.phone", "rating.value", "reasons.code"} {
+	for _, key := range []string{"staff.id", "cinema.id", "customer.phone", "transactionId", "rating.value", "reasons.code"} {
 		definitions["feedbacks"] = append(definitions["feedbacks"], mongo.IndexModel{Keys: bson.D{{Key: key, Value: 1}, {Key: "createdAt", Value: -1}}})
 	}
 	for c, defs := range definitions {

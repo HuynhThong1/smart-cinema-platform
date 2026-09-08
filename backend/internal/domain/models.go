@@ -67,6 +67,10 @@ type Customer struct {
 	Phone string `json:"phone" bson:"phone"`
 }
 type Feedback struct {
+	TransactionID       string `json:"transactionId" bson:"transactionId"`
+	TransactionSource   string `json:"transactionSource" bson:"transactionSource"`
+	TransactionVerified bool   `json:"transactionVerified" bson:"transactionVerified"`
+
 	ID       string   `json:"id" bson:"_id"`
 	Staff    Snapshot `json:"staff" bson:"staff"`
 	Cinema   Snapshot `json:"cinema" bson:"cinema"`

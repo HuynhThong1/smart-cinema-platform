@@ -77,6 +77,14 @@ import { AsyncPage, Filters, PageState, Pager } from './shared';
         @for (r of reasons(); track r.code) {
           <cinema-option [value]="r.code" [label]="i18n.label(r)" />
         }</cinema-select
+      ><cinema-select
+        [aria-label]="i18n.t('transaction.label')"
+        name="hasTransaction"
+        [(ngModel)]="hasTransaction"
+      >
+        <cinema-option [value]="''" [label]="i18n.t('transaction.all')" />
+        <cinema-option [value]="'true'" [label]="i18n.t('transaction.has')" />
+        <cinema-option [value]="'false'" [label]="i18n.t('transaction.none')" /> </cinema-select
       ><label class="checkbox-label"
         ><cinema-checkbox name="suspicious" [(ngModel)]="suspicious" />{{
           i18n.t('feedback.suspicious_only')
@@ -89,7 +97,7 @@ import { AsyncPage, Filters, PageState, Pager } from './shared';
     }
     @if (!busy()) {
       <div class="table-wrap">
-        <cinema-table [rows]="data().items" [columns]="8"
+        <cinema-table [rows]="data().items" [columns]="9"
           ><ng-template #header>
             <tr>
               <th>{{ i18n.t('administration.time') }}</th>
@@ -99,6 +107,7 @@ import { AsyncPage, Filters, PageState, Pager } from './shared';
               <th>{{ i18n.t('coaching.staff') }}</th>
               <th>{{ i18n.t('dashboard.cinema') }}</th>
               <th>{{ i18n.t('feedback.reason') }}</th>
+              <th>{{ i18n.t('transaction.label') }}</th>
               <th>{{ i18n.t('feedback.flag') }}</th>
             </tr> </ng-template
           ><ng-template #body let-f
@@ -121,11 +130,12 @@ import { AsyncPage, Filters, PageState, Pager } from './shared';
                   <span>{{ i18n.label(r) }} · </span>
                 }
               </td>
+              <td>{{ f.transactionId || '—' }}</td>
               <td>{{ f.metadata.suspicious ? '⚑' : '' }}</td>
             </tr></ng-template
           ><ng-template #empty
             ><tr>
-              <td colspan="8">{{ i18n.t('feedback.no_feedback_matches_these_filters') }}</td>
+              <td colspan="9">{{ i18n.t('feedback.no_feedback_matches_these_filters') }}</td>
             </tr></ng-template
           ></cinema-table
         >
@@ -145,6 +155,16 @@ import { AsyncPage, Filters, PageState, Pager } from './shared';
           <p class="tag bad">{{ i18n.t('feedback.suspicious_feedback') }}</p>
         }
         <dl>
+          <dt>{{ i18n.t('transaction.label') }}</dt>
+          <dd>
+            {{ f.transactionId || '—' }}
+            @if (f.transactionId) {
+              <br />{{
+                i18n.t(f.transactionVerified ? 'transaction.verified' : 'transaction.notVerified')
+              }}
+              · {{ i18n.t('transaction.' + (f.transactionSource || 'NONE')) }}
+            }
+          </dd>
           <dt>{{ i18n.t('feedback.customer') }}</dt>
           <dd>{{ f.customer.name }}<br />{{ f.customer.phone }}</dd>
           <dt>{{ i18n.t('coaching.staff') }}</dt>
@@ -195,6 +215,7 @@ export class FeedbackList extends AsyncPage {
   staffId = this.route.snapshot.queryParamMap.get('staffId') || '';
   reason = '';
   suspicious = false;
+  hasTransaction = '';
   params: Record<string, string | boolean> = {};
   localDate = (value: string) => this.i18n.date(value);
   async ngOnInit() {
@@ -220,6 +241,7 @@ export class FeedbackList extends AsyncPage {
       staffId: this.staffId,
       reason: this.reason,
       suspicious: this.suspicious,
+      hasTransaction: this.hasTransaction,
       page: this.page(),
     };
   }
