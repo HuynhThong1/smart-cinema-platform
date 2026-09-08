@@ -143,6 +143,15 @@
           },
           "consentVersion": {
             "type": "string"
+          },
+          "transactionId": {
+            "type": "string",
+            "description": "Optional printed Trans No, digits 6-10/slash/digits 3-5. Empty or malformed input is omitted without blocking feedback."
+          },
+          "transactionSource": {
+            "type": "string",
+            "enum": ["QR_TICKET", "QR_SCAN", "MANUAL", "NONE"],
+            "description": "Client-reported acquisition source, not proof of authenticity."
           }
         },
         "required": [
@@ -344,6 +353,19 @@
               }
             },
             "required": []
+          },
+          "transactionId": {
+            "type": "string",
+            "description": "Optional printed Trans No, digits 6-10/slash/digits 3-5. Empty or malformed input is omitted without blocking feedback."
+          },
+          "transactionSource": {
+            "type": "string",
+            "enum": ["QR_TICKET", "QR_SCAN", "MANUAL", "NONE"],
+            "description": "Client-reported acquisition source, not proof of authenticity."
+          },
+          "transactionVerified": {
+            "type": "boolean",
+            "description": "Server-owned; false until a trusted POS adapter is available."
           }
         },
         "required": []
@@ -1729,6 +1751,14 @@
               "type": "boolean"
             },
             "description": "True selects suspicious only"
+          },
+          {
+            "in": "query",
+            "name": "hasTransaction",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Filter records with or without a transaction ID; absent fields in legacy records count as without."
           }
         ],
         "responses": {
@@ -2755,6 +2785,14 @@
               "type": "boolean"
             },
             "description": "True selects suspicious only"
+          },
+          {
+            "in": "query",
+            "name": "hasTransaction",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Filter records with or without a transaction ID; absent fields in legacy records count as without."
           }
         ],
         "responses": {
@@ -3110,6 +3148,49 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/public/transaction/{transactionId}": {
+      "get": {
+        "summary": "Look up optional ticket context",
+        "description": "Accepts a URL-encoded slash in Trans No. Shares the feedback POST IP quota (20/minute). No POS adapter currently exists: returns verified=false without metadata. Never returns customer/staff identity.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "transactionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Unverified transaction",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "transactionId": {
+                      "type": "string"
+                    },
+                    "verified": {
+                      "type": "boolean",
+                      "enum": [false]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid transaction format"
+          },
+          "429": {
+            "description": "Rate limited"
           }
         }
       }

@@ -77,7 +77,12 @@
       <p id="phone-error" class="field-error" role="alert">
         {{ i18n.t('customer.please_enter_a_valid_vietnamese_phone_number') }}
       </p>
-      } <label for="comment">{{ i18n.t('customer.anything_else') }}</label
+      }
+      <cinema-transaction
+        [initial]="transactionId"
+        (changed)="transactionId = $event.id; transactionSource = $event.source"
+      />
+      <label for="comment">{{ i18n.t('customer.anything_else') }}</label
       ><textarea
         cinemaTextarea
         id="comment"

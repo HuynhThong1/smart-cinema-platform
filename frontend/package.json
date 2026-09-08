@@ -28,6 +28,7 @@
     "@phosphor-icons/web": "^2.1.2",
     "@primeuix/themes": "^2.0.0",
     "express": "^5.1.0",
+    "jsqr": "^1.4.0",
     "keycloak-js": "^26.2.0",
     "primeicons": "^7.0.0",
     "primeng": "21.1.9",

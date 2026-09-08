@@ -1,3 +1,6 @@
+import { TransactionField } from './transaction';
+import { validTransaction } from './transaction-parser';
+import { TransactionSource } from '@cinema/core';
 import { I18n } from '@cinema/i18n';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, ResolveFn } from '@angular/router';
@@ -39,6 +42,7 @@ export const feedbackResolver: ResolveFn<Initial> = async (route) => {
   selector: 'cinema-feedback',
   imports: [
     FormsModule,
+    TransactionField,
     CinemaButton,
     CinemaInput,
     CinemaTextarea,
@@ -62,6 +66,10 @@ export class FeedbackPage {
   reasons = signal<string[]>([]);
   name = '';
   phone = '';
+  transactionId = this.route.snapshot.queryParamMap.get('tx')?.slice(0, 32) || '';
+  transactionSource: TransactionSource = validTransaction(this.transactionId)
+    ? 'QR_TICKET'
+    : 'NONE';
   comment = '';
   consent = false;
   attempted = signal(false);
@@ -148,6 +156,8 @@ export class FeedbackPage {
         name: this.name.trim(),
         phone: this.phone,
         comment: this.comment,
+        transactionId: validTransaction(this.transactionId) ? this.transactionId : '',
+        transactionSource: this.transactionSource,
         consent: this.consent,
         consentVersion: this.config()?.consentVersion,
       });
@@ -171,6 +181,8 @@ export class FeedbackPage {
     this.name = '';
     this.phone = '';
     this.comment = '';
+    this.transactionId = '';
+    this.transactionSource = 'NONE';
     this.consent = false;
     this.attempted.set(false);
     this.submitError.set('');
