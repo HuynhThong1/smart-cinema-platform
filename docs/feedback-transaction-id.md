@@ -108,13 +108,17 @@ validation, not POS ticket authenticity verification.
 
 ## Animated QR scanner
 
-The camera preview has a moving scan line and a square target. A gentle digital
-zoom cycle moves from 1x to 1.8x and returns to the wide view every seven seconds.
+The camera preview has a moving scan line and a square target. It opens at 1x
+and stays there indefinitely until a supported transaction QR has been decoded.
+There is no timer-driven zoom or search cycle. The QR's four corners determine
+its bounding box: below 25% of the frame it zooms in towards 45% coverage,
+25–60% holds the current view, and above 60% widens if the source allows it.
+The hold band avoids jitter and digital zoom is capped at 2.5x.
 Both preview and decoder use the same crop from the original camera frame, before
 resizing to at most 640px. This retains more detail for small central QR codes;
 it does not control optical zoom or invent additional camera resolution.
 
-Once a supported transaction QR is decoded, the preview centres on its detected
+When zoom is needed, the preview centres on the detected
 corners over 320ms, highlights the target in green, and shows the captured ID after
 420ms. Invalid QR codes keep scanning. Leaving the scanner, opening help, hiding
 the page or destroying the component cancels the animation/capture and stops tracks.
@@ -125,3 +129,10 @@ production builds passed. Chromium camera simulation at 320/390px decoded actual
 synthetic Galaxy QR images using jsQR, rejected feedback URLs, and verified track
 cleanup and cancellation during the capture animation. Physical phone camera
 performance and autofocus still require device UAT.
+
+The current jsQR decoder provides corners only after successfully decoding a QR;
+this is detection-triggered capture zoom, not localization of unreadable QR codes.
+Blank frames and unsupported QR payloads leave the preview at 1x.
+The regression check records the actual preview crop for eight seconds of blank
+camera frames at 320/390px and verifies it never changes from 1x, then inserts a
+synthetic QR and verifies zoom starts only after detection and captures its ID.

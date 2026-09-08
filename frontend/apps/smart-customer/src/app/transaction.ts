@@ -15,7 +15,7 @@ import { I18n } from '@cinema/i18n';
 import { CinemaButton, CinemaInput } from '@cinema/ui';
 import { TransactionHelp } from './transaction-help';
 import { parseTransaction, validTransaction } from './transaction-parser';
-import { focusViewport, scanViewport, scanZoom, ScanViewport } from './scan-viewport';
+import { focusViewport, scanViewport, ScanViewport } from './scan-viewport';
 
 @Component({
   selector: 'cinema-transaction',
@@ -380,18 +380,13 @@ export class TransactionField {
       const context = canvas.getContext('2d', { willReadFrequently: true });
       if (!context) throw new Error('canvas unavailable');
       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const started = performance.now();
       let lastDecode = -Infinity;
       let locked: { from: ScanViewport; to: ScanViewport; at: number } | undefined;
       const read = (now: number) => {
         if (generation !== this.generation) return;
         try {
           if (video.readyState >= 2 && video.videoWidth) {
-            let crop = scanViewport(
-              video.videoWidth,
-              video.videoHeight,
-              reducedMotion ? 1 : scanZoom(now - started),
-            );
+            let crop = scanViewport(video.videoWidth, video.videoHeight, 1);
             if (locked) {
               const t = reducedMotion ? 1 : Math.min(1, (now - locked.at) / 320);
               const ease = 1 - (1 - t) ** 3;

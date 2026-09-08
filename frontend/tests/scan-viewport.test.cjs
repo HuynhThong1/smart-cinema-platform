@@ -14,14 +14,25 @@ test('zoom crops original pixels equally for portrait and landscape cameras', ()
   assert.deepEqual(exported.scanViewport(1920, 1080, 2), { x: 690, y: 270, size: 540 });
   assert.deepEqual(exported.scanViewport(1080, 1920, 2), { x: 270, y: 690, size: 540 });
 });
-test('automatic zoom is bounded and returns to wide view to recover off-centre codes', () => {
-  for (let ms = 0; ms < 14000; ms += 50) {
-    const zoom = exported.scanZoom(ms);
-    assert(zoom >= 1 && zoom <= 1.8);
-  }
-  assert.equal(exported.scanZoom(0), 1);
-  assert.equal(exported.scanZoom(4200), 1.8);
-  assert.equal(exported.scanZoom(7000), 1);
+test('detected QR size controls zoom with a broad hold band and a 2.5x cap', () => {
+  const crop = exported.scanViewport(1080, 1080, 1);
+  const focus = (ratio, viewport = crop) =>
+    exported.focusViewport(
+      viewport,
+      [
+        { x: 320 - 320 * ratio, y: 320 - 320 * ratio },
+        { x: 320 + 320 * ratio, y: 320 + 320 * ratio },
+      ],
+      640,
+      1080,
+      1080,
+    );
+  for (const ratio of [0.25, 0.4, 0.5, 0.59, 0.6]) assert.deepEqual(focus(ratio), crop);
+  assert(focus(0.24).size < crop.size);
+  assert.equal(focus(0.01).size, 1080 / 2.5);
+  const zoomed = exported.scanViewport(1080, 1080, 2);
+  assert(focus(0.61, zoomed).size > zoomed.size);
+  assert.equal(focus(0.9).size, 1080);
 });
 test('QR focus maps decoder coordinates back to source and keeps crop inside image', () => {
   const crop = exported.scanViewport(1920, 1080, 1);
