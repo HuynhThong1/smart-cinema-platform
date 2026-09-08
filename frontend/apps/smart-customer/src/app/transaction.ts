@@ -15,6 +15,7 @@ import { I18n } from '@cinema/i18n';
 import { CinemaButton, CinemaInput } from '@cinema/ui';
 import { TransactionHelp } from './transaction-help';
 import { parseTransaction, validTransaction } from './transaction-parser';
+import { focusViewport, scanViewport, scanZoom, ScanViewport } from './scan-viewport';
 
 @Component({
   selector: 'cinema-transaction',
@@ -48,13 +49,20 @@ import { parseTransaction, validTransaction } from './transaction-parser';
       }
       @if (mode() === 'scanning') {
         <div class="scanner">
-          <video
-            #video
-            autoplay
-            muted
-            playsinline
-            [attr.aria-label]="i18n.t('transaction.point')"
-          ></video>
+          <div class="scan-preview" [class.scan-locked]="scanLocked()">
+            <video
+              #video
+              autoplay
+              muted
+              playsinline
+              [attr.aria-label]="i18n.t('transaction.point')"
+            ></video>
+            <canvas #preview [attr.aria-label]="i18n.t('transaction.point')"></canvas>
+            <div class="scan-frame" aria-hidden="true"><span class="scan-line"></span></div>
+            <span class="scan-badge" role="status">{{
+              i18n.t(scanLocked() ? 'transaction.scanRead' : 'transaction.scanSearching')
+            }}</span>
+          </div>
           <p>{{ i18n.t('transaction.point') }}</p>
           <button cinemaButton type="button" class="text-button" (click)="manual()">
             {{ i18n.t('transaction.fallback') }}
@@ -159,10 +167,71 @@ import { parseTransaction, validTransaction } from './transaction-parser';
         text-align: center;
       }
       video {
+        display: none;
+      }
+      .scan-preview {
+        position: relative;
+        aspect-ratio: 1;
+        overflow: hidden;
+        border-radius: 12px;
+        background: #111827;
+      }
+      canvas {
         display: block;
         width: 100%;
-        max-height: 260px;
-        object-fit: cover;
+        height: 100%;
+      }
+      .scan-frame {
+        position: absolute;
+        inset: 17.5%;
+        border: 2px solid #fff;
+        border-radius: 16px;
+        box-shadow: 0 0 0 100vmax rgb(0 0 0 / 30%);
+        transition: border-color 180ms;
+        overflow: hidden;
+      }
+      .scan-line {
+        position: absolute;
+        left: 5%;
+        right: 5%;
+        height: 2px;
+        background: #f26b38;
+        box-shadow: 0 0 12px #f26b38;
+        animation: scanning 1.8s ease-in-out infinite alternate;
+      }
+      .scan-badge {
+        position: absolute;
+        bottom: 8px;
+        left: 8px;
+        right: 8px;
+        padding: 6px;
+        border-radius: 4px;
+        background: rgb(17 24 39 / 85%);
+        color: white;
+        font-size: 12px;
+      }
+      .scan-locked .scan-frame {
+        border-color: #4ade80;
+      }
+      .scan-locked .scan-line {
+        display: none;
+      }
+      @keyframes scanning {
+        from {
+          top: 8%;
+        }
+        to {
+          top: 92%;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .scan-line {
+          animation: none;
+          top: 50%;
+        }
+        .scan-frame {
+          transition: none;
+        }
       }
       .captured {
         padding: 14px 16px;
@@ -192,11 +261,15 @@ export class TransactionField {
   message = signal('');
   valid = validTransaction;
   video = viewChild<ElementRef<HTMLVideoElement>>('video');
+  preview = viewChild<ElementRef<HTMLCanvasElement>>('preview');
+  scanLocked = signal(false);
   manualInput = viewChild<ElementRef<HTMLInputElement>>('manualInput');
   private stream?: MediaStream;
   private generation = 0;
   private lookup = 0;
   private timer?: ReturnType<typeof setTimeout>;
+  private scanFrame?: number;
+  private captureTimer?: ReturnType<typeof setTimeout>;
   constructor() {
     inject(DestroyRef).onDestroy(() => {
       this.stop();
@@ -226,6 +299,9 @@ export class TransactionField {
   private cleanup?: () => void;
   private stop() {
     ++this.generation;
+    if (this.scanFrame !== undefined) cancelAnimationFrame(this.scanFrame);
+    clearTimeout(this.captureTimer);
+    this.scanLocked.set(false);
     this.stream?.getTracks().forEach((track) => track.stop());
     this.stream = undefined;
   }
@@ -275,7 +351,11 @@ export class TransactionField {
     try {
       if (!navigator.mediaDevices?.getUserMedia) throw new Error('camera unavailable');
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' } },
+        video: {
+          facingMode: { ideal: 'environment' },
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+        },
         audio: false,
       });
       if (generation !== this.generation) {
@@ -283,43 +363,108 @@ export class TransactionField {
         return;
       }
       this.stream = stream;
+      // A previously granted camera may resolve before Angular paints the scanner.
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      if (generation !== this.generation) return;
       const video = this.video()?.nativeElement;
       if (!video) throw new Error('video unavailable');
       video.srcObject = stream;
       await video.play();
       const { default: jsQR } = await import('jsqr');
+      if (generation !== this.generation) return;
+      const preview = this.preview()?.nativeElement;
+      const display = preview?.getContext('2d');
+      if (!preview || !display) throw new Error('preview unavailable');
+      preview.width = preview.height = 640;
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d', { willReadFrequently: true });
       if (!context) throw new Error('canvas unavailable');
-      const read = async () => {
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const started = performance.now();
+      let lastDecode = -Infinity;
+      let locked: { from: ScanViewport; to: ScanViewport; at: number } | undefined;
+      const read = (now: number) => {
         if (generation !== this.generation) return;
         try {
           if (video.readyState >= 2 && video.videoWidth) {
-            canvas.width = Math.min(video.videoWidth, 640);
-            canvas.height = Math.round((video.videoHeight * canvas.width) / video.videoWidth);
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            let crop = scanViewport(
+              video.videoWidth,
+              video.videoHeight,
+              reducedMotion ? 1 : scanZoom(now - started),
+            );
+            if (locked) {
+              const t = reducedMotion ? 1 : Math.min(1, (now - locked.at) / 320);
+              const ease = 1 - (1 - t) ** 3;
+              crop = {
+                x: locked.from.x + (locked.to.x - locked.from.x) * ease,
+                y: locked.from.y + (locked.to.y - locked.from.y) * ease,
+                size: locked.from.size + (locked.to.size - locked.from.size) * ease,
+              };
+            }
+            display.drawImage(video, crop.x, crop.y, crop.size, crop.size, 0, 0, 640, 640);
+            if (locked || now - lastDecode < 200) {
+              this.scanFrame = requestAnimationFrame(read);
+              return;
+            }
+            lastDecode = now;
+            canvas.width = canvas.height = Math.min(640, Math.round(crop.size));
+            context.drawImage(
+              video,
+              crop.x,
+              crop.y,
+              crop.size,
+              crop.size,
+              0,
+              0,
+              canvas.width,
+              canvas.height,
+            );
             const frame = context.getImageData(0, 0, canvas.width, canvas.height);
             const hit = jsQR(frame.data, frame.width, frame.height);
             if (hit) {
               const id = parseTransaction(hit.data);
               if (id) {
-                this.stop();
-                this.value.set(id);
-                this.mode.set('captured');
-                this.changed.emit({ id, source: 'QR_SCAN' });
-                void this.resolve(id);
-                return;
+                locked = {
+                  from: crop,
+                  to: focusViewport(
+                    crop,
+                    [
+                      hit.location.topLeftCorner,
+                      hit.location.topRightCorner,
+                      hit.location.bottomLeftCorner,
+                      hit.location.bottomRightCorner,
+                    ],
+                    canvas.width,
+                    video.videoWidth,
+                    video.videoHeight,
+                  ),
+                  at: now,
+                };
+                this.scanLocked.set(true);
+                this.message.set('');
+                this.captureTimer = setTimeout(
+                  () => {
+                    if (generation !== this.generation) return;
+                    this.stop();
+                    this.value.set(id);
+                    this.mode.set('captured');
+                    this.changed.emit({ id, source: 'QR_SCAN' });
+                    void this.resolve(id);
+                  },
+                  reducedMotion ? 0 : 420,
+                );
+              } else {
+                this.message.set('transaction.wrongQr');
               }
-              this.message.set('transaction.wrongQr');
             }
           }
-          setTimeout(() => void read(), 200);
+          this.scanFrame = requestAnimationFrame(read);
         } catch {
           this.manual();
           this.message.set('transaction.camera');
         }
       };
-      void read();
+      this.scanFrame = requestAnimationFrame(read);
     } catch {
       if (generation !== this.generation) return;
       this.manual();
