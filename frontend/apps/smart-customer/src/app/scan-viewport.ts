@@ -11,15 +11,6 @@ export function scanViewport(width: number, height: number, zoom: number): ScanV
   return { x: (width - size) / 2, y: (height - size) / 2, size };
 }
 
-export function scanZoom(elapsed: number): number {
-  // Return to the wide view periodically so an off-centre QR is not lost forever.
-  const phase = elapsed % 7000;
-  if (phase < 1200) return 1;
-  if (phase < 4200) return 1 + ((phase - 1200) / 3000) * 0.8;
-  if (phase < 5400) return 1.8;
-  return 1.8 - ((phase - 5400) / 1600) * 0.8;
-}
-
 export function focusViewport(
   crop: ScanViewport,
   points: { x: number; y: number }[],
@@ -33,7 +24,15 @@ export function focusViewport(
     right = Math.max(...xs);
   const top = Math.min(...ys),
     bottom = Math.max(...ys);
-  const size = Math.min(crop.size, Math.max(right - left, bottom - top) / 0.65);
+  const extent = Math.max(right - left, bottom - top);
+  const ratio = extent / crop.size;
+  // A broad hold band prevents small corner-estimation changes from reversing zoom.
+  // No detection calls this function: the camera remains at its original 1x crop.
+  if (ratio >= 0.25 && ratio <= 0.6) return crop;
+  const size = Math.min(
+    Math.min(width, height),
+    Math.max(Math.min(width, height) / 2.5, extent / 0.45),
+  );
   return {
     x: Math.max(0, Math.min(width - size, (left + right - size) / 2)),
     y: Math.max(0, Math.min(height - size, (top + bottom - size) / 2)),
