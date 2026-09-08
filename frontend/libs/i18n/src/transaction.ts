@@ -1,4 +1,14 @@
 export const transactionVi = {
+  whichQr: 'Quét mã QR nào?',
+  twoCodes: 'VÉ CỦA BẠN CÓ 2 MÃ QR',
+  scanNumber: 'Quét mã số',
+  scanThis: 'MÃ CẦN QUÉT',
+  notThis: 'Không dùng mã này',
+  middleQr: 'Mã ở giữa vé — ngay dưới dòng Trans No',
+  bottomQr: 'Mã ở cuối vé — mã dẫn tới trang đánh giá này, không dùng ở đây',
+  noTicket: 'Không có vé giấy? Bỏ qua mục này — đánh giá vẫn gửi được bình thường.',
+  understood: 'Đã hiểu',
+
   label: 'Mã giao dịch trên vé',
   optional: 'Không bắt buộc',
   scan: 'Quét mã QR trên vé',
@@ -28,6 +38,16 @@ export const transactionVi = {
   or: 'hoặc',
 };
 export const transactionEn = {
+  whichQr: 'Which QR should I scan?',
+  twoCodes: 'YOUR TICKET HAS 2 QR CODES',
+  scanNumber: 'Scan code number',
+  scanThis: 'SCAN THIS CODE',
+  notThis: 'Do not use this code',
+  middleQr: 'Middle of the ticket — directly below Trans No',
+  bottomQr: 'Bottom of the ticket — links to this feedback page; do not scan it here',
+  noTicket: 'No paper ticket? Skip this field — you can still submit feedback.',
+  understood: 'Got it',
+
   label: 'Transaction ID',
   optional: 'Optional',
   scan: 'Scan ticket QR code',

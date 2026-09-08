@@ -10,8 +10,9 @@ Supported scan payloads:
   a space + four suffix digits. For example, synthetic
   `T999900000001 0001` becomes `00000001/0001`.
 - A plain Trans No matching `^[0-9]{6,10}/[0-9]{3,5}$`.
-- An HTTP(S) feedback URL with path `/f/:token` and exactly one valid `tx`.
-  Scanning extracts the ID only: it never navigates or changes the staff QR.
+- Feedback URLs are rejected by the in-page scanner, including URLs with a valid `tx`.
+  Opening the feedback page with `?tx=` still prefills the optional ID.
+  Scanning never navigates or changes the staff QR.
 
 The observed entry QR supplied for this change was decoded locally and compared
 with the printed Trans No. Other opaque ticket formats are not guessed. Leading
@@ -54,7 +55,7 @@ and CSV. Search includes transaction IDs. `hasTransaction=true|false` works with
 existing cinema scope and pagination; missing IDs in legacy feedback count as
 without a transaction. Existing phone masking remains in effect.
 
-## Verification
+## Initial transaction feature verification
 
 - Both Angular production builds and TypeScript checks passed.
 - Frontend formatting and five unit tests passed (including entry QR parsing,
@@ -74,3 +75,33 @@ without a transaction. Existing phone masking remains in effect.
 - Admin authenticated browser QA was blocked by automatic approval review at
   local admin sign-in; backend scope/filter checks passed. Physical camera scans
   and camera permission behavior on iOS/Android still require UAT.
+
+## Handoff 5: scan guidance
+
+The question-mark button opens a bottom sheet with a synthetic ticket diagram,
+numbering the entry QR as 1 and the feedback-link QR as 2. Copy follows the active
+VI/EN language. The sheet supports close button, backdrop, Escape, acknowledgement,
+and dragging its handle down by more than 40% of the sheet height. PrimeNG traps
+focus and locks page scrolling; closing returns focus to the help button. Opening
+help stops an active scanner to prevent it from capturing behind the sheet.
+
+Scanner validation accepts only a plain valid Trans No or the observed Galaxy
+entry payload format. URLs, extra suffixes, malformed digit groups, control
+characters and oversized payloads are rejected. An invalid scan retains the
+current value and keeps scanning with an inline explanation. This is format
+validation, not POS ticket authenticity verification.
+
+
+### Handoff 5 verification
+
+- Both production builds, TypeScript, formatting and all six frontend unit tests passed.
+- Go domain/server tests passed; database integration tests were skipped in this run
+  because `TEST_MONGODB_URI` was not configured.
+- Chromium checks passed at 320, 390 and 1366px: VI/EN guidance, focus trap and
+  return, Escape, acknowledgement, backdrop dismissal, manual validation, no
+  horizontal overflow and no page errors. Downward handle drag also passed.
+- Screenshots: [Vietnamese 320px](../output/playwright/transaction-help-vi-320.png),
+  [Vietnamese 390px](../output/playwright/transaction-help-vi-390.png),
+  [English 390px](../output/playwright/transaction-help-en-390.png).
+- Physical phone camera scans still require UAT; QR format validation does not
+  prove that the transaction exists or belongs to the staff/cinema being rated.

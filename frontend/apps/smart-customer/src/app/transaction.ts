@@ -13,14 +13,29 @@ import { FormsModule } from '@angular/forms';
 import { Api, TransactionSource } from '@cinema/core';
 import { I18n } from '@cinema/i18n';
 import { CinemaButton, CinemaInput } from '@cinema/ui';
+import { TransactionHelp } from './transaction-help';
 import { parseTransaction, validTransaction } from './transaction-parser';
 
 @Component({
   selector: 'cinema-transaction',
-  imports: [FormsModule, CinemaButton, CinemaInput],
+  imports: [FormsModule, CinemaButton, CinemaInput, TransactionHelp],
   template: `
     <section class="transaction-field" aria-labelledby="transaction-label">
-      <h2 id="transaction-label" class="question">{{ i18n.t('transaction.label') }}</h2>
+      <div class="transaction-label-row">
+        <h2 id="transaction-label" class="question">{{ i18n.t('transaction.label') }}</h2>
+        <button
+          cinemaButton
+          type="button"
+          class="transaction-help-button"
+          [attr.aria-label]="i18n.t('transaction.whichQr')"
+          aria-haspopup="dialog"
+          [attr.aria-expanded]="helpOpen()"
+          (click)="openHelp()"
+        >
+          ?
+        </button>
+      </div>
+      <cinema-transaction-help [(open)]="helpOpen" />
       <p class="muted">{{ i18n.t('transaction.optional') }}</p>
       @if (mode() === 'idle') {
         <button cinemaButton type="button" class="secondary" (click)="scan()">
@@ -88,6 +103,27 @@ import { parseTransaction, validTransaction } from './transaction-parser';
       :host {
         display: block;
       }
+      .transaction-label-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .transaction-label-row h2 {
+        margin: 0;
+      }
+      .transaction-help-button {
+        min-width: 44px;
+        min-height: 44px;
+        border-radius: 50%;
+        background: #eaf1fa;
+        border: 1px solid #9dbde4;
+        color: #02458f;
+        padding: 0;
+      }
+      .transaction-help-button:hover {
+        background: #cbdcf1;
+      }
       .transaction-field {
         margin: 0;
       }
@@ -143,6 +179,14 @@ export class TransactionField {
   private api = inject(Api);
   initial = input('');
   changed = output<{ id: string; source: TransactionSource }>();
+  helpOpen = signal(false);
+  openHelp() {
+    if (this.mode() === 'scanning') {
+      this.stop();
+      this.mode.set('idle');
+    }
+    this.helpOpen.set(true);
+  }
   value = signal('');
   mode = signal<'idle' | 'manual' | 'scanning' | 'captured'>('idle');
   message = signal('');

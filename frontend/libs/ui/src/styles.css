@@ -1335,3 +1335,28 @@ cinema-checkbox {
     min-height: 44px;
   }
 }
+
+/* Customer ticket guidance: a mobile bottom sheet with PrimeNG focus management. */
+.p-dialog.cinema-bottom-sheet {
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: 92dvh;
+  margin: 0;
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 12px 32px rgba(45, 43, 43, 0.22);
+}
+.cinema-bottom-sheet .p-dialog-header {
+  padding: 10px 20px;
+}
+.cinema-bottom-sheet .p-dialog-content {
+  padding: 0 20px 24px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cinema-bottom-sheet {
+    transition-duration: 0ms !important;
+  }
+}
+
+.cinema-sheet-mask {
+  background: rgba(17, 24, 39, 0.45);
+}
