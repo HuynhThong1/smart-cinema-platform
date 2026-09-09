@@ -9,6 +9,7 @@ import {
   output,
   signal,
   viewChild,
+  viewChildren,
 } from '@angular/core';
 import { CinemaButton } from '@cinema/ui';
 import { I18n } from '@cinema/i18n';
@@ -25,6 +26,24 @@ import type { CinemaRenderer, SceneState } from './cinema-renderer';
       [attr.aria-label]="i18n.t('landing.map')"
       role="group"
     ></div>
+    <div class="scene-markers">
+      @for (index of stageIndices; track index) {
+        <button
+          #marker
+          cinemaButton
+          variant="text"
+          class="scene-marker"
+          [class.current]="state().stage === index"
+          [class.label-left]="index >= 5"
+          [attr.aria-label]="i18n.t(stageKeys[index])"
+          [attr.aria-pressed]="state().stage === index"
+          (click)="selected.emit(index)"
+        >
+          <span class="marker-number">{{ index + 1 }}</span>
+          <span class="marker-name">{{ i18n.t(stageKeys[index]) }}</span>
+        </button>
+      }
+    </div>
     @if (ready()) {
       <div class="scene-controls">
         <span>{{ i18n.t('landing.drag') }}</span>
@@ -74,6 +93,77 @@ import type { CinemaRenderer, SceneState } from './cinema-renderer';
     .scene-surface {
       position: absolute;
       inset: 0;
+    }
+    .scene-markers {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .scene-marker.p-button {
+      overflow: visible;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      pointer-events: auto;
+      background: transparent;
+      border: 0;
+    }
+    .marker-number {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border: 1px solid #b4d6f3;
+      border-radius: 50%;
+      background: #10314f;
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1;
+      box-shadow: 0 2px 7px #05142660;
+    }
+    .current .marker-number {
+      background: #f26b38;
+      border-color: #ffe2c9;
+      color: #172a3d;
+    }
+    .marker-name {
+      display: none;
+      position: absolute;
+      bottom: 43px;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      background: #09263eea;
+      color: #fff;
+      padding: 4px 9px;
+      border-radius: 3px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .current .marker-name,
+    .scene-marker:hover .marker-name,
+    .scene-marker:focus-visible .marker-name {
+      display: block;
+    }
+    .scene-marker.label-left .marker-name {
+      left: auto;
+      right: 8px;
+      transform: none;
+    }
+    .scene-marker.current,
+    .scene-marker:focus-visible {
+      z-index: 1;
+    }
+    .scene-marker:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 2px;
+      border-radius: 50%;
     }
     .scene-controls {
       position: absolute;
@@ -133,6 +223,18 @@ export class CinemaScene {
   readonly loaded = output<boolean>();
   readonly selected = output<number>();
   readonly ready = signal(false);
+  readonly stageIndices = [0, 1, 2, 3, 4, 5, 6, 7];
+  readonly stageKeys = [
+    'landing.stage0_name',
+    'landing.stage1_name',
+    'landing.stage2_name',
+    'landing.stage3_name',
+    'landing.stage4_name',
+    'landing.stage5_name',
+    'landing.stage6_name',
+    'landing.stage7_name',
+  ];
+  private readonly markers = viewChildren<ElementRef<HTMLButtonElement>>('marker');
   private readonly surface = viewChild.required<ElementRef<HTMLDivElement>>('surface');
   private readonly destroy = inject(DestroyRef);
   renderer?: CinemaRenderer;
@@ -148,7 +250,7 @@ export class CinemaScene {
         const { CinemaRenderer } = await import('./cinema-renderer');
         if (this.destroy.destroyed) return;
         this.renderer = new CinemaRenderer(this.surface().nativeElement, {
-          select: (index) => this.selected.emit(index),
+          markers: this.markers().map((marker) => marker.nativeElement),
           failed: () => {
             this.ready.set(false);
             this.loaded.emit(false);
