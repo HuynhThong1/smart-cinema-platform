@@ -35,3 +35,10 @@ Physical-device GPU testing, forced WebGL context-loss testing and a real QR fee
 - Rendering uses a minimum 2x sampling ratio, capped at 2.5x, refreshed on resize. Browser measurement at 390px: a 750px drawing buffer for a 375px canvas display width.
 - Rechecked default desktop view, camera rotation/zoom, keyboard marker selection, and 390px/320px layouts. English edge labels stay inside the viewport; the fresh browser log has no errors. Screenshots were inspected in the task.
 - These measurements used a browser reporting devicePixelRatio 1; physical Retina/high-DPI device testing is not claimed.
+
+## Shared service row — 2026-09-10
+
+- Place the ticket counter and concessions counter side by side, with aligned serving edges. Move their fixtures, staff, queue posts, and interactive products together; move stage markers and guest destinations to the new serving positions.
+- Match the CSS fallback with adjacent counters and updated stage positions.
+- Passed both-app TypeScript checks and the customer production build (existing jsqr CommonJS warning). Browser screenshot review confirms the row from default and rotated views, plus pointer and keyboard stage selection with no console errors.
+- The browser viewport override did not apply in this follow-up session (actual viewport remained 743px); the earlier 320/390/1366 checks above describe the previous revision, not a fresh responsive pass for this layout adjustment.

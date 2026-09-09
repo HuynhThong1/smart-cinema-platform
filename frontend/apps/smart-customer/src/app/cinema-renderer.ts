@@ -16,8 +16,8 @@ export interface SceneState {
 
 const POINTS = [
   [-4.4, 3.6],
-  [-5.2, 1.05],
-  [-5.1, -2.15],
+  [-6.35, -2.05],
+  [-2.95, -2.05],
   [-0.25, 1.2],
   [3.3, -0.6],
   [5.5, 3.25],
@@ -124,8 +124,8 @@ export class CinemaRenderer {
     rim.position.set(6, 6, -8);
     this.scene.add(rim);
     this.buildArchitecture();
-    this.buildConcessions();
-    this.buildBoxOffice();
+    this.buildServiceCounter(() => this.buildBoxOffice(), -6.35, -3.4, 0.2);
+    this.buildServiceCounter(() => this.buildConcessions(), -2.95, -3.45, -3.45);
     this.buildLobby();
     this.buildAuditorium();
     this.buildGuestServices();
@@ -376,6 +376,21 @@ export class CinemaRenderer {
     this.plant(-7.6, 4.6, 1.3);
     this.plant(7.7, 4.6, 1.15);
     this.plant(-0.7, -4.7, 0.8);
+  }
+  /** Keep each counter's fixtures, staff and interactive products together in one service row. */
+  private buildServiceCounter(build: () => void, x: number, z: number, originalZ: number) {
+    const firstChild = this.world.children.length;
+    build();
+    const fixtures = this.world.children.slice(firstChild);
+    const counter = new T.Group();
+    fixtures.forEach((fixture) => {
+      fixture.position.x += 5.2;
+      fixture.position.z -= originalZ;
+      counter.add(fixture);
+    });
+    counter.scale.x = 0.68;
+    counter.position.set(x, 0, z);
+    this.world.add(counter);
   }
   private buildBoxOffice() {
     this.box(4.6, 1, 0.9, -5.2, 0.55, 0.2, '#1555a0', this.world, 0.08);

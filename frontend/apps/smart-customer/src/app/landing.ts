@@ -37,8 +37,8 @@ export class LandingPage {
   readonly choices = ['C3', 'C4', 'C5'];
   readonly stages = [
     { x: 115, y: 335, icon: 'ph-door-open' },
-    { x: 100, y: 205, icon: 'ph-ticket' },
-    { x: 105, y: 75, icon: 'ph-popcorn' },
+    { x: 55, y: 110, icon: 'ph-ticket' },
+    { x: 198, y: 110, icon: 'ph-popcorn' },
     { x: 278, y: 265, icon: 'ph-scan' },
     { x: 435, y: 135, icon: 'ph-film-projector' },
     { x: 535, y: 305, icon: 'ph-hand-heart' },
