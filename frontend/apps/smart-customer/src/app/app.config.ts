@@ -13,7 +13,14 @@ export const appConfig: ApplicationConfig = {
     provideClientHydration(withEventReplay()),
     provideRouter([
       {
+        path: '',
+        pathMatch: 'full',
+        title: 'Galaxy Cinema · Khám phá rạp',
+        loadComponent: () => import('./landing').then((m) => m.LandingPage),
+      },
+      {
         path: 'f/:qrToken',
+        title: 'Galaxy Cinema · Đánh giá trải nghiệm',
         component: FeedbackPage,
         resolve: { initial: feedbackResolver },
       },

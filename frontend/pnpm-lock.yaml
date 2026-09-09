@@ -61,6 +61,9 @@ importers:
       rxjs:
         specifier: ~7.8.2
         version: 7.8.2
+      three:
+        specifier: ^0.185.1
+        version: 0.185.1
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
@@ -89,6 +92,9 @@ importers:
       "@types/node":
         specifier: ^24.0.0
         version: 24.13.3
+      "@types/three":
+        specifier: ^0.185.4
+        version: 0.185.4
       nx:
         specifier: 22.7.9
         version: 22.7.9
@@ -1229,6 +1235,12 @@ packages:
     resolution:
       {
         integrity: sha512-cG0QJAO6VkaRUlIb0zOzX9gfJgs1pjoOL9gZ/PK1kfvBs0GCkADu5oQh6gPxXgQnZ3gV575h+lQRC0NlMDTclA==,
+      }
+
+  "@dimforge/rapier3d-compat@0.12.0":
+    resolution:
+      {
+        integrity: sha512-uekIGetywIgopfD97oDL5PfeezkFpNhwlzlaEYNOA0N6ghdsOvh/HYjSMek5Q2O1PYvRSDFcqFVJl4r4ZBwOow==,
       }
 
   "@emnapi/core@1.11.3":
@@ -3520,6 +3532,12 @@ packages:
         integrity: sha512-JTSZZGQi1AyKirbLN3azmjVzef92tcX7h+iSqPdaeStyFpGpDlKvvpxeOE8njhbUanbRwr3z8DyzhICWnMtQeg==,
       }
 
+  "@tweenjs/tween.js@23.1.3":
+    resolution:
+      {
+        integrity: sha512-vJmvvwFxYuGnF2axRtPYocag6Clbb5YS7kLL+SO/TeVFzHqDIWrNKYtcsPMibjDx9O+bu+psAy9NKfWklassUA==,
+      }
+
   "@tybys/wasm-util@0.10.3":
     resolution:
       {
@@ -3710,6 +3728,24 @@ packages:
     resolution:
       {
         integrity: sha512-MK9V6NzAS1+Ud7JV9lJLFqW85VbC9dq3LmwZCuBe4wBDgKC0Kj/jd8Xl+nSviU+Qc3+m7umHHyHg//2KSa0a0Q==,
+      }
+
+  "@types/stats.js@0.17.4":
+    resolution:
+      {
+        integrity: sha512-jIBvWWShCvlBqBNIZt0KAshWpvSjhkwkEu4ZUcASoAvhmrgAUI2t1dXrjSL4xXVLB4FznPrIsX3nKXFl/Dt4vA==,
+      }
+
+  "@types/three@0.185.4":
+    resolution:
+      {
+        integrity: sha512-gAsBIC07NIFrxjbf7tH2t71c38uulFfk/RFoC7FNBSjMRAQ8J1x/RBvusX0N5PJouaYFJawXQqfCQ0RKUx/1nA==,
+      }
+
+  "@types/webxr@0.5.24":
+    resolution:
+      {
+        integrity: sha512-h8fgEd/DpoS9CBrjEQXR+dIDraopAEfu4wYVNY2tEPwk60stPWhvZMf4Foo5FakuQ7HFZoa8WceaWFervK2Ovg==,
       }
 
   "@types/ws@8.18.1":
@@ -5405,6 +5441,12 @@ packages:
       picomatch:
         optional: true
 
+  fflate@0.8.3:
+    resolution:
+      {
+        integrity: sha512-tbZNuJrLwGUp3zshBtdy4W+ORxZuIh8a5ilyIEQDC5rY1f3U20JMry0Ll3WBzU58EZKsEuJFXhb5gwv8CsPvgA==,
+      }
+
   figures@3.2.0:
     resolution:
       {
@@ -6233,6 +6275,12 @@ packages:
         integrity: sha512-zwOTdL3rFQ/lRdBnntKVOX6k5cKJwEc1HdilT71BWEu7J41gXIB2MRp+vxduPSwZJPWBxEzv4yH1wYLJGUHX4Q==,
       }
 
+  jsqr@1.4.0:
+    resolution:
+      {
+        integrity: sha512-dxLob7q65Xg2DvstYkRpkYtmKm2sPJ9oFhrhmudT1dZvNFFTlroai3AWSpLey/w5vMcLBXRgOJsbXpdN9HzU/A==,
+      }
+
   keycloak-js@26.2.4:
     resolution:
       {
@@ -6586,6 +6634,12 @@ packages:
     resolution:
       {
         integrity: sha512-abv/qOcuPfk3URPfDzmZU1LKmuw8kT+0nIHvKrKgFrwifol/doWcdA4ZqsWQ8ENrFKkd67Mfpo/LovbIUsbt3w==,
+      }
+
+  meshoptimizer@1.1.1:
+    resolution:
+      {
+        integrity: sha512-oRFNWJRDA/WTrVj7NWvqa5HqE1t9MYDj2VaWirQCzCCrAd2GHrqR/sQezCxiWATPNlKTcRaPRHPJwIRoPBAp5g==,
       }
 
   methods@1.1.2:
@@ -8646,6 +8700,12 @@ packages:
     peerDependencies:
       tslib: ^2
 
+  three@0.185.1:
+    resolution:
+      {
+        integrity: sha512-5aojFCXKwnjBRZvUnt3WFfEcvUJgkN5LlijRFN95hMy8WVkG4I0QNcJE+OuWvuJ0bOdStrbfXn0pkd6/QyiAlg==,
+      }
+
   thunky@1.1.0:
     resolution:
       {
@@ -9291,12 +9351,6 @@ packages:
         integrity: sha512-xYqdZFUK/VYazNl/oCDYN+3WloWQwMfZxBoiNt6qNyk+xfOdi598muWE42rNZFp1kNOiqW936q5RhUdnpqElSg==,
       }
     engines: { node: ">=18" }
-
-  jsqr@1.4.0:
-    resolution:
-      {
-        integrity: sha512-dxLob7q65Xg2DvstYkRpkYtmKm2sPJ9oFhrhmudT1dZvNFFTlroai3AWSpLey/w5vMcLBXRgOJsbXpdN9HzU/A==,
-      }
 
 snapshots:
   "@alloc/quick-lru@5.3.0": {}
@@ -10230,6 +10284,8 @@ snapshots:
       keyv: 5.6.0
 
   "@colordx/core@5.8.0": {}
+
+  "@dimforge/rapier3d-compat@0.12.0": {}
 
   "@emnapi/core@1.11.3":
     dependencies:
@@ -11795,6 +11851,8 @@ snapshots:
       postcss: 8.5.28
       tailwindcss: 4.3.3
 
+  "@tweenjs/tween.js@23.1.3": {}
+
   "@tybys/wasm-util@0.10.3":
     dependencies:
       tslib: 2.8.1
@@ -11920,6 +11978,19 @@ snapshots:
   "@types/sockjs@0.3.36":
     dependencies:
       "@types/node": 24.13.3
+
+  "@types/stats.js@0.17.4": {}
+
+  "@types/three@0.185.4":
+    dependencies:
+      "@dimforge/rapier3d-compat": 0.12.0
+      "@tweenjs/tween.js": 23.1.3
+      "@types/stats.js": 0.17.4
+      "@types/webxr": 0.5.24
+      fflate: 0.8.3
+      meshoptimizer: 1.1.1
+
+  "@types/webxr@0.5.24": {}
 
   "@types/ws@8.18.1":
     dependencies:
@@ -13050,6 +13121,8 @@ snapshots:
     optionalDependencies:
       picomatch: 4.0.4
 
+  fflate@0.8.3: {}
+
   figures@3.2.0:
     dependencies:
       escape-string-regexp: 1.0.5
@@ -13522,6 +13595,8 @@ snapshots:
     optionalDependencies:
       graceful-fs: 4.2.11
 
+  jsqr@1.4.0: {}
+
   keycloak-js@26.2.4: {}
 
   keyv@5.6.0:
@@ -13737,6 +13812,8 @@ snapshots:
   merge-descriptors@2.0.0: {}
 
   merge-stream@2.0.0: {}
+
+  meshoptimizer@1.1.1: {}
 
   methods@1.1.2: {}
 
@@ -15080,6 +15157,8 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
+  three@0.185.1: {}
+
   thunky@1.1.0: {}
 
   tinyglobby@0.2.15:
@@ -15454,5 +15533,3 @@ snapshots:
   yoctocolors-cjs@2.1.3: {}
 
   yoctocolors@2.2.0: {}
-
-  jsqr@1.4.0: {}

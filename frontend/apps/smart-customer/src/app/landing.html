@@ -1,0 +1,325 @@
+<header class="landing-header">
+  <a routerLink="/" [attr.aria-label]="t('home')"
+    ><img src="/galaxy-cinema-brand.png" width="140" height="48" [alt]="i18n.t('qr.galaxy_cinema')"
+  /></a>
+  <a class="header-link" href="#cinema">{{ t('explore') }}</a>
+  <cinema-language />
+</header>
+<main>
+  <section class="introduction">
+    <div class="intro-copy">
+      <p class="opening">{{ t('visit') }}</p>
+      <h1>{{ t('headline') }}</h1>
+    </div>
+    <div class="intro-aside">
+      <p>{{ t('intro') }}</p>
+      <a cinemaButton href="#cinema"
+        >{{ t('start') }} <i class="ph-duotone ph-arrow-down" aria-hidden="true"></i
+      ></a>
+    </div>
+  </section>
+
+  <section
+    id="cinema"
+    class="experience"
+    [class.movie-time]="stage() === 4"
+    [class.is-playing]="playing()"
+  >
+    <div class="experience-top">
+      <span
+        ><i class="status-light" aria-hidden="true"></i>{{ t(playing() ? 'live' : 'ready') }}</span
+      ><span class="demo-label">{{ t('demo') }}</span>
+    </div>
+    <div class="experience-body">
+      <div class="model-column">
+        <div class="model-viewport" role="group" [attr.aria-label]="t('map')">
+          <div class="model-scale" [class.webgl-loaded]="sceneReady()">
+            <div class="cinema-model" [style.--angle]="angle() + 'deg'">
+              <div class="foundation" aria-hidden="true"></div>
+              <div class="back-wall" aria-hidden="true">
+                <span>{{ i18n.t('qr.galaxy_cinema') }}</span>
+              </div>
+              <div class="left-wall" aria-hidden="true"></div>
+              <div class="zone lobby-zone" [class.active-zone]="stage() === 0" aria-hidden="true">
+                <span>{{ t('lobby') }}</span>
+              </div>
+              <div class="zone ticket-zone" [class.active-zone]="stage() === 1" aria-hidden="true">
+                <span>{{ t('tickets') }}</span>
+              </div>
+              <div class="zone snack-zone" [class.active-zone]="stage() === 2" aria-hidden="true">
+                <span>{{ t('snacks') }}</span>
+              </div>
+              <div
+                class="zone auditorium"
+                [class.active-zone]="stage() === 4 || stage() === 7"
+                aria-hidden="true"
+              >
+                <div class="screen">
+                  <div class="screen-art"><span>✦</span><span>{{ t('show') }}</span></div>
+                </div>
+                <div class="light-beam"></div>
+                @for (row of rows; track row; let r = $index) { @for (col of columns; track col) {
+                <div
+                  class="seat"
+                  [class.chosen-seat]="row + col === seat()"
+                  [style.left.px]="25 + (col - 1) * 36 + (col > 3 ? 15 : 0)"
+                  [style.top.px]="62 + r * 34"
+                  [style.--rise]="(4 - r) * 3 + 'px'"
+                >
+                  <b></b><i></i>
+                </div>
+                } }
+                <span class="hall-label">{{ t('screen') }}</span>
+              </div>
+              <div class="counter ticket-counter" aria-hidden="true">
+                <div class="counter-top">
+                  <i class="terminal"></i><i class="terminal second"></i>
+                </div>
+                <div class="counter-front">{{ t('tickets') }}</div>
+                <div class="counter-side"></div>
+              </div>
+              <div class="counter snack-counter" aria-hidden="true">
+                <div class="counter-top">
+                  @if (combo() !== 2) {<i class="popcorn"></i>}@if (combo() === 1) {<i
+                    class="drink"
+                  ></i
+                  >}
+                </div>
+                <div class="counter-front">{{ t('snacks') }}</div>
+                <div class="counter-side"></div>
+              </div>
+              <div class="poster poster-one" aria-hidden="true">✦</div>
+              <div class="poster poster-two" aria-hidden="true">◒</div>
+              <div class="gate" [class.gate-open]="stage() >= 3" aria-hidden="true">
+                <i></i><i></i><b></b>
+              </div>
+              <div class="lounge" aria-hidden="true"><i></i><i></i><b></b></div>
+              <div
+                class="care-desk"
+                [class.attention]="support() !== null && !resolved()"
+                aria-hidden="true"
+              >
+                <i class="ph-duotone ph-hand-heart"></i>
+              </div>
+              <div class="feedback-kiosk" aria-hidden="true">
+                <i class="ph-duotone ph-qr-code"></i>
+              </div>
+              <div class="cleaning-cart" [class.clean-complete]="cleaned()" aria-hidden="true">
+                <i
+                  class="ph-duotone"
+                  [class.ph-broom]="!cleaned()"
+                  [class.ph-check]="cleaned()"
+                ></i>
+              </div>
+              @for (point of stages; track $index; let index = $index) {
+              <button
+                cinemaButton
+                variant="text"
+                class="hotspot"
+                [class.selected]="stage() === index"
+                [style.left.px]="point.x"
+                [style.top.px]="point.y"
+                [attr.aria-label]="t('stage' + index + '_name')"
+                [attr.aria-pressed]="stage() === index"
+                (click)="select(index)"
+              >
+                {{ index + 1 }}
+              </button>
+              }
+              <div
+                class="visitor"
+                [style.left.px]="visitor().x + 35"
+                [style.top.px]="visitor().y + 12"
+                aria-hidden="true"
+              >
+                <i></i><b></b>
+              </div>
+            </div>
+          </div>
+          <cinema-scene
+            [state]="sceneState()"
+            (loaded)="sceneReady.set($event)"
+            (selected)="select($event)"
+          />
+        </div>
+        <div class="model-toolbar" [class.webgl-loaded]="sceneReady()">
+          <p>{{ t('mapHint') }}</p>
+          <div>
+            <button
+              cinemaButton
+              variant="text"
+              (click)="angle.set(angle() === -32 ? -12 : -32)"
+              [attr.aria-label]="t('rotate')"
+            >
+              <i class="ph-duotone ph-arrows-clockwise" aria-hidden="true"></i></button
+            ><button cinemaButton variant="text" (click)="reset()" [attr.aria-label]="t('reset')">
+              <i class="ph-duotone ph-arrow-counter-clockwise" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <aside class="stage-panel" [attr.aria-label]="t('journey')">
+        <div class="stage-story" aria-live="polite" aria-atomic="true">
+          <p class="stage-count">{{ i18n.t('landing.step', {current: stage() + 1, total: 8}) }}</p>
+          <i
+            class="stage-icon ph-duotone"
+            [class]="'stage-icon ph-duotone ' + stages[stage()].icon"
+            aria-hidden="true"
+          ></i>
+          <h2>{{ t('stage' + stage() + '_title') }}</h2>
+          <p class="stage-description">{{ t('stage' + stage() + '_body') }}</p>
+        </div>
+        <div class="stage-interaction">
+          @switch (stage()) { @case (0) {
+          <div class="welcome-mark" aria-hidden="true">
+            <i class="ph-duotone ph-ticket"></i><i class="ph-duotone ph-popcorn"></i
+            ><i class="ph-duotone ph-film-slate"></i>
+          </div>
+          } @case (1) {
+          <p class="field-label">{{ t('seat') }}</p>
+          <div class="options">
+            @for (choice of choices; track choice) {<button
+              cinemaButton
+              variant="secondary"
+              [class.picked]="seat() === choice"
+              [attr.aria-pressed]="seat() === choice"
+              (click)="pause(); seat.set(choice)"
+            >
+              {{ choice }}</button
+            >}
+          </div>
+          } @case (2) {
+          <p class="field-label">{{ t('combo') }}</p>
+          <div class="options">
+            @for (choice of [0, 1, 2]; track choice) {<button
+              cinemaButton
+              variant="secondary"
+              [class.picked]="combo() === choice"
+              [attr.aria-pressed]="combo() === choice"
+              (click)="pause(); combo.set(choice)"
+            >
+              {{ t('combo' + choice) }}</button
+            >}
+          </div>
+          } @case (3) {
+          <p class="confirmation">
+            <i class="ph-duotone ph-check-circle" aria-hidden="true"></i>{{ t('valid') }}
+          </p>
+          } @case (4) {
+          <div class="film-strip" aria-hidden="true">✦ &nbsp; ◯ &nbsp; ✦</div>
+          } @case (5) {
+          <p class="field-label">{{ t('support') }}</p>
+          <div class="options">
+            @for (choice of [0, 1, 2]; track choice) {<button
+              cinemaButton
+              variant="secondary"
+              [class.picked]="support() === choice"
+              [attr.aria-pressed]="support() === choice"
+              (click)="requestSupport(choice)"
+            >
+              {{ t('support' + choice) }}</button
+            >}
+          </div>
+          @if (support() !== null) {
+          <p class="response" role="status">{{ t(resolved() ? 'resolved' : 'sent') }}</p>
+          @if (!resolved()) {<button cinemaButton variant="text" (click)="resolved.set(true)">
+            {{ t('resolve') }}</button
+          >}} } @case (6) {
+          <p class="field-label">{{ t('rating') }}</p>
+          <div class="star-options">
+            @for (value of [1, 2, 3, 4, 5]; track value) {<button
+              cinemaButton
+              variant="text"
+              [class.rated]="rating() >= value"
+              [attr.aria-label]="i18n.t('landing.ratingLabel', {value})"
+              [attr.aria-pressed]="rating() === value"
+              (click)="pause(); rating.set(value)"
+            >
+              ★</button
+            >}
+          </div>
+          @if (rating()) {
+          <p class="response" role="status">{{ t('ratingThanks') }}</p>
+          } } @case (7) { @if (cleaned()) {
+          <p class="confirmation" role="status">
+            <i class="ph-duotone ph-check-circle" aria-hidden="true"></i>{{ t('cleanDone') }}
+          </p>
+          } @else {<button cinemaButton variant="secondary" (click)="cleaned.set(true)">
+            {{ t('cleanAction') }}</button
+          >} } }
+        </div>
+        @if (stage() < 7) {
+        <div class="demo-ticket">
+          <div>
+            <span>{{ t('ticket') }}</span><strong>{{ t('show') }}</strong
+            ><small>{{ t('showtime') }}</small>
+          </div>
+          <b>{{ seat() }}</b>
+        </div>
+        }
+        <div class="stage-navigation">
+          <button
+            cinemaButton
+            variant="text"
+            [disabled]="stage() === 0"
+            (click)="select(stage() - 1)"
+            [attr.aria-label]="t('previous')"
+          >
+            <i class="ph-duotone ph-arrow-left" aria-hidden="true"></i></button
+          ><button cinemaButton (click)="next()">
+            {{ t(stage() === 7 ? 'finished' : 'next') }}<i
+              class="ph-duotone ph-arrow-right"
+              aria-hidden="true"
+            ></i>
+          </button>
+        </div>
+      </aside>
+    </div>
+    <nav class="journey-nav" [attr.aria-label]="t('journey')">
+      @for (point of stages; track $index; let index = $index) {<button
+        cinemaButton
+        variant="text"
+        [class.current]="stage() === index"
+        [attr.aria-current]="stage() === index ? 'step' : null"
+        (click)="select(index)"
+      >
+        <span class="journey-number">{{ index + 1 }}</span
+        ><span>{{ t('stage' + index + '_name') }}</span></button
+      >}
+    </nav>
+    <div class="playback">
+      <button
+        cinemaButton
+        variant="text"
+        (click)="togglePlayback()"
+        [attr.aria-pressed]="playing()"
+      >
+        <i
+          class="ph-duotone"
+          [class.ph-pause]="playing()"
+          [class.ph-play]="!playing()"
+          aria-hidden="true"
+        ></i
+        >{{ t(playing() ? 'pause' : 'play') }}</button
+      ><span>{{ t('simulated') }}</span>
+    </div>
+  </section>
+  <section class="feedback-invitation">
+    <div class="qr-symbol" aria-hidden="true"><i class="ph-duotone ph-qr-code"></i></div>
+    <div>
+      <h2>{{ t('scanTitle') }}</h2>
+      <p>{{ t('scanBody') }}</p>
+    </div>
+    <a
+      cinemaButton
+      variant="secondary"
+      href="https://www.galaxycine.vn/"
+      target="_blank"
+      rel="noopener noreferrer"
+      >{{ t('galaxy') }}<i class="ph-duotone ph-arrow-up-right" aria-hidden="true"></i
+    ></a>
+  </section>
+</main>
+<footer class="landing-footer">
+  <span>{{ t('footer') }}</span><small>{{ t('privacy') }}</small>
+</footer>

@@ -1,11 +1,8 @@
 <main class="customer-page">
   <header class="customer-header">
-    <img
-      src="/galaxy-logo.png"
-      width="112"
-      height="34"
-      [alt]="i18n.t('qr.galaxy_cinema')"
-    /><cinema-language />
+    <a routerLink="/" [attr.aria-label]="i18n.t('landing.home')"
+      ><img src="/galaxy-logo.png" width="112" height="34" [alt]="i18n.t('qr.galaxy_cinema')" /></a
+    ><cinema-language />
   </header>
   @switch (screen()) { @case ('form') {
   <h1>{{ i18n.t('customer.rate_your_experience') }}</h1>
