@@ -197,15 +197,15 @@ h1 {
 }
 .ticket-zone {
   left: 16px;
-  top: 160px;
-  width: 238px;
-  height: 120px;
+  top: 14px;
+  width: 135px;
+  height: 150px;
 }
 .snack-zone {
-  left: 16px;
+  left: 159px;
   top: 14px;
-  width: 238px;
-  height: 134px;
+  width: 135px;
+  height: 150px;
 }
 .auditorium {
   left: 320px;
@@ -304,14 +304,15 @@ h1 {
 }
 .counter {
   position: absolute;
-  width: 148px;
+  width: 120px;
   height: 44px;
-  left: 37px;
+  left: 23px;
 }
 .ticket-counter {
-  top: 183px;
+  top: 55px;
 }
 .snack-counter {
+  left: 166px;
   top: 55px;
 }
 .counter-top {
@@ -324,7 +325,7 @@ h1 {
 .counter-front {
   position: absolute;
   top: 44px;
-  width: 148px;
+  width: 100%;
   height: 44px;
   transform-origin: top;
   transform: translateZ(44px) rotateX(-90deg);

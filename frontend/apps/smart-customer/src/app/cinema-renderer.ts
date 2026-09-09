@@ -16,8 +16,8 @@ export interface SceneState {
 
 const POINTS = [
   [-4.4, 3.6],
-  [-5.2, 1.05],
-  [-5.1, -2.15],
+  [-6.35, -2.05],
+  [-2.95, -2.05],
   [-0.25, 1.2],
   [3.3, -0.6],
   [5.5, 3.25],
@@ -37,9 +37,6 @@ export class CinemaRenderer {
   private readonly resizeObserver: ResizeObserver;
   private readonly visibilityObserver: IntersectionObserver;
   private readonly motion = matchMedia('(prefers-reduced-motion: reduce)');
-  private readonly raycaster = new T.Raycaster();
-  private readonly markerMeshes: T.Mesh[] = [];
-  private readonly markerLabels: T.Sprite[] = [];
   private readonly seatMeshes = new Map<string, T.Mesh[]>();
   private readonly bulbs: T.Mesh[] = [];
   private readonly labelTextures: {
@@ -77,18 +74,20 @@ export class CinemaRenderer {
   private visible = true;
   private lastTime = 0;
   private filmTime = 0;
-  private pointerStart = { x: 0, y: 0 };
+  private viewportWidth = 0;
+  private viewportHeight = 0;
+  private readonly projected = new T.Vector3();
 
   constructor(
     private readonly host: HTMLElement,
-    private readonly events: { select: (stage: number) => void; failed: () => void },
+    private readonly events: { markers: HTMLButtonElement[]; failed: () => void },
   ) {
     this.renderer = new T.WebGLRenderer({
       antialias: true,
       alpha: true,
       powerPreference: 'low-power',
     });
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+    this.renderer.setPixelRatio(Math.min(Math.max(devicePixelRatio, 2), 2.5));
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = T.PCFShadowMap;
     this.renderer.toneMapping = T.ACESFilmicToneMapping;
@@ -125,8 +124,8 @@ export class CinemaRenderer {
     rim.position.set(6, 6, -8);
     this.scene.add(rim);
     this.buildArchitecture();
-    this.buildConcessions();
-    this.buildBoxOffice();
+    this.buildServiceCounter(() => this.buildBoxOffice(), -6.35, -3.4, 0.2);
+    this.buildServiceCounter(() => this.buildConcessions(), -2.95, -3.45, -3.45);
     this.buildLobby();
     this.buildAuditorium();
     this.buildGuestServices();
@@ -178,8 +177,6 @@ export class CinemaRenderer {
       else this.stop();
     });
     this.visibilityObserver.observe(host);
-    this.renderer.domElement.addEventListener('pointerdown', this.pointerDown);
-    this.renderer.domElement.addEventListener('pointerup', this.pointerUp);
     this.renderer.domElement.addEventListener('webglcontextlost', this.contextLost);
     document.addEventListener('visibilitychange', this.visibilityChanged);
     this.resize();
@@ -256,12 +253,13 @@ export class CinemaRenderer {
     parent.add(mesh);
     return mesh;
   }
-  private textTexture(text: string, color: string, bg: string) {
+  private textTexture(text: string, color: string, bg: string, aspect = 4) {
     const canvas = document.createElement('canvas');
-    canvas.width = 768;
-    canvas.height = 192;
+    canvas.width = Math.min(2048, Math.round(256 * aspect));
+    canvas.height = 256;
     const texture = new T.CanvasTexture(canvas);
     texture.colorSpace = T.SRGBColorSpace;
+    texture.anisotropy = Math.min(16, this.renderer.capabilities.getMaxAnisotropy());
     this.textures.add(texture);
     this.drawText(texture, text, color, bg);
     return texture;
@@ -273,10 +271,13 @@ export class CinemaRenderer {
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = color;
-    ctx.font = '600 62px Georgia, serif';
+    let size = canvas.height * 0.7;
+    ctx.font = `600 ${size}px Georgia, serif`;
+    size *= Math.min(1, (canvas.width * 0.94) / ctx.measureText(text).width);
+    ctx.font = `600 ${size}px Georgia, serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(text, 384, 100, 720);
+    ctx.fillText(text, canvas.width / 2, canvas.height / 2);
     texture.needsUpdate = true;
   }
   private sign(
@@ -290,11 +291,11 @@ export class CinemaRenderer {
     color = '#fff',
     bg = '#034ea2',
   ) {
-    const texture = this.textTexture(vi, color, bg);
+    const texture = this.textTexture(vi, color, bg, w / h);
     this.labelTextures.push({ texture, vi, en, color, bg });
     const mesh = new T.Mesh(
       new T.PlaneGeometry(w, h),
-      new T.MeshBasicMaterial({ map: texture, side: T.DoubleSide }),
+      new T.MeshBasicMaterial({ map: texture, side: T.DoubleSide, toneMapped: false }),
     );
     mesh.position.set(x, y, z);
     this.world.add(mesh);
@@ -375,6 +376,21 @@ export class CinemaRenderer {
     this.plant(-7.6, 4.6, 1.3);
     this.plant(7.7, 4.6, 1.15);
     this.plant(-0.7, -4.7, 0.8);
+  }
+  /** Keep each counter's fixtures, staff and interactive products together in one service row. */
+  private buildServiceCounter(build: () => void, x: number, z: number, originalZ: number) {
+    const firstChild = this.world.children.length;
+    build();
+    const fixtures = this.world.children.slice(firstChild);
+    const counter = new T.Group();
+    fixtures.forEach((fixture) => {
+      fixture.position.x += 5.2;
+      fixture.position.z -= originalZ;
+      counter.add(fixture);
+    });
+    counter.scale.x = 0.68;
+    counter.position.set(x, 0, z);
+    this.world.add(counter);
   }
   private buildBoxOffice() {
     this.box(4.6, 1, 0.9, -5.2, 0.55, 0.2, '#1555a0', this.world, 0.08);
@@ -600,44 +616,11 @@ export class CinemaRenderer {
     this.person(this.world, 6.9, 0, 0.75, '#75b2af');
   }
   private buildMarkers() {
-    POINTS.forEach(([x, z], index) => {
+    POINTS.forEach(([x, z]) => {
       const ring = new T.Mesh(new T.TorusGeometry(0.22, 0.035, 8, 32), this.mat('#7ed0ff', 1));
       ring.position.set(x, 0.09, z);
       ring.rotation.x = -Math.PI / 2;
       this.world.add(ring);
-      const texture = this.textTexture(String(index + 1), '#fff', '#153c63');
-      // Circular badges stay legible as the camera rotates; navigation below is keyboard accessible.
-      const canvas = texture.image as HTMLCanvasElement;
-      canvas.width = 128;
-      canvas.height = 128;
-      const ctx = canvas.getContext('2d')!;
-      ctx.fillStyle = '#133a61';
-      ctx.beginPath();
-      ctx.arc(64, 64, 53, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#91c2eb';
-      ctx.lineWidth = 3;
-      ctx.stroke();
-      ctx.fillStyle = '#fff';
-      ctx.font = '600 48px Georgia';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(String(index + 1), 64, 66);
-      texture.needsUpdate = true;
-      const sprite = new T.Sprite(new T.SpriteMaterial({ map: texture, depthTest: false }));
-      sprite.position.set(x, 1.7, z);
-      sprite.scale.set(0.67, 0.67, 1);
-      sprite.userData['stage'] = index;
-      this.world.add(sprite);
-      this.markerLabels.push(sprite);
-      const hit = new T.Mesh(
-        new T.SphereGeometry(0.38, 8, 6),
-        new T.MeshBasicMaterial({ visible: false }),
-      );
-      hit.position.copy(sprite.position);
-      hit.userData['stage'] = index;
-      this.world.add(hit);
-      this.markerMeshes.push(hit);
     });
   }
 
@@ -652,7 +635,6 @@ export class CinemaRenderer {
       this.careLight,
       this.stageRing,
       this.beam,
-      ...this.markerMeshes,
       ...[...this.seatMeshes.values()].flat(),
     ]);
     const batches = new Map<T.Material, T.Mesh[]>();
@@ -706,10 +688,6 @@ export class CinemaRenderer {
     }
     if (this.motion.matches) this.guest.position.copy(this.guestTarget);
     this.stageRing.position.set(x, 0.11, z);
-    this.markerLabels.forEach((marker, index) => {
-      marker.material.color.set(index === state.stage ? '#ffb26c' : '#fff');
-      marker.scale.setScalar(index === state.stage ? 0.84 : 0.67);
-    });
     this.seatMeshes.forEach((parts, key) =>
       parts.forEach(
         (mesh, i) =>
@@ -763,28 +741,34 @@ export class CinemaRenderer {
   private resize() {
     const { width, height } = this.host.getBoundingClientRect();
     if (!width || !height) return;
+    this.viewportWidth = width;
+    this.viewportHeight = height;
+    this.renderer.setPixelRatio(Math.min(Math.max(devicePixelRatio, 2), 2.5));
     this.renderer.setSize(width, height, false);
     this.camera.aspect = width / height;
     this.camera.fov = width < 360 ? 51 : width < 600 ? 47 : 35;
     this.camera.updateProjectionMatrix();
   }
-  private pointerDown = (event: PointerEvent) => {
-    this.pointerStart = { x: event.clientX, y: event.clientY };
-  };
-  private pointerUp = (event: PointerEvent) => {
-    if (Math.hypot(event.clientX - this.pointerStart.x, event.clientY - this.pointerStart.y) > 6)
-      return;
-    const rect = this.host.getBoundingClientRect();
-    this.raycaster.setFromCamera(
-      new T.Vector2(
-        ((event.clientX - rect.left) / rect.width) * 2 - 1,
-        (-(event.clientY - rect.top) / rect.height) * 2 + 1,
-      ),
-      this.camera,
-    );
-    const hit = this.raycaster.intersectObjects(this.markerMeshes)[0];
-    if (hit) this.events.select(hit.object.userData['stage']);
-  };
+  private positionMarkers() {
+    POINTS.forEach(([x, z], index) => {
+      this.projected.set(x, 1.7, z).project(this.camera);
+      const marker = this.events.markers[index];
+      if (!marker) return;
+      const left = T.MathUtils.clamp(
+        ((this.projected.x + 1) * this.viewportWidth) / 2,
+        24,
+        this.viewportWidth - 24,
+      );
+      const top = T.MathUtils.clamp(
+        ((1 - this.projected.y) * this.viewportHeight) / 2,
+        30,
+        this.viewportHeight - 76,
+      );
+      marker.style.transform = `translate(${Math.round(left)}px, ${Math.round(top)}px) translate(-50%, -50%)`;
+      marker.style.visibility = Math.abs(this.projected.z) <= 1 ? 'visible' : 'hidden';
+    });
+  }
+
   private contextLost = (event: Event) => {
     event.preventDefault();
     this.stop();
@@ -822,6 +806,7 @@ export class CinemaRenderer {
     }
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
+    this.positionMarkers();
     this.frame = requestAnimationFrame(this.render);
   };
   dispose() {
@@ -831,8 +816,6 @@ export class CinemaRenderer {
     this.resizeObserver?.disconnect();
     this.visibilityObserver?.disconnect();
     this.controls.dispose();
-    this.renderer.domElement.removeEventListener('pointerdown', this.pointerDown);
-    this.renderer.domElement.removeEventListener('pointerup', this.pointerUp);
     this.renderer.domElement.removeEventListener('webglcontextlost', this.contextLost);
     document.removeEventListener('visibilitychange', this.visibilityChanged);
     const geometries = new Set<T.BufferGeometry>();

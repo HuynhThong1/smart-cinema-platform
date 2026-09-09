@@ -27,3 +27,18 @@ Visual reference: [Galaxy Cinema](https://www.galaxycine.vn/). The landing-only 
 - The renderer adds approximately 123 kB estimated compressed transfer, lazy-loaded only from the landing.
 
 Physical-device GPU testing, forced WebGL context-loss testing and a real QR feedback submission are not covered by these browser checks. Backend contracts and feedback submission logic were not changed.
+
+## Text clarity verification — 2026-09-10
+
+- Replaced rasterized stage numbers with projected HTML buttons: 15px numbers, 13px selected/hover/focus labels and 44px hit areas. Text stays at its readable CSS size through camera movement and zoom.
+- Sign textures now match the sign aspect ratio, fit the font to the available space, use up to 16x anisotropic filtering and bypass tone mapping. This avoids the original small glyphs and stretched fixed-aspect textures.
+- Rendering uses a minimum 2x sampling ratio, capped at 2.5x, refreshed on resize. Browser measurement at 390px: a 750px drawing buffer for a 375px canvas display width.
+- Rechecked default desktop view, camera rotation/zoom, keyboard marker selection, and 390px/320px layouts. English edge labels stay inside the viewport; the fresh browser log has no errors. Screenshots were inspected in the task.
+- These measurements used a browser reporting devicePixelRatio 1; physical Retina/high-DPI device testing is not claimed.
+
+## Shared service row — 2026-09-10
+
+- Place the ticket counter and concessions counter side by side, with aligned serving edges. Move their fixtures, staff, queue posts, and interactive products together; move stage markers and guest destinations to the new serving positions.
+- Match the CSS fallback with adjacent counters and updated stage positions.
+- Passed both-app TypeScript checks and the customer production build (existing jsqr CommonJS warning). Browser screenshot review confirms the row from default and rotated views, plus pointer and keyboard stage selection with no console errors.
+- The browser viewport override did not apply in this follow-up session (actual viewport remained 743px); the earlier 320/390/1366 checks above describe the previous revision, not a fresh responsive pass for this layout adjustment.
