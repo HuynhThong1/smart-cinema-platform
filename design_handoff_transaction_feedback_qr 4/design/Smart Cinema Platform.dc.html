@@ -1,0 +1,2348 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/broadsheet-1e4e4462-be32-4780-821b-de7f14d9a980/styles.css">
+<script src="_ds/broadsheet-1e4e4462-be32-4780-821b-de7f14d9a980/_ds_bundle.js"></script>
+<script src="./image-slot.js"></script>
+<style>
+  body { margin: 0; }
+  a { color: var(--color-accent); }
+  a:hover { color: var(--color-accent-700); }
+  .sc-scroll { overflow-x: auto; }
+  .sc-kpi { font-family: var(--font-heading); font-weight: 600; font-size: 34px; line-height: 1; }
+  .sc-lbl { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent); }
+  .sc-en { font-size: 11px; letter-spacing: 0.04em; color: var(--color-text-muted); font-style: italic; }
+
+  /* Galaxy Cinema brand palette retuning the Broadsheet tokens */
+  :root {
+    --color-bg: #FFFFFF;
+    --color-surface: #F5F5F5;
+    --color-text: #1F2937;
+    --color-text-muted: #6B7280;
+    --color-divider: #E5E7EB;
+
+    --color-primary: #F26B38;
+    --color-primary-hover: #E95D29;
+    --color-primary-active: #D94F20;
+
+    --color-accent: #034EA2;
+    --color-accent-100: #eaf1fa; --color-accent-200: #cbdcf1; --color-accent-300: #9dbde4;
+    --color-accent-400: #6795cf; --color-accent-500: #2f6dba; --color-accent-600: #02458F;
+    --color-accent-700: #013D80; --color-accent-800: #002f64; --color-accent-900: #001f43;
+
+    --color-accent-2: #DC2626;
+    --color-accent-2-100: #fef2f2; --color-accent-2-200: #fee2e2; --color-accent-2-300: #fecaca;
+    --color-accent-2-400: #f87171; --color-accent-2-500: #ef4444; --color-accent-2-600: #c81e1e;
+    --color-accent-2-700: #b91c1c; --color-accent-2-800: #991b1b; --color-accent-2-900: #7f1d1d;
+
+    --color-neutral-100: #F5F5F5; --color-neutral-200: #E5E7EB; --color-neutral-300: #D1D5DB;
+    --color-neutral-400: #9CA3AF; --color-neutral-500: #6B7280; --color-neutral-600: #4B5563;
+    --color-neutral-700: #374151; --color-neutral-800: #1F2937; --color-neutral-900: #111827;
+
+    --color-process-yellow: #F59E0B;
+  }
+  .btn-primary { background: var(--color-primary); color: #fff; }
+  .btn-primary:hover { background: var(--color-primary-hover); }
+  .btn-primary:active { background: var(--color-primary-active); }
+  .input { background: var(--color-bg); }
+  .input:focus-visible { border-color: var(--color-primary); }
+  .text-muted { color: var(--color-text-muted); }
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)">
+
+  <header style="padding:18px 30px 0">
+    <div style="height:1px;background:var(--color-text)"></div>
+    <div style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:24px;padding:8px 0 8px">
+      <div style="margin-right:auto">
+        <div class="sc-lbl">Design prototype — Smart Cinema Platform · Phase 1 · Transaction Feedback QR</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div class="sc-lbl">Ứng dụng / Application</div>
+        <div style="display:flex;gap:0">
+          <button class="btn" style="{{ tabCustomer }}" onClick="{{ goCustomer }}">Khách hàng <span style="opacity:.6;font-weight:400">/ Customer</span></button>
+          <button class="btn" style="{{ tabAdmin }}" onClick="{{ goAdmin }}">Quản trị <span style="opacity:.6;font-weight:400">/ Admin</span></button>
+        </div>
+      </div>
+    </div>
+    <div style="height:1px;background:var(--color-text)"></div>
+  </header>
+
+  <sc-if value="{{ isCustomer }}" hint-placeholder-val="{{ true }}">
+    <div style="display:grid;grid-template-columns:minmax(220px,260px) minmax(0,1fr);gap:40px;padding:30px;align-items:start">
+
+      <aside style="display:flex;flex-direction:column;gap:20px;position:sticky;top:20px">
+        <div>
+          <h6 style="margin:0 0 8px">Trạng thái màn hình</h6>
+          <div class="sc-en" style="margin-bottom:10px">Screen states — Flow A</div>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <sc-for list="{{ custStates }}" as="s" hint-placeholder-count="6">
+              <button class="btn" style="{{ s.style }}" onClick="{{ s.go }}">
+                <span style="flex:1;text-align:left">{{ s.vi }}</span>
+                <span style="opacity:.55;font-weight:400;font-size:12px">{{ s.en }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+        <div>
+          <h6 style="margin:0 0 8px">Route</h6>
+          <div style="font-size:13px;background:var(--color-surface);padding:8px 10px;border-radius:2px;word-break:break-all">smart.cinema.vn<span style="color:var(--color-accent-700)">/f/X7M4Q9AKP2</span></div>
+          <p class="sc-en" style="margin-top:8px;line-height:1.5">Public token — không chứa staff code. SSR + <code>noindex,nofollow</code>.</p>
+        </div>
+        <div>
+          <h6 style="margin:0 0 8px">Nguyên tắc</h6>
+          <ul style="margin:0;padding-left:16px;font-size:13px;line-height:1.6">
+            <li>Không hiển thị tên / mã nhân viên</li>
+            <li>Hoàn thành trong 15–30 giây</li>
+            <li>Touch target ≥ 44px</li>
+            <li>Reasons đổi theo rating</li>
+          </ul>
+        </div>
+      </aside>
+
+      <div style="display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start">
+        <div>
+          <div class="sc-lbl" style="margin-bottom:8px">iPhone 390 × 780 · mobile-first</div>
+          <div style="width:390px;max-width:100%;border:1px solid var(--color-divider);border-radius:4px;background:var(--color-bg);box-shadow:var(--shadow-md);overflow:hidden">
+            <div style="display:flex;justify-content:space-between;padding:8px 18px 6px;font-size:11px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">
+              <span>21:59</span><span>5G ▮▮▮</span>
+            </div>
+
+            <div style="height:720px;overflow-y:auto;padding:0 22px 30px">
+
+              <div style="display:flex;align-items:center;gap:10px;padding:6px 0 18px">
+                <image-slot id="cinema-logo" style="width:112px;height:34px" shape="rect" fit="contain" src="https://www.galaxycine.vn/_next/static/media/logo-glx-header.8bbdac6e.png" placeholder="Logo"></image-slot>
+                <div style="margin-left:auto;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 50%, transparent)">VI / EN</div>
+              </div>
+
+              <sc-if value="{{ cLoading }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:14px">
+                  <div style="height:34px;width:70%;background:var(--color-surface);border-radius:2px"></div>
+                  <div style="height:14px;width:45%;background:var(--color-surface);border-radius:2px"></div>
+                  <div style="height:64px;background:var(--color-surface);border-radius:2px;margin-top:14px"></div>
+                  <div style="height:44px;background:var(--color-surface);border-radius:2px"></div>
+                  <div style="height:44px;background:var(--color-surface);border-radius:2px"></div>
+                  <div style="height:90px;background:var(--color-surface);border-radius:2px"></div>
+                  <div style="height:44px;background:var(--color-surface);border-radius:2px"></div>
+                  <div class="sc-en" style="text-align:center;margin-top:10px">Đang tải biểu mẫu… / Loading</div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ cForm }}" hint-placeholder-val="{{ true }}">
+                <div>
+                  <h1 style="font-size:31px;margin:0">Đánh giá trải nghiệm</h1>
+                  <div class="sc-en" style="margin-bottom:6px">Rate your experience</div>
+                  <div style="font-size:13px;color:color-mix(in srgb, var(--color-text) 60%, transparent);margin-bottom:22px">{{ nowLabel }}</div>
+
+                  <p style="font-size:17px;margin:0 0 12px;text-wrap:pretty">Trải nghiệm của bạn hôm nay thế nào?<br><span class="sc-en">How was your visit today?</span></p>
+
+                  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:6px">
+                    <sc-for list="{{ ratingOpts }}" as="r" hint-placeholder-count="5">
+                      <button class="btn" style="{{ r.style }}" onClick="{{ r.pick }}">
+                        <span style="width:26px;flex:none;text-align:center;font-family:var(--font-heading);font-weight:600;font-size:15px;color:{{ r.numColor }}">{{ r.value }}</span>
+                        <span style="flex:1;text-align:left;line-height:1.25">
+                          <span style="display:block;font-size:15px">{{ r.vi }}</span>
+                          <span style="display:block;font-size:11px;font-weight:400;font-style:italic;color:var(--color-text-muted)">{{ r.en }}</span>
+                        </span>
+                        <span style="flex:none;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center">{{ r.svg }}</span>
+                      </button>
+                    </sc-for>
+                  </div>
+                  <sc-if value="{{ errRating }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-size:12px;color:var(--color-accent-2-700);margin-top:2px">Vui lòng chọn mức đánh giá / Rating is required</div>
+                  </sc-if>
+
+                  <sc-if value="{{ hasRating }}" hint-placeholder-val="{{ false }}">
+                    <div style="margin-top:22px">
+                      <div style="font-size:15px;margin-bottom:4px">{{ reasonPrompt }}</div>
+                      <div class="sc-en" style="margin-bottom:10px">Select all that apply — optional</div>
+                      <div style="display:flex;flex-wrap:wrap;gap:8px">
+                        <sc-for list="{{ reasonOpts }}" as="x" hint-placeholder-count="6">
+                          <button class="btn" style="{{ x.style }}" onClick="{{ x.toggle }}">{{ x.vi }}</button>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-if>
+
+                  <div style="display:flex;flex-direction:column;gap:16px;margin-top:26px">
+                    <div class="field">
+                      <label for="cf-name">Họ và tên * <span style="font-style:italic;opacity:.7">Full name</span></label>
+                      <input id="cf-name" class="input" style="min-height:46px;font-size:16px" placeholder="Nguyễn Văn A" value="{{ cname }}" onInput="{{ setName }}">
+                      <sc-if value="{{ errName }}" hint-placeholder-val="{{ false }}">
+                        <div style="font-size:12px;color:var(--color-accent-2-700);margin-top:4px">{{ errName }}</div>
+                      </sc-if>
+                    </div>
+                    <div class="field">
+                      <label for="cf-phone">Số điện thoại * <span style="font-style:italic;opacity:.7">Phone number</span></label>
+                      <input id="cf-phone" class="input" style="min-height:46px;font-size:16px" inputmode="tel" placeholder="0912 345 678" value="{{ phone }}" onInput="{{ setPhone }}">
+                      <sc-if value="{{ errPhone }}" hint-placeholder-val="{{ false }}">
+                        <div style="font-size:12px;color:var(--color-accent-2-700);margin-top:4px">{{ errPhone }}</div>
+                      </sc-if>
+                    </div>
+                    <div class="field">
+                      <label>Mã giao dịch trên vé <span style="font-style:italic;opacity:.7">Transaction ID — không bắt buộc</span></label>
+
+                      <sc-if value="{{ txnIdle }}" hint-placeholder-val="{{ true }}">
+                        <div>
+                          <button class="btn btn-secondary btn-block" style="min-height:52px;font-size:15px;gap:10px;justify-content:center" onClick="{{ startScan }}">
+                            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"></path><path d="M7 12h10"></path></svg>
+                            Quét mã QR trên vé
+                          </button>
+                          <div style="display:flex;align-items:center;gap:10px;margin-top:10px;font-size:13px;color:var(--color-text-muted)">
+                            <span style="flex:1;height:1px;background:var(--color-border)"></span>
+                            <span>hoặc</span>
+                            <span style="flex:1;height:1px;background:var(--color-border)"></span>
+                          </div>
+                          <button class="btn btn-ghost btn-block" style="min-height:44px;font-size:14px;margin-top:6px" onClick="{{ startManual }}">Nhập tay mã giao dịch / Enter manually</button>
+                        </div>
+                      </sc-if>
+
+                      <sc-if value="{{ txnScanning }}" hint-placeholder-val="{{ false }}">
+                        <div style="border:1px solid var(--color-border);border-radius:2px;padding:22px;text-align:center;background:var(--color-surface)">
+                          <div style="width:96px;height:96px;margin:0 auto 14px;position:relative">
+                            <span style="position:absolute;inset:0;border:2px solid var(--color-accent);clip-path:polygon(0 0,34% 0,34% 4%,4% 4%,4% 34%,0 34%,0 100%,34% 100%,34% 96%,4% 96%,4% 66%,0 66%,0 0,100% 0,100% 34%,96% 34%,96% 4%,66% 4%,66% 0,100% 0,100% 100%,66% 100%,66% 96%,96% 96%,96% 66%,100% 66%)"></span>
+                            <span style="position:absolute;left:8%;right:8%;top:48%;height:2px;background:var(--color-accent)"></span>
+                          </div>
+                          <div style="font-size:15px">Đưa mã QR ở cuối vé vào khung</div>
+                          <div class="sc-en">Point at the QR code printed on your ticket</div>
+                          <button class="btn btn-ghost" style="margin-top:10px;font-size:13px" onClick="{{ startManual }}">Không quét được? Nhập tay</button>
+                        </div>
+                      </sc-if>
+
+                      <sc-if value="{{ txnManual }}" hint-placeholder-val="{{ false }}">
+                        <div>
+                          <input id="cf-txn" class="input" style="min-height:46px;font-size:16px;font-variant-numeric:tabular-nums;letter-spacing:.04em" inputmode="numeric" placeholder="01313035/0002" value="{{ txnId }}" onInput="{{ setTxn }}">
+                          <div style="font-size:12px;color:var(--color-text-muted);margin-top:6px;line-height:1.5">Dòng <strong>Trans No</strong> in ở giữa vé, ngay trên mã QR.</div>
+                          <sc-if value="{{ errTxn }}" hint-placeholder-val="{{ false }}">
+                            <div style="font-size:12px;color:var(--color-accent-2-700);margin-top:4px">{{ errTxn }}</div>
+                          </sc-if>
+                          <button class="btn btn-ghost" style="padding-left:0;font-size:13px;margin-top:4px" onClick="{{ startScan }}">← Quét QR thay vì nhập tay</button>
+                        </div>
+                      </sc-if>
+
+                      <sc-if value="{{ txnResolved }}" hint-placeholder-val="{{ false }}">
+                        <div style="border:1px solid var(--color-accent-300);border-radius:2px;padding:14px 16px;background:var(--color-accent-100)">
+                          <div style="display:flex;align-items:baseline;gap:8px">
+                            <span style="font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--color-accent-700)">Vé đã nhận diện</span>
+                            <button class="btn btn-ghost" style="margin-left:auto;padding:0;font-size:13px;min-height:0" onClick="{{ clearTxn }}">Đổi vé</button>
+                          </div>
+                          <div style="font-size:17px;margin-top:6px;line-height:1.3">{{ tkFilm }}</div>
+                          <div style="font-size:13px;color:var(--color-text-muted);margin-top:3px">{{ tkMeta }}</div>
+                          <div style="font-size:13px;font-variant-numeric:tabular-nums;margin-top:8px">Trans No <strong>{{ txnId }}</strong></div>
+                        </div>
+                      </sc-if>
+                    </div>
+
+                    <div class="field">
+                      <label for="cf-cmt">Chia sẻ thêm <span style="font-style:italic;opacity:.7">Anything else</span></label>
+                      <textarea id="cf-cmt" class="input" style="min-height:84px;font-size:16px" placeholder="Không bắt buộc / Optional" onInput="{{ setComment }}"></textarea>
+                    </div>
+                  </div>
+
+                  <label style="display:flex;gap:10px;align-items:flex-start;margin-top:22px;font-size:13px;line-height:1.5;cursor:pointer">
+                    <input type="checkbox" style="width:22px;height:22px;flex:none;accent-color:var(--color-accent);margin:0" checked="{{ consent }}" onChange="{{ toggleConsent }}">
+                    <span>Tôi đồng ý cho rạp sử dụng thông tin trên để ghi nhận và cải thiện chất lượng dịch vụ. <a href="#" onClick="{{ goPrivacy }}">Chính sách bảo mật</a>.</span>
+                  </label>
+                  <sc-if value="{{ errConsent }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-size:12px;color:var(--color-accent-2-700);margin-top:6px">Cần đồng ý để gửi đánh giá / Consent required</div>
+                  </sc-if>
+
+                  <button class="btn btn-primary btn-block" style="min-height:50px;font-size:16px;margin-top:22px" onClick="{{ submit }}" disabled="{{ submitting }}">{{ submitLabel }}</button>
+                  <div class="sc-en" style="text-align:center;margin-top:10px">Chỉ mất 15–30 giây · Takes 15–30 seconds</div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ cThanks }}" hint-placeholder-val="{{ false }}">
+                <div style="padding-top:80px;text-align:left">
+                  <div style="font-size:40px;line-height:1;margin-bottom:18px">✓</div>
+                  <h1 style="font-size:31px;margin:0">Cảm ơn bạn!</h1>
+                  <div class="sc-en" style="margin-bottom:18px">Thank you — your feedback was recorded</div>
+                  <p style="font-size:15px;text-wrap:pretty">Đánh giá của bạn đã được ghi nhận lúc <strong>{{ nowLabel }}</strong> và sẽ giúp chúng tôi phục vụ tốt hơn.</p>
+                  <p class="sc-en" style="line-height:1.6">Ghi nhận 1 feedback record. Không hiển thị thông tin nhân viên.</p>
+                  <button class="btn btn-secondary" style="margin-top:10px" onClick="{{ resetForm }}">Gửi đánh giá khác / Send another</button>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ cInvalid }}" hint-placeholder-val="{{ false }}">
+                <div style="padding-top:90px">
+                  <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-2-700);margin-bottom:12px">QR không hợp lệ / Invalid QR</div>
+                  <h1 style="font-size:29px;margin:0 0 12px">Mã QR hiện không khả dụng</h1>
+                  <p style="font-size:15px;text-wrap:pretty">Vui lòng liên hệ nhân viên tại rạp để được hỗ trợ.</p>
+                  <p class="sc-en">Please ask a staff member at the cinema for help.</p>
+                  <button class="btn btn-secondary" style="margin-top:8px" onClick="{{ retry }}">Thử lại / Retry</button>
+                  <p class="sc-en" style="margin-top:26px;line-height:1.6">Cùng một thông báo dùng cho token không tồn tại, QR disabled/revoked, staff inactive và cinema inactive — không lộ thông tin kỹ thuật.</p>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ cError }}" hint-placeholder-val="{{ false }}">
+                <div style="padding-top:90px">
+                  <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-2-700);margin-bottom:12px">Lỗi hệ thống / System error</div>
+                  <h1 style="font-size:29px;margin:0 0 12px">Không gửi được đánh giá</h1>
+                  <p style="font-size:15px">Đường truyền đang gặp sự cố. Nội dung bạn nhập vẫn được giữ lại.</p>
+                  <p class="sc-en">Something went wrong. Your answers are kept.</p>
+                  <button class="btn btn-primary btn-block" style="min-height:48px" onClick="{{ retry }}">Gửi lại / Try again</button>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ cPrivacy }}" hint-placeholder-val="{{ false }}">
+                <div>
+                  <button class="btn btn-ghost" style="padding-left:0" onClick="{{ backToForm }}">← Quay lại</button>
+                  <h1 style="font-size:27px;margin:10px 0 4px">Chính sách bảo mật</h1>
+                  <div class="sc-en" style="margin-bottom:16px">Privacy policy · consent version v1</div>
+                  <p style="font-size:14px">Chúng tôi thu thập họ tên, số điện thoại và nội dung đánh giá của bạn nhằm mục đích ghi nhận chất lượng phục vụ và cải thiện dịch vụ tại rạp.</p>
+                  <p style="font-size:14px">Thông tin không được dùng cho mục đích marketing. Nếu sau này có chương trình liên hệ marketing, chúng tôi sẽ xin phép riêng.</p>
+                  <p style="font-size:14px">Bạn có thể yêu cầu xoá dữ liệu bằng cách liên hệ quầy dịch vụ khách hàng.</p>
+                </div>
+              </sc-if>
+
+            </div>
+          </div>
+        </div>
+
+        <div style="max-width:340px;min-width:240px;flex:1">
+          <h6 style="margin:0 0 10px">Validation &amp; hành vi</h6>
+          <div class="sc-en" style="margin-bottom:14px">Behaviour spec — §10, §12, §13</div>
+          <div style="display:flex;flex-direction:column;gap:14px;font-size:13px;line-height:1.55">
+            <div><strong>Họ tên</strong> — required, 2–100 ký tự, trim.</div>
+            <div><strong>Điện thoại</strong> — required, chuẩn hoá <code>0912345678</code> / <code>+84912345678</code> → <code>84912345678</code>.</div>
+            <div><strong>Consent</strong> — checkbox bắt buộc, ghi lại version + thời điểm.</div>
+            <div><strong>Rating</strong> — required; reasons load theo rating (4–5 positive, 1–3 negative).</div>
+            <div><strong>Submit</strong> — mỗi lần tạo 1 record mới, không deduplicate; rate limit theo IP + QR token; nghi vấn → <code>suspicious=true</code>.</div>
+            <div><strong>createdAt</strong> — server time, lưu UTC, hiển thị Asia/Ho_Chi_Minh.</div>
+          </div>
+          <div style="margin-top:22px;padding-top:16px;border-top:1px solid var(--color-divider)">
+            <div class="sc-lbl" style="margin-bottom:8px">Payload gửi lên</div>
+            <pre style="font-size:11px;line-height:1.5;background:var(--color-surface);padding:12px;border-radius:2px;overflow-x:auto;margin:0">POST /api/v1/public/feedback
+{
+  "qrToken": "X7M4Q9AKP2",
+  "rating": {{ dbgRating }},
+  "reasons": {{ dbgReasons }},
+  "customer": { "name": "…", "phone": "…" },
+  "comment": "…",
+  "consent": { "accepted": true, "version": "v1" }
+}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isAdmin }}" hint-placeholder-val="{{ false }}">
+    <div>
+
+    <div style="padding:26px 30px 0">
+      <div style="height:3px;background:var(--color-text)"></div>
+      <div style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:30px;padding:12px 0 10px">
+        <div style="margin-right:auto;min-width:0">
+          <div style="font-family:var(--font-heading);font-weight:600;font-size:26px;letter-spacing:-0.02em;line-height:1;color:var(--color-accent)">SMART CINEMA PLATFORM</div>
+          <div class="sc-lbl" style="margin-top:5px">Galaxy Cinema · Transaction Feedback QR</div>
+        </div>
+
+        <div style="display:flex;align-items:baseline;gap:0;font-size:13px">
+          <span style="padding-right:14px;color:color-mix(in srgb, var(--color-text) 58%, transparent);white-space:nowrap">{{ hubScope }}</span>
+          <span style="align-self:stretch;width:1px;background:var(--color-divider)"></span>
+          <button class="btn btn-ghost" style="border-radius:0;padding:2px 14px;font-size:13px;display:inline-flex;align-items:baseline;gap:6px" onClick="{{ goNotif }}">
+            <span>Thông báo</span>
+            <sc-if value="{{ notifUnread }}" hint-placeholder-val="{{ true }}">
+              <span style="font-size:11px;font-weight:600;color:var(--color-accent-2);vertical-align:super">{{ notifUnreadLabel }}</span>
+            </sc-if>
+          </button>
+          <span style="align-self:stretch;width:1px;background:var(--color-divider)"></span>
+          <div style="position:relative" data-acct-menu="true">
+            <button class="btn btn-ghost" style="border-radius:0;padding:2px 0 2px 14px;font-size:13px;display:inline-flex;align-items:baseline;gap:6px" onClick="{{ toggleAcct }}">
+              <span style="font-weight:600">{{ acctUser }}</span>
+              <span style="font-size:11px;font-style:italic;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ acctRole }}</span>
+              <span style="font-size:10px;opacity:.55">▾</span>
+            </button>
+            <sc-if value="{{ acctOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute;right:0;top:100%;margin-top:8px;min-width:206px;background:var(--color-bg);box-shadow:var(--shadow-md);padding:6px 0;z-index:40">
+                <sc-for list="{{ acctMenu }}" as="m" hint-placeholder-count="3">
+                  <button class="btn btn-ghost" style="{{ m.style }}" onClick="{{ m.go }}">{{ m.label }}</button>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+      <div style="height:1px;background:var(--color-text)"></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:minmax(200px,232px) minmax(0,1fr);gap:34px;padding:24px 30px 60px;align-items:start">
+
+      <aside style="position:sticky;top:16px;display:flex;flex-direction:column;gap:22px">
+        <div>
+          <div class="sc-lbl" style="margin-bottom:6px">Đăng nhập với vai trò</div>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <sc-for list="{{ roles }}" as="r" hint-placeholder-count="3">
+              <button class="btn" style="{{ r.style }}" onClick="{{ r.pick }}">
+                <span style="flex:1;text-align:left">{{ r.label }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <div style="font-size:12px;margin-top:8px;color:color-mix(in srgb, var(--color-text) 60%, transparent)">{{ roleScope }}</div>
+        </div>
+
+        <button class="btn" style="{{ notifBellStyle }}" onClick="{{ goNotif }}">
+          <span style="flex:1;text-align:left">Thông báo</span>
+          <sc-if value="{{ notifUnread }}" hint-placeholder-val="{{ true }}">
+            <span class="tag" style="background:var(--color-accent-2);color:var(--color-bg);font-size:11px;padding:1px 7px">{{ notifUnreadLabel }}</span>
+          </sc-if>
+        </button>
+
+        <nav style="display:flex;flex-direction:column;gap:16px">
+          <sc-for list="{{ navGroups }}" as="g" hint-placeholder-count="6">
+            <div>
+              <h6 style="margin:0 0 6px">{{ g.label }}</h6>
+              <div style="display:flex;flex-direction:column;gap:1px">
+                <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3">
+                  <button class="btn" style="{{ it.style }}" onClick="{{ it.go }}">
+                    <span style="flex:1;text-align:left">{{ it.vi }}</span>
+                    <span style="font-size:11px;font-weight:400;opacity:.5;font-style:italic">{{ it.en }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </nav>
+
+        <div style="padding-top:14px;border-top:1px solid var(--color-divider)">
+          <div class="sc-lbl" style="margin-bottom:6px">Trạng thái dữ liệu</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px">
+            <sc-for list="{{ dataStates }}" as="d" hint-placeholder-count="5">
+              <button class="btn" style="{{ d.style }}" onClick="{{ d.go }}">{{ d.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+      </aside>
+
+      <main style="min-width:0">
+
+        <sc-if value="{{ aReady }}" hint-placeholder-val="{{ true }}">
+          <div>
+
+            <sc-if value="{{ sDash }}" hint-placeholder-val="{{ true }}">
+              <div>
+                <div class="sc-lbl">{{ dashKicker }}</div>
+                <h2 style="margin:2px 0 2px">{{ dashTitle }}</h2>
+                <div class="sc-en" style="margin-bottom:20px">Feedback overview · 01–05/09/2026 · so với kỳ trước</div>
+
+                <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:36px">
+                  <div class="seg">
+                    <label class="seg-opt"><input type="radio" name="range" checked>Hôm nay</label>
+                    <label class="seg-opt"><input type="radio" name="range">Hôm qua</label>
+                    <label class="seg-opt"><input type="radio" name="range">7 ngày</label>
+                    <label class="seg-opt"><input type="radio" name="range">30 ngày</label>
+                    <label class="seg-opt"><input type="radio" name="range">Tuỳ chọn</label>
+                  </div>
+                  <sc-if value="{{ isHO }}" hint-placeholder-val="{{ false }}">
+                    <div class="field" style="width:200px">
+                      <label>Rạp / Cinema</label>
+                      <select class="input"><option>Tất cả 6 rạp</option><option>Galaxy Nguyễn Du</option><option>Galaxy Tân Bình</option></select>
+                    </div>
+                  </sc-if>
+                  <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-left:auto"><input type="checkbox" style="accent-color:var(--color-accent)">Bao gồm feedback nghi vấn</label>
+                  <button class="btn btn-secondary">Xuất CSV</button>
+                </div>
+
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:34px;margin-bottom:52px">
+                  <sc-for list="{{ dashKpis }}" as="k" hint-placeholder-count="4">
+                    <div>
+                      <div class="sc-lbl" style="margin-bottom:10px">{{ k.vi }}</div>
+                      <div style="display:flex;align-items:baseline;gap:10px">
+                        <div class="sc-kpi" style="font-size:40px;line-height:.9">{{ k.val }}</div>
+                        <span style="{{ k.deltaStyle }}">{{ k.delta }}</span>
+                      </div>
+                      <svg viewBox="0 0 72 24" preserveAspectRatio="none" style="width:100%;max-width:120px;height:24px;display:block;margin-top:10px;overflow:visible">
+                        <path d="{{ k.spark.d }}" fill="none" stroke="{{ k.spark.color }}" stroke-width="1.4"></path>
+                      </svg>
+                      <div class="sc-en" style="margin-top:6px">{{ k.en }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <div style="margin-bottom:56px">
+                  <h4 style="margin:0 0 2px">Lượng feedback &amp; điểm trung bình</h4>
+                  <div class="sc-en" style="margin-bottom:6px">Volume vs. average rating · 14 ngày gần nhất</div>
+                  <div style="display:flex;gap:20px;font-size:12px;margin-bottom:10px">
+                    <span><span style="display:inline-block;width:16px;height:2px;background:var(--color-accent);vertical-align:middle;margin-right:5px"></span>Lượng feedback (trục trái)</span>
+                    <span><span style="display:inline-block;width:16px;height:0;border-top:2px dashed var(--color-accent-2);vertical-align:middle;margin-right:5px"></span>Điểm TB / 5 (trục phải)</span>
+                  </div>
+                  <svg viewBox="0 0 720 232" style="width:100%;height:auto;overflow:visible;font-family:var(--font-body)">
+                    <sc-for list="{{ chYTicks }}" as="t" hint-placeholder-count="5">
+                      <g>
+                        <line x1="{{ chAxisL }}" x2="{{ chAxisR }}" y1="{{ t.y }}" y2="{{ t.y }}" stroke="var(--color-neutral-200)" stroke-width="1"></line>
+                        <text x="{{ chAxisL }}" y="{{ t.y }}" dx="-8" dy="4" text-anchor="end" font-size="11" fill="color-mix(in srgb, var(--color-text) 55%, transparent)">{{ t.label }}</text>
+                      </g>
+                    </sc-for>
+                    <sc-for list="{{ chRTicks }}" as="t" hint-placeholder-count="3">
+                      <text x="{{ chAxisR }}" y="{{ t.y }}" dx="10" dy="4" font-size="11" fill="var(--color-accent-2-700)">{{ t.label }}</text>
+                    </sc-for>
+                    <path d="{{ chVolArea }}" fill="color-mix(in srgb, var(--color-accent) 12%, transparent)" stroke="none"></path>
+                    <path d="{{ chVol }}" fill="none" stroke="var(--color-accent)" stroke-width="2.5" stroke-linejoin="round"></path>
+                    <path d="{{ chRate }}" fill="none" stroke="var(--color-accent-2)" stroke-width="1.75" stroke-dasharray="5 4"></path>
+                    <sc-for list="{{ chDots }}" as="p" hint-placeholder-count="14">
+                      <circle cx="{{ p.x }}" cy="{{ p.y }}" r="2.5" fill="var(--color-bg)" stroke="var(--color-accent)" stroke-width="1.5"></circle>
+                    </sc-for>
+                    <circle cx="{{ chLast.x }}" cy="{{ chLast.y }}" r="4.5" fill="var(--color-accent)"></circle>
+                    <text x="{{ chLast.x }}" y="{{ chLast.y }}" dx="-6" dy="-12" text-anchor="end" font-size="13" font-weight="600" fill="var(--color-accent-700)">{{ chLastLabel }}</text>
+                    <circle cx="{{ chLastR.x }}" cy="{{ chLastR.y }}" r="4" fill="var(--color-accent-2)"></circle>
+                    <text x="{{ chLastR.x }}" y="{{ chLastR.y }}" dx="-6" dy="16" text-anchor="end" font-size="13" font-weight="600" fill="var(--color-accent-2-700)">{{ chLastRLabel }}</text>
+                    <line x1="{{ chAxisL }}" x2="{{ chAxisR }}" y1="{{ chAxisB }}" y2="{{ chAxisB }}" stroke="var(--color-text)"></line>
+                    <sc-for list="{{ chXTicks }}" as="t" hint-placeholder-count="5">
+                      <text x="{{ t.x }}" y="{{ chAxisB }}" dy="18" text-anchor="middle" font-size="11" fill="color-mix(in srgb, var(--color-text) 55%, transparent)">{{ t.label }}</text>
+                    </sc-for>
+                  </svg>
+                </div>
+
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:52px;margin-bottom:56px">
+                  <div>
+                    <h4 style="margin:0 0 2px">Cơ cấu điểm</h4>
+                    <div class="sc-en" style="margin-bottom:14px">Rating mix · 953 feedback</div>
+                    <div style="display:flex;width:100%">
+                      <sc-for list="{{ mix }}" as="m" hint-placeholder-count="5">
+                        <span style="{{ m.segStyle }}">{{ m.segLabel }}</span>
+                      </sc-for>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:10px 14px;margin-top:14px;font-size:12px">
+                      <sc-for list="{{ mix }}" as="m" hint-placeholder-count="5">
+                        <span style="display:flex;align-items:center;gap:6px">
+                          <span style="{{ m.swatch }}"></span>
+                          <span><strong>{{ m.value }}★</strong> {{ m.count }} · {{ m.pct }}</span>
+                        </span>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 style="margin:0 0 2px">Lý do nổi bật</h4>
+                    <div class="sc-en" style="margin-bottom:14px">Top reasons — cyan tích cực, magenta tiêu cực</div>
+                    <div style="display:flex;flex-direction:column;gap:10px">
+                      <sc-for list="{{ dashReasons }}" as="r" hint-placeholder-count="10">
+                        <div style="display:grid;grid-template-columns:minmax(0,1fr) 96px;gap:12px;align-items:center;font-size:13px">
+                          <span style="min-width:0">
+                            <span style="display:block;margin-bottom:4px">{{ r.vi }}</span>
+                            <span style="{{ r.barStyle }}"></span>
+                          </span>
+                          <span style="text-align:right;font-variant-numeric:tabular-nums;color:color-mix(in srgb, var(--color-text) 62%, transparent)">{{ r.n }} · {{ r.share }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="margin-bottom:56px">
+                  <h4 style="margin:0 0 2px">Feedback theo giờ &amp; ngày trong tuần</h4>
+                  <div class="sc-en" style="margin-bottom:14px">Heatmap — nơi cần bố trí nhân sự</div>
+                  <div class="sc-scroll">
+                    <div style="min-width:560px">
+                      <div style="display:grid;grid-template-columns:44px repeat(7,minmax(0,1fr));gap:3px;font-size:11px;margin-bottom:3px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">
+                        <span></span>
+                        <sc-for list="{{ heatHours }}" as="h" hint-placeholder-count="7">
+                          <span style="text-align:center">{{ h }}</span>
+                        </sc-for>
+                      </div>
+                      <div style="display:flex;flex-direction:column;gap:3px">
+                        <sc-for list="{{ heatRows }}" as="r" hint-placeholder-count="7">
+                          <div style="display:grid;grid-template-columns:44px repeat(7,minmax(0,1fr));gap:3px;align-items:center">
+                            <span style="font-size:12px;font-weight:600">{{ r.day }}</span>
+                            <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="7">
+                              <span style="{{ c.style }}">{{ c.n }}</span>
+                            </sc-for>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:11px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">
+                    <span>Ít</span>
+                    <sc-for list="{{ heatScale }}" as="s" hint-placeholder-count="5">
+                      <span style="{{ s.style }}"></span>
+                    </sc-for>
+                    <span>Nhiều · tối đa 66</span>
+                  </div>
+                </div>
+
+                <sc-if value="{{ isHO }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-bottom:56px">
+                    <h4 style="margin:0 0 2px">Điểm trung bình theo rạp</h4>
+                    <div class="sc-en" style="margin-bottom:16px">Cinema comparison trên thang 4,0 – 5,0 · vạch đen là mức toàn hệ thống 4,51 — click để drill-down</div>
+                    <div style="display:flex;flex-direction:column;gap:14px;max-width:760px">
+                      <sc-for list="{{ cinemaDots }}" as="c" hint-placeholder-count="6">
+                        <div style="display:grid;grid-template-columns:160px minmax(0,1fr) 112px;gap:14px;align-items:center;font-size:13px;cursor:pointer" onClick="{{ c.open }}">
+                          <span>{{ c.name }}</span>
+                          <span style="position:relative;display:block;height:16px">
+                            <span style="position:absolute;top:50%;left:0;right:0;height:1px;background:var(--color-neutral-200)"></span>
+                            <span style="{{ c.lineStyle }}"></span>
+                            <span style="{{ benchLeft }}"></span>
+                            <span style="{{ c.dotStyle }}"></span>
+                          </span>
+                          <span style="text-align:right;font-variant-numeric:tabular-nums"><strong>{{ c.avg }}</strong> · {{ c.n }} fb · <span style="color:var(--color-accent-2-700)">{{ c.neg }}</span></span>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <div style="display:grid;grid-template-columns:160px minmax(0,1fr) 112px;gap:14px;max-width:760px;margin-top:6px;font-size:11px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">
+                      <span></span>
+                      <span style="display:flex;justify-content:space-between">
+                        <span>4,0</span><span>4,5</span><span>5,0</span>
+                      </span>
+                      <span></span>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <div>
+                  <h4 style="margin:0 0 2px">Cần chú ý</h4>
+                  <div class="sc-en" style="margin-bottom:16px">Needs attention — xu hướng 7 ngày, click để xem hiệu suất</div>
+                  <div style="display:flex;flex-direction:column;gap:0;max-width:820px">
+                    <sc-for list="{{ watchList }}" as="w" hint-placeholder-count="3">
+                      <div style="display:grid;grid-template-columns:minmax(0,1fr) 96px 80px 90px;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid var(--color-divider);cursor:pointer" onClick="{{ w.open }}">
+                        <span style="min-width:0">
+                          <span style="display:block;font-size:14px"><strong>{{ w.code }}</strong> · {{ w.name }}</span>
+                          <span style="display:block;font-size:12px;color:color-mix(in srgb, var(--color-text) 62%, transparent)">{{ w.note }}</span>
+                        </span>
+                        <svg viewBox="0 0 72 24" preserveAspectRatio="none" style="width:96px;height:24px;overflow:visible">
+                          <path d="{{ w.spark.d }}" fill="none" stroke="{{ w.spark.color }}" stroke-width="1.6"></path>
+                        </svg>
+                        <span style="text-align:right;font-variant-numeric:tabular-nums"><strong>{{ w.avg }}</strong></span>
+                        <span style="text-align:right;font-size:13px;color:var(--color-accent-2-700)">{{ w.neg }} tiêu cực</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="margin-top:16px;display:flex;gap:10px">
+                    <button class="btn btn-secondary" onClick="{{ goFb }}">Xem tất cả feedback</button>
+                    <button class="btn btn-ghost" onClick="{{ goRank }}">Bảng xếp hạng →</button>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ sFb }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div class="sc-lbl">Feedback</div>
+                <h2 style="margin:2px 0 2px">Tất cả feedback</h2>
+                <div class="sc-en" style="margin-bottom:20px">All feedback · {{ fbCount }} records</div>
+
+                <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:24px">
+                  <div class="field" style="width:190px"><label>Tìm kiếm</label><input class="input" placeholder="Tên hoặc số điện thoại"></div>
+                  <div class="field" style="width:150px"><label>Khoảng ngày</label><input class="input" value="01/09 – 05/09"></div>
+                  <div class="field" style="width:120px"><label>Điểm</label><select class="input"><option>Tất cả</option><option>1 – 2</option><option>3</option><option>4 – 5</option></select></div>
+                  <div class="field" style="width:160px"><label>Nhân viên</label><select class="input"><option>Tất cả nhân viên</option><option>GS025</option><option>GS018</option></select></div>
+                  <div class="field" style="width:160px"><label>Lý do</label><select class="input"><option>Tất cả lý do</option><option>Thời gian chờ lâu</option></select></div>
+                  <label style="display:flex;align-items:center;gap:8px;font-size:13px;padding-bottom:8px"><input type="checkbox" style="accent-color:var(--color-accent)">Chỉ nghi vấn</label>
+                  <button class="btn btn-secondary" style="margin-left:auto">Xuất CSV</button>
+                </div>
+
+                <div class="sc-scroll">
+                  <table class="table" style="min-width:900px">
+                    <thead><tr><th>Thời gian</th><th>Điểm</th><th>Khách hàng</th><th>Điện thoại</th><th>Nhân viên</th><th>Rạp</th><th>Lý do</th><th>Cờ</th></tr></thead>
+                    <tbody>
+                      <sc-for list="{{ feedbacks }}" as="f" hint-placeholder-count="8">
+                        <tr style="cursor:pointer" onClick="{{ f.open }}">
+                          <td style="white-space:nowrap">{{ f.time }}</td>
+                          <td><span class="tag" style="{{ f.ratingStyle }}">{{ f.rating }} · {{ f.short }}</span></td>
+                          <td>{{ f.name }}</td>
+                          <td style="font-variant-numeric:tabular-nums">{{ f.phone }}</td>
+                          <td><strong>{{ f.staffCode }}</strong></td>
+                          <td style="color:color-mix(in srgb, var(--color-text) 60%, transparent)">{{ f.cinema }}</td>
+                          <td style="font-size:12px">{{ f.reasonText }}</td>
+                          <td>{{ f.flag }}</td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+                <div style="display:flex;align-items:center;gap:14px;margin-top:18px;font-size:13px">
+                  <span class="text-muted">1–8 trong 953</span>
+                  <div style="margin-left:auto;display:flex;gap:6px">
+                    <button class="btn btn-secondary">‹ Trước</button>
+                    <button class="btn btn-secondary">Sau ›</button>
+                  </div>
+                </div>
+                <p class="sc-en" style="margin-top:20px;max-width:60ch;line-height:1.6">Số điện thoại được mask cho role không cần xem đầy đủ (§33). Click một dòng để mở side drawer chi tiết.</p>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ sAnalytics }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div class="sc-lbl">Feedback</div>
+                <h2 style="margin:2px 0 2px">Phân tích feedback</h2>
+                <div class="sc-en" style="margin-bottom:24px">Analytics — distribution, reasons, time of day</div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:40px">
+                  <div>
+                    <h4 style="margin:0 0 14px">Tỷ lệ cảm xúc</h4>
+                    <div style="display:flex;align-items:center;gap:20px">
+                      <svg viewBox="0 0 42 42" style="width:130px;height:130px;transform:rotate(-90deg)">
+                        <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--color-surface)" stroke-width="7"></circle>
+                        <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--color-accent)" stroke-width="7" stroke-dasharray="85 15"></circle>
+                        <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--color-neutral-400)" stroke-width="7" stroke-dasharray="8 92" stroke-dashoffset="-85"></circle>
+                        <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--color-accent-2)" stroke-width="7" stroke-dasharray="7 93" stroke-dashoffset="-93"></circle>
+                      </svg>
+                      <div style="font-size:13px;line-height:2">
+                        <div><span style="display:inline-block;width:10px;height:10px;background:var(--color-accent)"></span> Tích cực 85%</div>
+                        <div><span style="display:inline-block;width:10px;height:10px;background:var(--color-neutral-400)"></span> Trung tính 8%</div>
+                        <div><span style="display:inline-block;width:10px;height:10px;background:var(--color-accent-2)"></span> Tiêu cực 7%</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 style="margin:0 0 14px">Theo giờ trong ngày</h4>
+                    <div style="display:flex;align-items:flex-end;gap:5px;height:130px">
+                      <sc-for list="{{ hourly }}" as="h" hint-placeholder-count="10">
+                        <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px;height:100%">
+                          <span style="{{ h.barStyle }}"></span>
+                          <span style="font-size:10px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ h.label }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ sStaff }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div class="sc-lbl">Staff</div>
+                <h2 style="margin:2px 0 2px">Danh sách nhân viên</h2>
+                <div class="sc-en" style="margin-bottom:20px">Staff list · {{ staffScopeNote }}</div>
+                <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:22px">
+                  <div class="field" style="width:200px"><label>Tìm kiếm</label><input class="input" placeholder="Mã hoặc tên nhân viên"></div>
+                  <div class="field" style="width:140px"><label>Trạng thái</label><select class="input"><option>Tất cả</option><option>Active</option><option>Inactive</option></select></div>
+                  <div style="margin-left:auto;display:flex;gap:8px">
+                    <button class="btn btn-secondary" onClick="{{ goImport }}">Import Excel/CSV</button>
+                    <button class="btn btn-primary" onClick="{{ openCreateStaff }}">+ Thêm nhân viên</button>
+                  </div>
+                </div>
+                <div class="sc-scroll">
+                  <table class="table" style="min-width:760px">
+                    <thead><tr><th>Mã</th><th>Họ tên</th><th>Rạp</th><th>Trạng thái</th><th>QR</th><th>Cập nhật</th><th></th></tr></thead>
+                    <tbody>
+                      <sc-for list="{{ staffRows }}" as="s" hint-placeholder-count="8">
+                        <tr>
+                          <td><strong>{{ s.code }}</strong></td>
+                          <td>{{ s.name }}</td>
+                          <td style="color:color-mix(in srgb, var(--color-text) 60%, transparent)">{{ s.cinema }}</td>
+                          <td><span class="tag" style="{{ s.statusStyle }}">{{ s.status }}</span></td>
+                          <td><span class="tag" style="{{ s.qrStyle }}">{{ s.qr }}</span></td>
+                          <td style="color:color-mix(in srgb, var(--color-text) 60%, transparent)">{{ s.updated }}</td>
+                          <td style="text-align:right;white-space:nowrap">
+                            <button class="btn btn-ghost" onClick="{{ s.openPerf }}">Hiệu suất</button>
+                            <button class="btn btn-ghost" onClick="{{ s.openQR }}">QR</button>
+                          </td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ sImport }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div class="sc-lbl">Staff</div>
+                <h2 style="margin:2px 0 2px">Import nhân viên</h2>
+                <div class="sc-en" style="margin-bottom:24px">Flow D — upload → validate → preview → confirm → result</div>
+
+                <div style="display:flex;flex-wrap:wrap;gap:26px;margin-bottom:32px">
+                  <sc-for list="{{ importSteps }}" as="st" hint-placeholder-count="3">
+                    <div style="{{ st.style }}">
+                      <div class="sc-lbl" style="margin-bottom:4px">Bước {{ st.n }}</div>
+                      <div style="font-family:var(--font-heading);font-weight:600;font-size:17px">{{ st.vi }}</div>
+                      <div class="sc-en">{{ st.en }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <sc-if value="{{ imp1 }}" hint-placeholder-val="{{ true }}">
+                  <div style="max-width:620px">
+                    <div style="border:1px dashed color-mix(in srgb, var(--color-text) 35%, transparent);border-radius:4px;padding:44px 30px;text-align:center;background:var(--color-surface)">
+                      <div style="font-family:var(--font-heading);font-weight:600;font-size:19px;margin-bottom:6px">Kéo tệp .xlsx / .csv vào đây</div>
+                      <div class="sc-en" style="margin-bottom:16px">Drag a file here, or browse — max 5 MB</div>
+                      <button class="btn btn-primary" onClick="{{ impNext }}">Chọn tệp</button>
+                    </div>
+                    <div style="display:flex;gap:10px;margin-top:16px;align-items:center">
+                      <button class="btn btn-ghost" style="padding-left:0">↓ Tải template mẫu</button>
+                      <span class="text-muted" style="font-size:12px">Staff Code · Full Name · Cinema Code</span>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ imp2 }}" hint-placeholder-val="{{ false }}">
+                  <div>
+                    <div style="display:flex;flex-wrap:wrap;gap:30px;margin-bottom:20px">
+                      <div><div class="sc-lbl">Tổng dòng</div><div class="sc-kpi">100</div></div>
+                      <div><div class="sc-lbl">Hợp lệ</div><div class="sc-kpi" style="color:var(--color-accent-700)">95</div></div>
+                      <div><div class="sc-lbl">Lỗi</div><div class="sc-kpi" style="color:var(--color-accent-2-700)">5</div></div>
+                    </div>
+                    <div class="sc-scroll">
+                      <table class="table" style="min-width:700px">
+                        <thead><tr><th>Dòng</th><th>Staff Code</th><th>Họ tên</th><th>Cinema Code</th><th>Kết quả</th></tr></thead>
+                        <tbody>
+                          <sc-for list="{{ importRows }}" as="r" hint-placeholder-count="6">
+                            <tr>
+                              <td>{{ r.line }}</td><td><strong>{{ r.code }}</strong></td><td>{{ r.name }}</td><td>{{ r.cinema }}</td>
+                              <td><span class="tag" style="{{ r.style }}">{{ r.msg }}</span></td>
+                            </tr>
+                          </sc-for>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div style="display:flex;gap:10px;margin-top:20px">
+                      <button class="btn btn-primary" onClick="{{ impNext }}">Xác nhận import 95 dòng</button>
+                      <button class="btn btn-secondary">↓ Tải file lỗi</button>
+                      <button class="btn btn-ghost" onClick="{{ impReset }}">Huỷ</button>
+                    </div>
+                    <p class="sc-en" style="margin-top:16px">Không ghi dữ liệu trước khi người dùng xác nhận. Duplicate staff code bị chặn.</p>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ imp3 }}" hint-placeholder-val="{{ false }}">
+                  <div style="max-width:560px">
+                    <h3 style="margin:0 0 4px">Đã import 95 nhân viên</h3>
+                    <div class="sc-en" style="margin-bottom:20px">5 dòng bị bỏ qua · ghi audit log IMPORT_STAFF</div>
+                    <div style="display:flex;gap:10px">
+                      <button class="btn btn-primary" onClick="{{ goQR }}">Generate QR cho nhân viên mới</button>
+                      <button class="btn btn-secondary">↓ Tải file lỗi</button>
+                      <button class="btn btn-ghost" onClick="{{ impReset }}">Import tệp khác</button>
+                    </div>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ sQR }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div class="sc-lbl">Staff · QR</div>
+                <h2 style="margin:2px 0 2px">Quản lý QR</h2>
+                <div class="sc-en" style="margin-bottom:22px">QR management — one fixed QR per staff member</div>
+
+                <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:22px">
+                  <div class="field" style="width:190px"><label>Tìm kiếm</label><input class="input" placeholder="Mã hoặc tên"></div>
+                  <div class="field" style="width:160px"><label>Trạng thái QR</label><select class="input"><option>Tất cả</option><option>Active</option><option>Disabled</option><option>Chưa tạo</option></select></div>
+                  <button class="btn btn-primary" style="margin-left:auto" onClick="{{ openBatch }}">Generate QR cho tất cả</button>
+                </div>
+
+                <div style="display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,0.65fr);gap:34px;align-items:start">
+                  <div class="sc-scroll">
+                    <table class="table" style="min-width:520px">
+                      <thead><tr><th>Mã</th><th>Họ tên</th><th>QR</th><th>Cập nhật</th><th></th></tr></thead>
+                      <tbody>
+                        <sc-for list="{{ qrRows }}" as="q" hint-placeholder-count="8">
+                          <tr style="{{ q.rowStyle }}">
+                            <td><strong>{{ q.code }}</strong></td>
+                            <td>{{ q.name }}</td>
+                            <td><span class="tag" style="{{ q.style }}">{{ q.status }}</span></td>
+                            <td style="color:color-mix(in srgb, var(--color-text) 60%, transparent)">{{ q.updated }}</td>
+                            <td style="text-align:right"><button class="btn btn-ghost" onClick="{{ q.select }}">{{ q.action }}</button></td>
+                          </tr>
+                        </sc-for>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div style="position:sticky;top:16px">
+                    <h4 style="margin:0 0 2px">{{ qrTitle }}</h4>
+                    <div class="sc-en" style="margin-bottom:16px">{{ qrSub }}</div>
+
+                    <sc-if value="{{ qrEmpty }}" hint-placeholder-val="{{ false }}">
+                      <div style="padding:34px 20px;background:var(--color-surface);border-radius:2px;text-align:center">
+                        <div style="font-family:var(--font-heading);font-weight:600;font-size:17px;margin-bottom:6px">Chưa có QR</div>
+                        <div class="sc-en" style="margin-bottom:14px">No QR generated for this staff member</div>
+                        <button class="btn btn-primary" onClick="{{ generateOne }}">Generate QR</button>
+                      </div>
+                    </sc-if>
+
+                    <sc-if value="{{ qrHas }}" hint-placeholder-val="{{ true }}">
+                      <div>
+                        <div style="display:flex;justify-content:center;padding:18px;background:#fff;border-radius:2px;box-shadow:var(--shadow-sm)">
+                          <div style="{{ qrGridStyle }}">
+                            <sc-for list="{{ qrCells }}" as="c" hint-placeholder-count="120">
+                              <span style="{{ c }}"></span>
+                            </sc-for>
+                          </div>
+                        </div>
+                        <div style="font-size:12px;margin-top:10px;word-break:break-all">smart.cinema.vn/f/<strong>{{ qrToken }}</strong></div>
+                        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:14px">
+                          <button class="btn btn-secondary" onClick="{{ toastCopy }}">Copy URL</button>
+                          <button class="btn btn-secondary" onClick="{{ toastPng }}">PNG</button>
+                          <button class="btn btn-secondary" onClick="{{ toastSvg }}">SVG</button>
+                          <button class="btn btn-primary" onClick="{{ showPrint }}">Mẫu in</button>
+                        </div>
+                        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">
+                          <button class="btn btn-ghost" onClick="{{ openRegen }}">Regenerate</button>
+                          <button class="btn btn-ghost" style="color:var(--color-accent-2-700)" onClick="{{ openDisable }}">Disable</button>
+                        </div>
+                        <p class="sc-en" style="margin-top:16px;line-height:1.6">QR cố định theo nhân viên; đổi quầy POS không đổi QR. Regenerate làm token cũ mất hiệu lực ngay.</p>
+                      </div>
+                    </sc-if>
+                  </div>
+                </div>
+
+                <sc-if value="{{ printOpen }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:44px;padding-top:24px;border-top:1px solid var(--color-divider)">
+                    <div style="display:flex;align-items:flex-end;gap:16px;margin-bottom:20px">
+                      <div>
+                        <h4 style="margin:0 0 2px">Mẫu in tại quầy POS</h4>
+                        <div class="sc-en">Print template · A6 105 × 148 mm · safe zone quanh QR</div>
+                      </div>
+                      <div style="margin-left:auto;display:flex;gap:8px">
+                        <button class="btn btn-secondary" onClick="{{ toastPdf }}">↓ PDF</button>
+                        <button class="btn btn-primary" onClick="{{ toastPrint }}">In</button>
+                        <button class="btn btn-ghost" onClick="{{ hidePrint }}">Đóng</button>
+                      </div>
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:30px;align-items:flex-start">
+                      <div style="width:298px;background:#fff;padding:26px 24px 18px;box-shadow:var(--shadow-md);border-radius:2px;display:flex;flex-direction:column;align-items:center;text-align:center">
+                        <image-slot id="print-logo" style="width:130px;height:38px" shape="rect" fit="contain" src="https://www.galaxycine.vn/_next/static/media/logo-glx-header.8bbdac6e.png" placeholder="Logo"></image-slot>
+                        <div style="margin:22px 0 20px;padding:12px;border:1px solid var(--color-neutral-200)">
+                          <div style="{{ qrGridStyleLg }}">
+                            <sc-for list="{{ qrCells }}" as="c" hint-placeholder-count="120">
+                              <span style="{{ c }}"></span>
+                            </sc-for>
+                          </div>
+                        </div>
+                        <div style="font-family:var(--font-heading);font-weight:600;font-size:19px;line-height:1.2;letter-spacing:-0.01em">QUÉT MÃ ĐỂ ĐÁNH GIÁ<br>TRẢI NGHIỆM CỦA BẠN</div>
+                        <div style="font-size:12px;font-style:italic;color:var(--color-neutral-700);margin-top:6px">Scan to rate your experience</div>
+                        <div style="font-size:13px;margin-top:14px;color:var(--color-accent-700)">Chỉ mất 15–30 giây</div>
+                        <div style="margin-top:20px;padding-top:10px;border-top:1px dotted var(--color-neutral-300);width:100%;font-size:9px;letter-spacing:.1em;color:var(--color-neutral-600);display:flex;justify-content:space-between">
+                          <span>{{ qrStaffCode }}</span><span>{{ qrToken }}</span>
+                        </div>
+                      </div>
+                      <div style="max-width:340px;font-size:13px;line-height:1.6">
+                        <h5 style="margin:0 0 8px">Yêu cầu in</h5>
+                        <ul style="margin:0 0 16px;padding-left:16px">
+                          <li>QR ≥ 35 mm, tương phản cao, nền trắng trơn</li>
+                          <li>Safe zone ≥ 4 modules quanh QR</li>
+                          <li>Không đặt QR trên nền hình ảnh</li>
+                          <li>Metadata (mã NV, token) chỉ ở chân thẻ cho manager</li>
+                          <li>Không in tên nhân viên ở mặt khách xem</li>
+                        </ul>
+                        <h5 style="margin:0 0 8px">Định dạng</h5>
+                        <div style="display:flex;flex-wrap:wrap;gap:6px">
+                          <span class="tag tag-neutral">A6 card</span><span class="tag tag-neutral">A5 poster</span><span class="tag tag-neutral">80 × 80 sticker</span><span class="tag tag-neutral">Tent card</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ sRank }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div class="sc-lbl">Performance</div>
+                <h2 style="margin:2px 0 2px">{{ rankTitle }}</h2>
+                <div class="sc-en" style="margin-bottom:8px">{{ rankSub }}</div>
+                <p style="font-size:13px;background:var(--color-surface);display:inline-block;padding:6px 12px;border-radius:2px">Cần tối thiểu <strong>20 feedback</strong> để vào ranking · <code>minimumFeedbackForRanking = 20</code></p>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:40px;margin-top:18px">
+                  <div>
+                    <h4 style="margin:0 0 14px">Top</h4>
+                    <table class="table">
+                      <thead><tr><th>#</th><th>{{ rankUnit }}</th><th style="text-align:right">Điểm</th><th style="text-align:right">Feedback</th></tr></thead>
+                      <tbody>
+                        <sc-for list="{{ rankTop }}" as="r" hint-placeholder-count="5">
+                          <tr><td>{{ r.pos }}</td><td>{{ r.label }}</td><td style="text-align:right"><strong>{{ r.avg }}</strong></td><td style="text-align:right">{{ r.n }}</td></tr>
+                        </sc-for>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div>
+                    <h4 style="margin:0 0 14px">Cần cải thiện</h4>
+                    <table class="table">
+                      <thead><tr><th>#</th><th>{{ rankUnit }}</th><th style="text-align:right">Điểm</th><th style="text-align:right">Feedback</th></tr></thead>
+                      <tbody>
+                        <sc-for list="{{ rankBottom }}" as="r" hint-placeholder-count="5">
+                          <tr><td>{{ r.pos }}</td><td>{{ r.label }}</td><td style="text-align:right;color:var(--color-accent-2-700)"><strong>{{ r.avg }}</strong></td><td style="text-align:right">{{ r.n }}</td></tr>
+                        </sc-for>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div style="margin-top:34px">
+                  <h4 style="margin:0 0 10px">Chưa đủ điều kiện</h4>
+                  <table class="table" style="max-width:520px">
+                    <thead><tr><th>Nhân viên</th><th style="text-align:right">Điểm</th><th style="text-align:right">Feedback</th><th>Trạng thái</th></tr></thead>
+                    <tbody>
+                      <tr><td>GS041 · Trần Thị M</td><td style="text-align:right">5.00</td><td style="text-align:right">1</td><td><span class="tag tag-neutral">Not eligible</span></td></tr>
+                      <tr><td>GS044 · Lê Văn P</td><td style="text-align:right">4.90</td><td style="text-align:right">11</td><td><span class="tag tag-neutral">Not eligible</span></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ sPerf }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <button class="btn btn-ghost" style="padding-left:0" onClick="{{ goDash }}">← Dashboard</button>
+                <div style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:20px;margin:8px 0 26px">
+                  <div>
+                    <div class="sc-lbl">Staff performance detail</div>
+                    <h2 style="margin:2px 0 0">{{ perfName }}</h2>
+                    <div style="font-size:13px;color:color-mix(in srgb, var(--color-text) 60%, transparent)">{{ perfCode }} · {{ perfCinema }} · <span class="tag tag-accent">Active</span></div>
+                  </div>
+                  <button class="btn btn-primary" style="margin-left:auto" onClick="{{ openCoaching }}">Tạo coaching</button>
+                </div>
+
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:26px;margin-bottom:36px">
+                  <div><div class="sc-lbl">Feedback</div><div class="sc-kpi">{{ perfN }}</div></div>
+                  <div><div class="sc-lbl">Điểm TB</div><div class="sc-kpi">{{ perfAvg }}</div></div>
+                  <div><div class="sc-lbl">Tích cực</div><div class="sc-kpi" style="color:var(--color-accent-700)">{{ perfPos }}</div></div>
+                  <div><div class="sc-lbl">Tiêu cực</div><div class="sc-kpi" style="color:var(--color-accent-2-700)">{{ perfNeg }}</div></div>
+                  <div><div class="sc-lbl">Xếp hạng</div><div class="sc-kpi">{{ perfRank }}</div></div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:40px;margin-bottom:40px">
+                  <div>
+                    <h4 style="margin:0 0 2px">Xu hướng điểm</h4>
+                    <div class="sc-en" style="margin-bottom:12px">Rating trend · before / after coaching</div>
+                    <svg viewBox="0 0 320 110" style="width:100%;height:auto">
+                      <line x1="170" y1="0" x2="170" y2="100" stroke="var(--color-accent-2)" stroke-dasharray="3 3"></line>
+                      <polyline points="{{ perfTrend }}" fill="none" stroke="var(--color-accent)" stroke-width="2"></polyline>
+                      <text x="174" y="12" font-size="9" fill="var(--color-accent-2-700)">Coaching 29/08</text>
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 style="margin:0 0 2px">Lý do nổi bật</h4>
+                    <div class="sc-en" style="margin-bottom:12px">Reason distribution</div>
+                    <div style="display:flex;flex-direction:column;gap:7px">
+                      <sc-for list="{{ perfReasons }}" as="r" hint-placeholder-count="4">
+                        <div style="display:grid;grid-template-columns:minmax(0,1fr) 40px;gap:10px;font-size:13px;align-items:center">
+                          <span><span style="display:block">{{ r.vi }}</span><span style="height:8px;background:var(--color-surface);display:block;margin-top:3px"><span style="{{ r.barStyle }}"></span></span></span>
+                          <span style="text-align:right;color:color-mix(in srgb, var(--color-text) 60%, transparent)">{{ r.n }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:40px">
+                  <div>
+                    <h4 style="margin:0 0 12px">Feedback tiêu cực gần nhất</h4>
+                    <table class="table">
+                      <thead><tr><th>Thời gian</th><th>Điểm</th><th>Lý do</th></tr></thead>
+                      <tbody>
+                        <sc-for list="{{ perfNegList }}" as="f" hint-placeholder-count="4">
+                          <tr style="cursor:pointer" onClick="{{ f.open }}"><td style="white-space:nowrap">{{ f.time }}</td><td>{{ f.rating }} · {{ f.short }}</td><td style="font-size:12px">{{ f.reasonText }}</td></tr>
+                        </sc-for>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div>
+                    <h4 style="margin:0 0 12px">Lịch sử coaching</h4>
+                    <table class="table">
+                      <thead><tr><th>Ngày</th><th>Chủ đề</th><th>Trạng thái</th></tr></thead>
+                      <tbody>
+                        <tr><td>29/08</td><td>Tư vấn promotion</td><td><span class="tag tag-accent">Completed</span></td></tr>
+                        <tr><td>05/09</td><td>Thời gian phục vụ</td><td><span class="tag tag-outline">Open</span></td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ sCoach }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div class="sc-lbl">Coaching</div>
+                <h2 style="margin:2px 0 2px">Coaching cases</h2>
+                <div class="sc-en" style="margin-bottom:22px">Từ feedback → vấn đề → hành động → follow-up</div>
+                <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:22px">
+                  <div class="seg">
+                    <label class="seg-opt"><input type="radio" name="cst" checked>Tất cả</label>
+                    <label class="seg-opt"><input type="radio" name="cst">Open</label>
+                    <label class="seg-opt"><input type="radio" name="cst">In progress</label>
+                    <label class="seg-opt"><input type="radio" name="cst">Completed</label>
+                  </div>
+                  <button class="btn btn-primary" style="margin-left:auto" onClick="{{ openCoaching }}">+ Tạo coaching</button>
+                </div>
+                <div class="sc-scroll">
+                  <table class="table" style="min-width:760px">
+                    <thead><tr><th>Nhân viên</th><th>Chủ đề</th><th>Hành động</th><th>Follow-up</th><th>Trạng thái</th><th>Người tạo</th></tr></thead>
+                    <tbody>
+                      <sc-for list="{{ coachRows }}" as="c" hint-placeholder-count="4">
+                        <tr>
+                          <td><strong>{{ c.code }}</strong> · {{ c.name }}</td>
+                          <td>{{ c.topic }}</td>
+                          <td style="font-size:12px;color:color-mix(in srgb, var(--color-text) 65%, transparent)">{{ c.action }}</td>
+                          <td>{{ c.follow }}</td>
+                          <td><span class="tag" style="{{ c.style }}">{{ c.status }}</span></td>
+                          <td style="font-size:12px">{{ c.by }}</td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+                <div style="margin-top:34px">
+                  <h4 style="margin:0 0 12px">Vòng đời một case</h4>
+                  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;font-size:13px">
+                    <span class="tag tag-accent">OPEN</span><span>→</span><span class="tag tag-accent">IN_PROGRESS</span><span>→</span><span class="tag tag-accent">COMPLETED</span><span>·</span><span class="tag tag-neutral">CANCELLED</span>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ sCfgRating }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div class="sc-lbl">Configuration</div>
+                <h2 style="margin:2px 0 2px">Cấu hình rating</h2>
+                <div class="sc-en" style="margin-bottom:24px">Đổi kiểu rating không cần deploy frontend</div>
+                <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,340px);gap:40px;align-items:start">
+                  <div>
+                    <div class="field" style="max-width:420px;margin-bottom:22px">
+                      <label>Kiểu hiển thị / ratingType</label>
+                      <div class="seg" style="margin-top:4px">
+                        <sc-for list="{{ ratingTypes }}" as="t" hint-placeholder-count="4">
+                          <label class="seg-opt" style="{{ t.style }}"><input type="radio" name="rt" checked="{{ t.on }}" onChange="{{ t.pick }}">{{ t.label }}</label>
+                        </sc-for>
+                      </div>
+                    </div>
+                    <table class="table">
+                      <thead><tr><th>Giá trị</th><th>Icon</th><th>Nhãn hiển thị</th><th>Bật</th><th></th></tr></thead>
+                      <tbody>
+                        <sc-for list="{{ ratingOpts }}" as="r" hint-placeholder-count="5">
+                          <tr>
+                            <td><strong>{{ r.value }}</strong></td>
+                            <td><span style="width:22px;height:22px;display:inline-flex">{{ r.svg }}</span></td>
+                            <td><input class="input" style="max-width:220px" value="{{ r.vi }}"></td>
+                            <td><input type="checkbox" checked style="accent-color:var(--color-accent)"></td>
+                            <td style="text-align:right;white-space:nowrap;color:color-mix(in srgb, var(--color-text) 45%, transparent)">↑ ↓</td>
+                          </tr>
+                        </sc-for>
+                      </tbody>
+                    </table>
+                    <div style="display:flex;gap:8px;margin-top:18px">
+                      <button class="btn btn-primary" onClick="{{ toastSaved }}">Lưu cấu hình</button>
+                      <button class="btn btn-ghost">Huỷ</button>
+                    </div>
+                  </div>
+                  <div style="position:sticky;top:16px">
+                    <h4 style="margin:0 0 2px">Live preview</h4>
+                    <div class="sc-en" style="margin-bottom:14px">Customer form — {{ ratingTypeLabel }}</div>
+                    <div style="padding:20px;background:var(--color-surface);border-radius:2px">
+                      <div style="font-size:15px;margin-bottom:12px">Trải nghiệm của bạn hôm nay thế nào?</div>
+                      <div style="display:flex;flex-wrap:wrap;gap:6px">
+                        <sc-for list="{{ previewOpts }}" as="p" hint-placeholder-count="5">
+                          <span style="{{ p.style }}">{{ p.render }}</span>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ sCfgReason }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div class="sc-lbl">Configuration</div>
+                <h2 style="margin:2px 0 2px">Cấu hình lý do feedback</h2>
+                <div class="sc-en" style="margin-bottom:22px">Reasons phụ thuộc rating · reorder · enable/disable</div>
+                <div style="display:flex;gap:10px;margin-bottom:20px">
+                  <button class="btn btn-primary" onClick="{{ toastSaved }}">+ Thêm lý do</button>
+                </div>
+                <div class="sc-scroll">
+                  <table class="table" style="min-width:760px">
+                    <thead><tr><th>Mã</th><th>Nhãn (VI / EN)</th><th>Loại</th><th>Áp dụng cho rating</th><th>Bắt buộc</th><th>Trạng thái</th><th></th></tr></thead>
+                    <tbody>
+                      <sc-for list="{{ reasonConfig }}" as="r" hint-placeholder-count="8">
+                        <tr>
+                          <td style="font-size:12px"><code>{{ r.code }}</code></td>
+                          <td>{{ r.vi }} <span class="sc-en">{{ r.en }}</span></td>
+                          <td><span class="tag" style="{{ r.typeStyle }}">{{ r.type }}</span></td>
+                          <td>
+                            <span style="display:flex;gap:3px">
+                              <sc-for list="{{ r.scale }}" as="v" hint-placeholder-count="5">
+                                <span style="{{ v.style }}">{{ v.n }}</span>
+                              </sc-for>
+                            </span>
+                          </td>
+                          <td><input type="checkbox" style="accent-color:var(--color-accent)"></td>
+                          <td><span class="tag" style="{{ r.statusStyle }}">{{ r.status }}</span></td>
+                          <td style="text-align:right;color:color-mix(in srgb, var(--color-text) 45%, transparent)">↑ ↓</td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ sCinemas }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div class="sc-lbl">Administration</div>
+                <h2 style="margin:2px 0 2px">Rạp</h2>
+                <div class="sc-en" style="margin-bottom:22px">Cinemas — code, name, status</div>
+                <button class="btn btn-primary" style="margin-bottom:18px" onClick="{{ openCreateCinema }}">+ Thêm rạp</button>
+                <table class="table" style="max-width:680px">
+                  <thead><tr><th>Code</th><th>Tên rạp</th><th>Nhân viên</th><th>Trạng thái</th><th></th></tr></thead>
+                  <tbody>
+                    <sc-for list="{{ cinemaAdmin }}" as="c" hint-placeholder-count="6">
+                      <tr><td><strong>{{ c.code }}</strong></td><td>{{ c.name }}</td><td>{{ c.staff }}</td><td><span class="tag" style="{{ c.style }}">{{ c.status }}</span></td><td style="text-align:right"><button class="btn btn-ghost">Sửa</button></td></tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ sUsers }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div class="sc-lbl">Administration</div>
+                <h2 style="margin:2px 0 2px">Người dùng quản trị</h2>
+                <div class="sc-en" style="margin-bottom:22px">Users — Keycloak mapping, role &amp; cinema scope</div>
+                <button class="btn btn-primary" style="margin-bottom:18px" onClick="{{ openCreateUser }}">+ Thêm người dùng</button>
+                <div class="sc-scroll">
+                  <table class="table" style="min-width:700px">
+                    <thead><tr><th>Username</th><th>Họ tên</th><th>Role</th><th>Phạm vi rạp</th><th>Trạng thái</th><th></th></tr></thead>
+                    <tbody>
+                      <sc-for list="{{ userRows }}" as="u" hint-placeholder-count="4">
+                        <tr><td><code>{{ u.username }}</code></td><td>{{ u.name }}</td><td><span class="tag" style="{{ u.roleStyle }}">{{ u.role }}</span></td><td>{{ u.scope }}</td><td><span class="tag" style="{{ u.style }}">{{ u.status }}</span></td><td style="text-align:right"><button class="btn btn-ghost">Sửa</button></td></tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ sNotif }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div class="sc-lbl">Notifications</div>
+                <h2 style="margin:2px 0 2px">Hộp thư thông báo</h2>
+                <div class="sc-en" style="margin-bottom:22px">Cảnh báo realtime · báo cáo định kỳ · sự kiện hệ thống</div>
+
+                <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px">
+                  <sc-for list="{{ notifFilters }}" as="f" hint-placeholder-count="5">
+                    <button class="btn" style="{{ f.style }}" onClick="{{ f.pick }}">{{ f.label }}</button>
+                  </sc-for>
+                  <button class="btn btn-ghost" style="margin-left:auto" onClick="{{ markAllUnread }}">Đặt lại chưa đọc</button>
+                  <button class="btn btn-secondary" onClick="{{ markAllRead }}">Đánh dấu tất cả đã đọc</button>
+                </div>
+
+                <sc-if value="{{ notifEmpty }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding:56px 0;max-width:420px">
+                    <h4 style="margin:0 0 6px">Không có thông báo</h4>
+                    <div style="font-size:14px;color:color-mix(in srgb, var(--color-text) 62%, transparent)">{{ notifEmptyText }}</div>
+                  </div>
+                </sc-if>
+
+                <div>
+                  <sc-for list="{{ notifList }}" as="n" hint-placeholder-count="6">
+                    <div style="{{ n.rowStyle }}">
+                      <span style="{{ n.dotStyle }}"></span>
+                      <div style="min-width:0">
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:5px">
+                          <span class="tag" style="{{ n.kindStyle }}">{{ n.kind }}</span>
+                          <span style="font-size:12px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ n.time }} · {{ n.ago }}</span>
+                        </div>
+                        <h4 style="{{ n.titleStyle }}">{{ n.title }}</h4>
+                        <div style="font-size:14px;color:color-mix(in srgb, var(--color-text) 70%, transparent);text-wrap:pretty">{{ n.body }}</div>
+                      </div>
+                      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+                        <button class="btn btn-secondary" style="font-size:12px;padding:5px 10px" onClick="{{ n.open }}">{{ n.cta }}</button>
+                        <button class="btn btn-ghost" style="font-size:12px;padding:5px 10px" onClick="{{ n.toggleRead }}">{{ n.readLabel }}</button>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <div style="margin-top:34px;max-width:640px">
+                  <h4 style="margin:0 0 8px">Quy ước</h4>
+                  <div style="font-size:13px;color:color-mix(in srgb, var(--color-text) 68%, transparent);text-wrap:pretty">
+                    ALERT là cảnh báo cần xử lý trong ca · SYSTEM là sự kiện vận hành (import, QR, nghi vấn) · DIGEST là báo cáo theo lịch · TASK là việc coaching đến hạn. Thông báo giữ 90 ngày, sau đó tự lưu trữ.
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ sNotifRules }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div class="sc-lbl">Notifications</div>
+                <h2 style="margin:2px 0 2px">Quy tắc &amp; kênh gửi</h2>
+                <div class="sc-en" style="margin-bottom:22px">Ai nhận cái gì, qua kênh nào, khi nào</div>
+
+                <sc-if value="{{ rulesReadOnly }}" hint-placeholder-val="{{ false }}">
+                  <div style="max-width:560px;margin-bottom:22px;font-size:13px;color:var(--color-accent-2-800)">
+                    Vai trò Cinema Manager chỉ xem được quy tắc áp dụng cho rạp mình. Chỉnh sửa thuộc Head Office.
+                  </div>
+                </sc-if>
+
+                <div class="sc-scroll">
+                  <table class="table" style="min-width:900px">
+                    <thead><tr><th>Mã</th><th>Sự kiện</th><th>Điều kiện</th><th>Người nhận</th><th>Kênh</th><th>Trạng thái</th><th></th></tr></thead>
+                    <tbody>
+                      <sc-for list="{{ notifRules }}" as="r" hint-placeholder-count="7">
+                        <tr>
+                          <td style="font-size:12px"><code>{{ r.code }}</code></td>
+                          <td>{{ r.event }}</td>
+                          <td style="font-size:12px;color:color-mix(in srgb, var(--color-text) 65%, transparent)">{{ r.cond }}</td>
+                          <td style="font-size:12px">{{ r.to }}</td>
+                          <td style="font-size:12px">{{ r.chText }}</td>
+                          <td><span class="tag" style="{{ r.statusStyle }}">{{ r.statusLabel }}</span></td>
+                          <td style="text-align:right">
+                            <sc-if value="{{ r.canEdit }}" hint-placeholder-val="{{ true }}">
+                              <button class="btn btn-ghost" style="font-size:12px;padding:4px 8px" onClick="{{ toastSaved }}">Sửa</button>
+                            </sc-if>
+                          </td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:40px;margin-top:40px">
+                  <div>
+                    <h4 style="margin:0 0 2px">Kênh gửi</h4>
+                    <div class="sc-en" style="margin-bottom:14px">Channels · phase 1</div>
+                    <table class="table">
+                      <thead><tr><th>Kênh</th><th>Trạng thái</th><th>Ghi chú</th></tr></thead>
+                      <tbody>
+                        <tr><td>In-app</td><td><span class="tag tag-accent">Bật</span></td><td style="font-size:12px">Mặc định, không tắt được</td></tr>
+                        <tr><td>Email</td><td><span class="tag tag-accent">Bật</span></td><td style="font-size:12px">SMTP Head Office</td></tr>
+                        <tr><td>Zalo OA</td><td><span class="tag tag-accent">Bật</span></td><td style="font-size:12px">Chỉ cảnh báo NEG_BURST</td></tr>
+                        <tr><td>SMS</td><td><span class="tag tag-neutral">Tắt</span></td><td style="font-size:12px">Dự kiến phase 2</td></tr>
+                      </tbody>
+                    </table>
+                    <div style="margin-top:18px;font-size:13px;color:color-mix(in srgb, var(--color-text) 68%, transparent);text-wrap:pretty">
+                      Giờ yên lặng 23:00–07:00: cảnh báo không đẩy Email/Zalo mà gộp vào digest sáng hôm sau. Chống dội: tối đa 1 cảnh báo cùng loại / nhân viên / 30 phút.
+                    </div>
+                  </div>
+                  <div>
+                    <h4 style="margin:0 0 2px">Nhật ký gửi</h4>
+                    <div class="sc-en" style="margin-bottom:14px">Delivery log · 24 giờ gần nhất</div>
+                    <table class="table">
+                      <thead><tr><th>Thời gian</th><th>Quy tắc</th><th>Người nhận</th><th>Kênh</th><th>Kết quả</th></tr></thead>
+                      <tbody>
+                        <sc-for list="{{ sendLog }}" as="l" hint-placeholder-count="4">
+                          <tr>
+                            <td style="font-size:12px">{{ l.time }}</td>
+                            <td style="font-size:12px"><code>{{ l.rule }}</code></td>
+                            <td style="font-size:12px">{{ l.to }}</td>
+                            <td style="font-size:12px">{{ l.ch }}</td>
+                            <td><span class="tag" style="{{ l.style }}">{{ l.status }}</span></td>
+                          </tr>
+                        </sc-for>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ sAudit }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div class="sc-lbl">Administration</div>
+                <h2 style="margin:2px 0 2px">Audit log</h2>
+                <div class="sc-en" style="margin-bottom:22px">Privileged actions — Phase 1 requirement</div>
+                <div style="display:flex;flex-direction:column">
+                  <sc-for list="{{ auditRows }}" as="a" hint-placeholder-count="6">
+                    <div style="display:grid;grid-template-columns:130px 160px minmax(0,1fr);gap:16px;padding:12px 0;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);font-size:13px">
+                      <span style="color:color-mix(in srgb, var(--color-text) 60%, transparent)">{{ a.time }}</span>
+                      <span>{{ a.actor }}</span>
+                      <span><strong style="color:var(--color-accent-700)">{{ a.action }}</strong> — {{ a.target }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ sHub }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div class="sc-lbl">Sau đăng nhập</div>
+                <h2 style="margin:2px 0 2px">Chọn chức năng</h2>
+                <div class="sc-en" style="margin-bottom:6px">Module launcher — Smart Cinema Platform</div>
+                <div style="font-size:13px;color:color-mix(in srgb, var(--color-text) 62%, transparent);margin-bottom:30px">
+                  {{ hubUser }} · {{ hubScope }} — chỉ hiện các module bạn có quyền truy cập.
+                </div>
+
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;max-width:1000px">
+                  <sc-for list="{{ hubModules }}" as="m" hint-placeholder-count="6">
+                    <div class="card" style="{{ m.style }}" onClick="{{ m.go }}">
+                      <div style="display:flex;align-items:center;gap:8px">
+                        <span class="card-kicker" style="letter-spacing:.08em">{{ m.code }}</span>
+                        <span class="tag" style="{{ m.phaseStyle }}">{{ m.phase }}</span>
+                      </div>
+                      <div class="card-title" style="margin:0">{{ m.vi }}</div>
+                      <div class="sc-en" style="margin:-4px 0 0">{{ m.en }}</div>
+                      <div class="card-body" style="flex:1;text-wrap:pretty">{{ m.desc }}</div>
+                      <div class="card-meta" style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+                        <span>{{ m.meta }}</span>
+                        <span style="{{ m.actionStyle }};color:var(--color-accent-700);font-weight:600">{{ m.actionLabel }}</span>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <div style="margin-top:34px;max-width:620px;font-size:13px;color:color-mix(in srgb, var(--color-text) 68%, transparent);text-wrap:pretty">
+                  Phase 1 chỉ mở Transaction Feedback QR. Các module còn lại giữ chỗ trong menu để điều hướng và phân quyền không phải làm lại khi mở rộng — quyền truy cập lấy từ role trong Keycloak.
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ sLogin }}" hint-placeholder-val="{{ false }}">
+              <div style="max-width:400px;padding-top:40px">
+                <div class="sc-lbl">Keycloak · OIDC + PKCE</div>
+                <h2 style="margin:2px 0 4px">Đăng nhập quản trị</h2>
+                <div class="sc-en" style="margin-bottom:26px">Admin sign in — authorization code flow</div>
+                <div style="display:flex;flex-direction:column;gap:16px">
+                  <div class="field"><label>Tên đăng nhập</label><input class="input" style="min-height:42px" value="manager.gnd"></div>
+                  <div class="field"><label>Mật khẩu</label><input class="input" style="min-height:42px" type="password" value="••••••••"><div style="font-size:12px;color:var(--color-accent-2-700);margin-top:4px">Sai tên đăng nhập hoặc mật khẩu.</div></div>
+                  <button class="btn btn-primary btn-block" style="min-height:44px" onClick="{{ goHub }}">Đăng nhập</button>
+                  <a href="#" style="font-size:13px">Quên mật khẩu?</a>
+                </div>
+              </div>
+            </sc-if>
+
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ aLoading }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="height:12px;width:120px;background:var(--color-surface);margin-bottom:10px"></div>
+            <div style="height:34px;width:280px;background:var(--color-surface);margin-bottom:26px"></div>
+            <div style="display:flex;gap:26px;margin-bottom:34px">
+              <div style="height:56px;width:120px;background:var(--color-surface)"></div>
+              <div style="height:56px;width:120px;background:var(--color-surface)"></div>
+              <div style="height:56px;width:120px;background:var(--color-surface)"></div>
+              <div style="height:56px;width:120px;background:var(--color-surface)"></div>
+            </div>
+            <div style="height:150px;background:var(--color-surface);margin-bottom:22px"></div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="height:32px;background:var(--color-surface)"></div>
+              <div style="height:32px;background:var(--color-surface);opacity:.7"></div>
+              <div style="height:32px;background:var(--color-surface);opacity:.5"></div>
+              <div style="height:32px;background:var(--color-surface);opacity:.3"></div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ aEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="max-width:460px;padding-top:60px">
+            <div class="sc-lbl">Empty state</div>
+            <h2 style="margin:2px 0 6px">Chưa có feedback nào</h2>
+            <p style="font-size:15px">Khi nhân viên đã có QR và khách bắt đầu quét, dữ liệu sẽ xuất hiện tại đây.</p>
+            <p class="sc-en">No feedback yet in the selected range.</p>
+            <div style="display:flex;gap:8px;margin-top:10px">
+              <button class="btn btn-primary" onClick="{{ goQR }}">Đến QR Management</button>
+              <button class="btn btn-secondary">Mở rộng khoảng ngày</button>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ aError }}" hint-placeholder-val="{{ false }}">
+          <div style="max-width:460px;padding-top:60px">
+            <div class="sc-lbl" style="color:var(--color-accent-2-700)">API error · request-id 8f2c…</div>
+            <h2 style="margin:2px 0 6px">Không tải được dữ liệu</h2>
+            <p style="font-size:15px">Máy chủ đang không phản hồi. Bạn có thể thử lại; nếu vẫn lỗi, gửi request-id cho đội kỹ thuật.</p>
+            <button class="btn btn-primary" onClick="{{ aReadyGo }}">Thử lại</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ aDenied }}" hint-placeholder-val="{{ false }}">
+          <div style="max-width:480px;padding-top:60px">
+            <div class="sc-lbl" style="color:var(--color-accent-2-700)">403 · Permission denied</div>
+            <h2 style="margin:2px 0 6px">Bạn không có quyền xem nội dung này</h2>
+            <p style="font-size:15px">Cinema Manager chỉ truy cập dữ liệu của rạp mình. Quyền được enforce ở backend, không chỉ ở route guard.</p>
+            <p class="sc-en">Contact Head Office if you need broader access.</p>
+            <button class="btn btn-secondary" onClick="{{ aReadyGo }}">Về dashboard rạp</button>
+          </div>
+        </sc-if>
+
+      </main>
+    </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ drawerOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:color-mix(in srgb, var(--color-neutral-900) 45%, transparent);display:flex;justify-content:flex-end;z-index:40" onClick="{{ closeDrawer }}">
+      <div style="width:min(460px,100%);height:100%;background:var(--color-bg);box-shadow:var(--shadow-lg);overflow-y:auto;padding:26px 28px" onClick="{{ stop }}">
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:20px">
+          <div>
+            <div class="sc-lbl">Feedback detail</div>
+            <h3 style="margin:2px 0 0">{{ dTime }}</h3>
+          </div>
+          <button class="btn btn-icon btn-secondary" style="margin-left:auto" onClick="{{ closeDrawer }}">✕</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+          <span style="width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center">{{ dIcon }}</span>
+          <div>
+            <div style="font-family:var(--font-heading);font-weight:600;font-size:22px">{{ dRating }} / 5</div>
+            <div class="sc-en">{{ dRatingLabel }}</div>
+          </div>
+          <span class="tag" style="{{ dFlagStyle }}">{{ dFlagText }}</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px;font-size:14px">
+          <div><div class="sc-lbl">Khách hàng</div>{{ dName }} · {{ dPhone }}</div>
+          <div><div class="sc-lbl">Nhân viên</div><strong>{{ dStaffCode }}</strong> · {{ dStaffName }}</div>
+          <div><div class="sc-lbl">Rạp</div>{{ dCinema }}</div>
+          <div>
+            <div class="sc-lbl" style="margin-bottom:5px">Lý do</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              <sc-for list="{{ dReasons }}" as="r" hint-placeholder-count="2">
+                <span class="tag" style="{{ r.style }}">{{ r.vi }}</span>
+              </sc-for>
+            </div>
+          </div>
+          <div><div class="sc-lbl">Bình luận</div><span style="font-style:italic">“{{ dComment }}”</span></div>
+          <div style="padding-top:14px;border-top:1px solid var(--color-divider)">
+            <div class="sc-lbl" style="margin-bottom:6px">Metadata</div>
+            <div style="font-size:12px;line-height:1.7;color:color-mix(in srgb, var(--color-text) 65%, transparent)">
+              QR token {{ dToken }}<br>ipHash 9c2f…a71 · consent v1 accepted<br>createdAt {{ dCreated }} (UTC, server time)
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:24px">
+          <button class="btn btn-primary" onClick="{{ openPerfFromDrawer }}">Xem hiệu suất nhân viên</button>
+          <button class="btn btn-secondary" onClick="{{ openCoaching }}">Tạo coaching</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ dialogOpen }}" hint-placeholder-val="{{ false }}">
+    <div class="dialog-backdrop" style="z-index:50" onClick="{{ closeDialog }}">
+      <div class="dialog" onClick="{{ stop }}">
+        <div class="dialog-title">{{ dlgTitle }}</div>
+        <div class="dialog-body">{{ dlgBody }}</div>
+        <sc-if value="{{ dlgForm }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <sc-for list="{{ dlgFields }}" as="f" hint-placeholder-count="3">
+              <div class="field"><label>{{ f.label }}</label><input class="input" placeholder="{{ f.ph }}"></div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <div class="dialog-actions">
+          <button class="btn btn-secondary" onClick="{{ closeDialog }}">Huỷ</button>
+          <button class="btn btn-primary" style="{{ dlgConfirmStyle }}" onClick="{{ confirmDialog }}">{{ dlgConfirm }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--color-neutral-900);color:var(--color-neutral-100);padding:10px 18px;border-radius:2px;font-size:14px;box-shadow:var(--shadow-lg);z-index:60">{{ toast }}</div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1400,&quot;height&quot;:980},&quot;txnEntry&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;scan-first&quot;,&quot;manual-first&quot;,&quot;prefilled&quot;],&quot;default&quot;:&quot;scan-first&quot;,&quot;tsType&quot;:&quot;'scan-first' | 'manual-first' | 'prefilled'&quot;,&quot;section&quot;:&quot;Mã giao dịch&quot;}}">
+class Component extends DCLogic {
+  state = {
+    mode: 'customer', cScreen: 'form',
+    rating: 0, reasons: [], cname: '', phone: '', comment: '', consent: false,
+    txnMode: null, txnId: '',
+    tried: false, submitting: false,
+    role: 'CM', aScreen: 'dash', aState: 'ready',
+    qrIdx: 0, printOpen: false, importStep: 1,
+    drawer: null, dialog: null, toast: '', ratingType: 'ICON+TEXT',
+    perfIdx: 0,
+    notifFilter: 'all', readIds: [3, 5, 6], acctOpen: false
+  };
+
+  NOTIFS = [
+    { id: 0, kind: 'ALERT', time: '05/09 21:59', ago: '2 phút trước', title: 'Chuỗi feedback tiêu cực — GS018 Lê Văn C', body: '3 feedback 1–2★ trong 60 phút tại Galaxy Nguyễn Du. Quy tắc NEG_BURST.', cta: 'Xem feedback', to: 'fb' },
+    { id: 1, kind: 'ALERT', time: '05/09 21:20', ago: '41 phút trước', title: 'Feedback 1★ mới', body: 'Trần Văn L — "Nhân viên trả lời khá gắt." · GS018 · Nguyễn Du', cta: 'Mở chi tiết', to: 'fb' },
+    { id: 2, kind: 'SYSTEM', time: '05/09 20:39', ago: '1 giờ trước', title: 'Phát hiện feedback nghi vấn', body: 'Trùng số điện thoại 09••••9900 trong 2 phút — đã gắn cờ, loại khỏi ranking.', cta: 'Xem feedback', to: 'fb' },
+    { id: 3, kind: 'SYSTEM', time: '05/09 19:44', ago: '3 giờ trước', title: 'Import nhân viên hoàn tất', body: '95 dòng thành công · 5 dòng lỗi. File kết quả có thể tải trong 7 ngày.', cta: 'Mở Import', to: 'import' },
+    { id: 4, kind: 'TASK', time: '05/09 09:00', ago: 'Hôm nay', title: 'Coaching sắp đến hạn follow-up', body: 'Case GS031 Phạm Thị D — hạn 10/09/2026 (còn 5 ngày).', cta: 'Mở case', to: 'coach' },
+    { id: 5, kind: 'DIGEST', time: '05/09 08:00', ago: 'Hôm nay', title: 'Báo cáo ngày 04/09 đã sẵn sàng', body: '187 feedback · 4.58 trung bình · 8% tiêu cực. Gửi qua email lúc 08:00.', cta: 'Mở phân tích', to: 'analytics' },
+    { id: 6, kind: 'SYSTEM', time: '04/09 18:02', ago: 'Hôm qua', title: 'QR của GS040 Đỗ Thu F đã bị thu hồi', body: 'Thực hiện bởi Manager A. QR cũ ngừng nhận feedback ngay lập tức.', cta: 'Quản lý QR', to: 'qr' }
+  ];
+
+  RULES = [
+    { code: 'NEG_INSTANT', event: 'Feedback tiêu cực', cond: 'rating ≤ 2', to: 'Cinema Manager', ch: ['In-app', 'Email'], on: true },
+    { code: 'NEG_BURST', event: 'Chuỗi tiêu cực cùng nhân viên', cond: '≥ 3 feedback ≤ 2★ / 60 phút', to: 'Cinema Manager + Head Office', ch: ['In-app', 'Email', 'Zalo OA'], on: true },
+    { code: 'SUSPICIOUS', event: 'Feedback nghi vấn', cond: 'trùng SĐT trong 10 phút', to: 'Cinema Manager', ch: ['In-app'], on: true },
+    { code: 'DAILY_DIGEST', event: 'Báo cáo ngày', cond: '08:00 hằng ngày', to: 'Cinema Manager + Head Office', ch: ['Email'], on: true },
+    { code: 'WEEKLY_RANK', event: 'Ranking tuần', cond: 'Thứ 2, 09:00', to: 'Head Office', ch: ['Email'], on: true },
+    { code: 'COACH_DUE', event: 'Coaching đến hạn', cond: 'trước hạn 2 ngày', to: 'Người tạo case', ch: ['In-app', 'Email'], on: true },
+    { code: 'QR_EVENT', event: 'QR tạo mới / thu hồi', cond: 'mọi thay đổi QR', to: 'System Admin', ch: ['In-app'], on: false }
+  ];
+
+  SENDLOG = [
+    { time: '05/09 21:59', rule: 'NEG_BURST', to: 'manager.gnd', ch: 'Email', status: 'Đã gửi' },
+    { time: '05/09 21:59', rule: 'NEG_BURST', to: 'ho.analyst', ch: 'Zalo OA', status: 'Đã gửi' },
+    { time: '05/09 21:20', rule: 'NEG_INSTANT', to: 'manager.gnd', ch: 'In-app', status: 'Đã đọc' },
+    { time: '05/09 08:00', rule: 'DAILY_DIGEST', to: 'manager.gtb', ch: 'Email', status: 'Thất bại' }
+  ];
+
+  RATINGS = [
+    { value: 1, vi: 'Rất không hài lòng', en: 'Very unhappy', short: 'Rất kém', mouth: 'M8 17.5 Q12 12.5 16 17.5' },
+    { value: 2, vi: 'Không hài lòng', en: 'Unhappy', short: 'Chưa tốt', mouth: 'M8 16.6 Q12 13.6 16 16.6' },
+    { value: 3, vi: 'Bình thường', en: 'Neutral', short: 'Bình thường', mouth: 'M8.5 15.6 H15.5' },
+    { value: 4, vi: 'Hài lòng', en: 'Happy', short: 'Hài lòng', mouth: 'M8 14.4 Q12 17.4 16 14.4' },
+    { value: 5, vi: 'Rất hài lòng', en: 'Delighted', short: 'Rất tốt', mouth: 'M7.6 13.6 Q12 18.4 16.4 13.6' }
+  ];
+
+  face(r, color) {
+    const e = React.createElement;
+    return e('svg', { viewBox: '0 0 24 24', width: '100%', height: '100%', fill: 'none', stroke: color, strokeWidth: 1.6, strokeLinecap: 'round', key: r.value },
+      e('circle', { cx: 12, cy: 12, r: 9.2, opacity: 0.9 }),
+      e('circle', { cx: 8.9, cy: 9.9, r: 0.9, fill: color, stroke: 'none' }),
+      e('circle', { cx: 15.1, cy: 9.9, r: 0.9, fill: color, stroke: 'none' }),
+      e('path', { d: r.mouth })
+    );
+  }
+
+  POS = ['Thân thiện', 'Tư vấn rõ ràng', 'Phục vụ nhanh', 'Chủ động hỗ trợ', 'Thanh toán thuận tiện', 'Sản phẩm tốt', 'Khác'];
+  NEG = ['Thái độ phục vụ', 'Tư vấn chưa rõ', 'Thời gian chờ lâu', 'Đơn hàng chưa chính xác', 'Thanh toán', 'Chất lượng sản phẩm', 'Khác'];
+
+  STAFF = [
+    { code: 'GS025', name: 'Nguyễn Văn A', cinema: 'Nguyễn Du', status: 'Active', qr: 'Active', updated: '05/09', n: 182, avg: '4.82', pos: '94%', neg: '2%' },
+    { code: 'GS026', name: 'Trần Thị B', cinema: 'Nguyễn Du', status: 'Active', qr: 'Active', updated: '05/09', n: 161, avg: '4.70', pos: '91%', neg: '4%' },
+    { code: 'GS018', name: 'Lê Văn C', cinema: 'Nguyễn Du', status: 'Active', qr: 'Active', updated: '04/09', n: 143, avg: '3.72', pos: '68%', neg: '18%' },
+    { code: 'GS031', name: 'Phạm Thị D', cinema: 'Nguyễn Du', status: 'Active', qr: 'Disabled', updated: '03/09', n: 96, avg: '4.41', pos: '87%', neg: '6%' },
+    { code: 'GS027', name: 'Vũ Minh E', cinema: 'Nguyễn Du', status: 'Active', qr: 'Chưa tạo', updated: '—', n: 0, avg: '—', pos: '—', neg: '—' },
+    { code: 'GS040', name: 'Đỗ Thu F', cinema: 'Nguyễn Du', status: 'Inactive', qr: 'Revoked', updated: '28/08', n: 54, avg: '4.10', pos: '80%', neg: '9%' },
+    { code: 'GS033', name: 'Hoàng Nam G', cinema: 'Nguyễn Du', status: 'Active', qr: 'Active', updated: '05/09', n: 121, avg: '4.55', pos: '90%', neg: '5%' },
+    { code: 'GS041', name: 'Trần Thị M', cinema: 'Nguyễn Du', status: 'Active', qr: 'Active', updated: '05/09', n: 1, avg: '5.00', pos: '100%', neg: '0%' }
+  ];
+
+  FB = [
+    { time: '05/09 21:59', rating: 2, name: 'Nguyễn Văn B', phone: '09••••5678', staffCode: 'GS018', staffName: 'Lê Văn C', cinema: 'Nguyễn Du', reasons: ['Tư vấn chưa rõ', 'Thời gian chờ lâu'], comment: 'Tư vấn ưu đãi chưa rõ, chờ hơi lâu ở quầy.', suspicious: false },
+    { time: '05/09 21:44', rating: 5, name: 'Lê Thị H', phone: '09••••1122', staffCode: 'GS025', staffName: 'Nguyễn Văn A', cinema: 'Nguyễn Du', reasons: ['Thân thiện', 'Phục vụ nhanh'], comment: 'Bạn nhân viên rất nhiệt tình.', suspicious: false },
+    { time: '05/09 21:20', rating: 4, name: 'Phạm Quốc K', phone: '09••••7788', staffCode: 'GS026', staffName: 'Trần Thị B', cinema: 'Nguyễn Du', reasons: ['Tư vấn rõ ràng'], comment: '', suspicious: false },
+    { time: '05/09 20:58', rating: 1, name: 'Trần Văn L', phone: '09••••3344', staffCode: 'GS018', staffName: 'Lê Văn C', cinema: 'Nguyễn Du', reasons: ['Thái độ phục vụ'], comment: 'Nhân viên trả lời khá gắt.', suspicious: false },
+    { time: '05/09 20:41', rating: 5, name: 'Vũ Thị N', phone: '09••••9900', staffCode: 'GS033', staffName: 'Hoàng Nam G', cinema: 'Nguyễn Du', reasons: ['Chủ động hỗ trợ'], comment: '', suspicious: false },
+    { time: '05/09 20:39', rating: 5, name: 'Vũ Thị N', phone: '09••••9900', staffCode: 'GS033', staffName: 'Hoàng Nam G', cinema: 'Nguyễn Du', reasons: ['Chủ động hỗ trợ'], comment: '', suspicious: true },
+    { time: '05/09 20:12', rating: 3, name: 'Đặng Minh P', phone: '09••••2233', staffCode: 'GS031', staffName: 'Phạm Thị D', cinema: 'Nguyễn Du', reasons: ['Thời gian chờ lâu'], comment: 'Xếp hàng khá lâu vào suất tối.', suspicious: false },
+    { time: '05/09 19:50', rating: 4, name: 'Bùi Thanh Q', phone: '09••••4455', staffCode: 'GS025', staffName: 'Nguyễn Văn A', cinema: 'Nguyễn Du', reasons: ['Thanh toán thuận tiện'], comment: '', suspicious: false }
+  ];
+
+  CINEMAS = [
+    { code: 'GND', name: 'Galaxy Nguyễn Du', n: 953, avg: '4.62', neg: '7%', staff: 42, status: 'Active' },
+    { code: 'GTB', name: 'Galaxy Tân Bình', n: 812, avg: '4.55', neg: '9%', staff: 36, status: 'Active' },
+    { code: 'GQT', name: 'Galaxy Quang Trung', n: 744, avg: '4.71', neg: '5%', staff: 31, status: 'Active' },
+    { code: 'GKH', name: 'Galaxy Kinh Dương Vương', n: 590, avg: '4.28', neg: '14%', staff: 27, status: 'Active' },
+    { code: 'GSV', name: 'Galaxy Sala', n: 468, avg: '4.66', neg: '6%', staff: 22, status: 'Active' },
+    { code: 'GHV', name: 'Galaxy Huỳnh Văn Bánh', n: 301, avg: '4.12', neg: '17%', staff: 18, status: 'Paused' }
+  ];
+
+  COACH = [
+    { code: 'GS018', name: 'Lê Văn C', topic: 'Tư vấn promotion', action: 'Roleplay 5 phút trước ca', follow: '12/09/2026', status: 'OPEN', by: 'Manager A' },
+    { code: 'GS031', name: 'Phạm Thị D', topic: 'Thời gian phục vụ', action: 'Shadow quầy giờ cao điểm', follow: '10/09/2026', status: 'IN_PROGRESS', by: 'Manager A' },
+    { code: 'GS040', name: 'Đỗ Thu F', topic: 'Thái độ phục vụ', action: 'Coaching 1-1 + theo dõi 2 tuần', follow: '01/09/2026', status: 'COMPLETED', by: 'Manager A' },
+    { code: 'GS026', name: 'Trần Thị B', topic: 'Upsell combo', action: 'Kịch bản gợi ý combo', follow: '15/09/2026', status: 'OPEN', by: 'Head Office' }
+  ];
+
+  AUDIT = [
+    { time: '05/09 21:20', actor: 'Head Office Admin', action: 'UPDATE_FEEDBACK_CONFIG', target: 'ratingType STAR → EMOJI' },
+    { time: '05/09 20:15', actor: 'Manager A', action: 'DISABLE_STAFF', target: 'Staff GS040' },
+    { time: '05/09 20:01', actor: 'Manager A', action: 'GENERATE_QR', target: 'Staff GS025' },
+    { time: '05/09 19:44', actor: 'Manager A', action: 'IMPORT_STAFF', target: '95 rows imported, 5 rejected' },
+    { time: '04/09 18:02', actor: 'Manager A', action: 'REGENERATE_QR', target: 'Staff GS031 — token rotated' },
+    { time: '04/09 09:12', actor: 'System Admin', action: 'CREATE_USER', target: 'manager.gtb — CINEMA_MANAGER / GTB' }
+  ];
+
+  USERS = [
+    { username: 'manager.gnd', name: 'Nguyễn Quản Lý', role: 'CINEMA_MANAGER', scope: 'Galaxy Nguyễn Du', status: 'Active' },
+    { username: 'manager.gtb', name: 'Trần Quản Lý', role: 'CINEMA_MANAGER', scope: 'Galaxy Tân Bình', status: 'Active' },
+    { username: 'ho.analyst', name: 'Lê Phân Tích', role: 'HEAD_OFFICE', scope: 'Toàn hệ thống', status: 'Active' },
+    { username: 'sysadmin', name: 'Vũ Hệ Thống', role: 'SYSTEM_ADMIN', scope: 'Toàn hệ thống', status: 'Locked' }
+  ];
+
+  IMPORT_ROWS = [
+    { line: 2, code: 'GS100', name: 'Nguyễn Văn X', cinema: 'GND', ok: true, msg: 'Hợp lệ' },
+    { line: 3, code: 'GS101', name: 'Trần Thị Y', cinema: 'GND', ok: true, msg: 'Hợp lệ' },
+    { line: 4, code: 'GS025', name: 'Lê Văn Z', cinema: 'GND', ok: false, msg: 'Staff code đã tồn tại' },
+    { line: 5, code: '', name: 'Phạm Thị W', cinema: 'GND', ok: false, msg: 'Thiếu staff code' },
+    { line: 6, code: 'GS103', name: 'Đỗ Văn V', cinema: 'XXX', ok: false, msg: 'Cinema code không tồn tại' },
+    { line: 7, code: 'GS104', name: 'Hoàng Thị U', cinema: 'GND', ok: true, msg: 'Hợp lệ' }
+  ];
+
+  // ── helpers ──────────────────────────────────────────────
+  tab(on) {
+    return 'border-radius:0;border:1px solid ' + (on ? 'var(--color-accent)' : 'var(--color-divider)') +
+      ';margin-left:-1px;' + (on ? 'background:var(--color-accent);color:var(--color-bg)' : 'background:transparent');
+  }
+  navBtn(on) {
+    return 'justify-content:flex-start;width:100%;padding:6px 8px;font-size:13px;border-radius:2px;' +
+      (on ? 'background:var(--color-accent);color:var(--color-bg)' : 'background:transparent');
+  }
+  pill(on) {
+    return 'padding:5px 10px;font-size:12px;border:1px solid ' + (on ? 'var(--color-accent)' : 'var(--color-divider)') +
+      ';border-radius:2px;' + (on ? 'background:color-mix(in srgb, var(--color-accent) 14%, transparent);color:var(--color-accent-800)' : '');
+  }
+  bar(pct, color) {
+    return 'display:block;height:100%;width:' + pct + '%;background:' + color;
+  }
+  tagStyle(kind) {
+    if (kind === 'ok') return 'background:var(--color-accent-100);color:var(--color-accent-800)';
+    if (kind === 'bad') return 'background:var(--color-accent-2-100);color:var(--color-accent-2-800)';
+    return 'background:var(--color-neutral-100);color:var(--color-neutral-800)';
+  }
+  ratingKind(v) { return v >= 4 ? 'ok' : v === 3 ? 'muted' : 'bad'; }
+  fmtFb(f, i) {
+    const r = this.RATINGS[f.rating - 1];
+    return {
+      ...f, short: r.short, icon: this.face(r, f.rating >= 4 ? 'var(--color-accent)' : f.rating === 3 ? 'var(--color-neutral-500)' : 'var(--color-accent-2)'), ratingLabel: r.vi,
+      ratingStyle: this.tagStyle(this.ratingKind(f.rating)),
+      reasonText: f.reasons.join(' · '),
+      flag: f.suspicious ? '⚑' : '',
+      open: () => this.setState({ drawer: i })
+    };
+  }
+  qrCells(px, gap) {
+    const n = 25, seed = 7 + this.state.qrIdx * 13;
+    let s = seed, cells = [];
+    const rnd = () => { s = (s * 1103515245 + 12345) & 0x7fffffff; return s / 0x7fffffff; };
+    const finder = (r, c) => {
+      const zones = [[0, 0], [0, n - 7], [n - 7, 0]];
+      for (const [zr, zc] of zones) {
+        if (r >= zr && r < zr + 7 && c >= zc && c < zc + 7) {
+          const dr = Math.max(Math.abs(r - (zr + 3)), Math.abs(c - (zc + 3)));
+          return dr === 1 ? 'off' : 'on';
+        }
+      }
+      return null;
+    };
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) {
+      const f = finder(r, c);
+      const on = f ? f === 'on' : rnd() > 0.5;
+      cells.push('display:block;width:' + px + 'px;height:' + px + 'px;background:' + (on ? '#201e1d' : 'transparent'));
+    }
+    return { cells, grid: 'display:grid;grid-template-columns:repeat(' + n + ',' + px + 'px);gap:' + gap + 'px' };
+  }
+  poly(vals, min, max, h) {
+    const n = vals.length;
+    return vals.map((v, i) => (i * (320 / (n - 1))).toFixed(1) + ',' + (h - ((v - min) / (max - min)) * h).toFixed(1)).join(' ');
+  }
+  toast(msg) {
+    clearTimeout(this._t);
+    this.setState({ toast: msg });
+    this._t = setTimeout(() => this.setState({ toast: '' }), 2200);
+  }
+  // ── chart helpers ──────────────────────────────────────
+  pts(vals, lo, hi, x0, x1, yTop, yBot) {
+    const n = vals.length;
+    return vals.map((v, i) => ({
+      v, i,
+      x: +(x0 + (x1 - x0) * (n === 1 ? 0 : i / (n - 1))).toFixed(1),
+      y: +(yBot - (yBot - yTop) * ((v - lo) / (hi - lo))).toFixed(1)
+    }));
+  }
+  d(p) { return p.map((q, i) => (i ? 'L' : 'M') + q.x + ' ' + q.y).join(' '); }
+  spark(vals, color) {
+    const lo = Math.min(...vals), hi = Math.max(...vals), pad = (hi - lo) * 0.35 || 1;
+    return { d: this.d(this.pts(vals, lo - pad, hi + pad * 0.4, 0, 72, 3, 21)), color };
+  }
+
+  DASH_DAYS = ['23/08', '24/08', '25/08', '26/08', '27/08', '28/08', '29/08', '30/08', '31/08', '01/09', '02/09', '03/09', '04/09', '05/09'];
+  HEAT_HOURS = ['10–12', '12–14', '14–16', '16–18', '18–20', '20–22', '22–24'];
+  HEAT = [
+    ['T2', [4, 9, 11, 14, 26, 18, 6]], ['T3', [3, 8, 10, 13, 24, 17, 5]],
+    ['T4', [5, 10, 12, 16, 29, 20, 7]], ['T5', [6, 11, 14, 18, 33, 22, 8]],
+    ['T6', [8, 15, 19, 26, 47, 35, 13]], ['T7', [12, 22, 28, 38, 66, 52, 21]],
+    ['CN', [11, 20, 26, 35, 58, 44, 17]]
+  ];
+
+  dashData(HO) {
+    const vol = [42, 55, 48, 61, 73, 58, 66, 80, 72, 69, 85, 91, 78, 88];
+    const rate = [4.5, 4.6, 4.4, 4.7, 4.8, 4.6, 4.7, 4.75, 4.6, 4.7, 4.8, 4.85, 4.7, 4.82];
+    const k = HO ? 4.06 : 1;
+    const volS = vol.map(v => Math.round(v * k));
+
+    // main chart geometry — viewBox 720 × 250
+    const L = 42, R = 674, T = 18, B = 196;
+    const vMax = HO ? 400 : 100;
+    const vp = this.pts(volS, 0, vMax, L, R, T, B);
+    const rp = this.pts(rate, 4.0, 5.0, L, R, T, B);
+    const last = vp[vp.length - 1], lastR = rp[rp.length - 1];
+
+    const heatMax = 66;
+    const tint = (n, mag) => {
+      const t = n / heatMax;
+      return 'color-mix(in srgb, var(--color-' + (mag ? 'accent-2' : 'accent') + ') ' + Math.round(12 + t * 78) + '%, var(--color-bg))';
+    };
+
+    const reasons = [
+      ...[['Thân thiện', 402], ['Phục vụ nhanh', 366], ['Tư vấn rõ ràng', 291], ['Chủ động hỗ trợ', 188], ['Thanh toán thuận tiện', 121]].map(([vi, n]) => ({ vi, n, pos: true })),
+      ...[['Thời gian chờ lâu', 64], ['Tư vấn chưa rõ', 41], ['Thái độ phục vụ', 27], ['Đơn hàng chưa chính xác', 19], ['Thanh toán', 11]].map(([vi, n]) => ({ vi, n, pos: false }))
+    ].sort((a, b) => b.n - a.n);
+
+    const watch = [
+      { code: 'GS018', name: 'Lê Văn C', avg: '3.41', neg: 14, trend: [4.2, 4.1, 3.9, 3.8, 3.6, 3.5, 3.41], note: 'NEG_BURST · 3 feedback ≤2★ / 60 phút' },
+      { code: 'GS031', name: 'Phạm Thị D', avg: '4.02', neg: 8, trend: [4.4, 4.3, 4.3, 4.2, 4.1, 4.05, 4.02], note: 'Chờ lâu — coaching đến hạn 10/09' },
+      { code: 'GS040', name: 'Đỗ Thu F', avg: '4.18', neg: 6, trend: [4.5, 4.4, 4.35, 4.3, 4.2, 4.2, 4.18], note: 'QR vừa thu hồi — dữ liệu tạm dừng' }
+    ];
+
+    return {
+      dashKpis: [
+        { vi: 'Tổng feedback', en: 'Total feedback', val: HO ? '3.868' : '953', delta: '+8,4%', up: true, spark: this.spark(volS, 'var(--color-accent)') },
+        { vi: 'Điểm trung bình', en: 'Average rating / 5', val: HO ? '4,51' : '4,62', delta: '+0,06', up: true, spark: this.spark(rate, 'var(--color-accent)') },
+        { vi: 'Tích cực 4–5★', en: 'Positive share', val: '85%', delta: '+2 điểm', up: true, spark: this.spark([79, 80, 82, 81, 83, 84, 85], 'var(--color-accent)') },
+        { vi: 'Tiêu cực 1–2★', en: 'Negative share', val: '7%', delta: '−1 điểm', up: false, spark: this.spark([10, 9, 9, 8, 8, 7, 7], 'var(--color-accent-2)') }
+      ].map(x => ({
+        ...x,
+        deltaStyle: 'font-size:12px;font-weight:600;color:var(--color-' + (x.up ? 'accent-700' : 'accent-2-700') + ')'
+      })),
+
+      chVol: this.d(vp),
+      chVolArea: this.d(vp) + ' L' + R + ' ' + B + ' L' + L + ' ' + B + ' Z',
+      chRate: this.d(rp),
+      chDots: vp.map((p, i) => ({ ...p, r: 2.5, label: this.DASH_DAYS[i] })),
+      chRateDots: rp,
+      chLast: last, chLastLabel: String(volS[volS.length - 1]),
+      chLastR: lastR, chLastRLabel: '4,82',
+      chYTicks: [0, 0.25, 0.5, 0.75, 1].map(f => ({
+        y: +(B - (B - T) * f).toFixed(1), label: String(Math.round(vMax * f))
+      })),
+      chRTicks: [0, 0.5, 1].map(f => ({
+        y: +(B - (B - T) * f).toFixed(1), label: (4 + f).toFixed(1).replace('.', ',')
+      })),
+      chXTicks: vp.filter((_, i) => i % 3 === 0 || i === vp.length - 1).map((p, j) => ({
+        x: p.x, label: this.DASH_DAYS[p.i]
+      })),
+      chAxisL: L, chAxisR: R, chAxisT: T, chAxisB: B,
+
+      mix: [[5, 612], [4, 198], [3, 74], [2, 41], [1, 28]].map(([v, c]) => {
+        const pct = (c / 953) * 100;
+        return {
+          value: v, count: c, pct: Math.round(pct) + '%',
+          short: this.RATINGS[v - 1].short,
+          segStyle: 'flex:' + c + ' 0 0;min-width:0;height:34px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:' +
+            (v >= 4 ? 'var(--color-bg)' : v === 3 ? 'var(--color-text)' : 'var(--color-bg)') +
+            ';background:' + (v === 5 ? 'var(--color-accent)' : v === 4 ? 'var(--color-accent-400)' : v === 3 ? 'var(--color-neutral-200)' : v === 2 ? 'var(--color-accent-2-400)' : 'var(--color-accent-2)'),
+          segLabel: pct >= 6 ? Math.round(pct) + '%' : '',
+          swatch: 'display:inline-block;width:10px;height:10px;background:' +
+            (v === 5 ? 'var(--color-accent)' : v === 4 ? 'var(--color-accent-400)' : v === 3 ? 'var(--color-neutral-200)' : v === 2 ? 'var(--color-accent-2-400)' : 'var(--color-accent-2)')
+        };
+      }),
+
+      heatHours: this.HEAT_HOURS,
+      heatRows: this.HEAT.map(([day, row]) => ({
+        day,
+        cells: row.map((n, i) => ({
+          n, hour: this.HEAT_HOURS[i],
+          style: 'display:flex;align-items:center;justify-content:center;height:30px;font-size:11px;font-variant-numeric:tabular-nums;color:' +
+            (n / heatMax > 0.55 ? 'var(--color-bg)' : 'color-mix(in srgb, var(--color-text) 70%, transparent)') +
+            ';background:' + tint(n, false)
+        }))
+      })),
+      heatScale: [0.08, 0.25, 0.45, 0.7, 1].map(f => ({
+        style: 'display:block;width:26px;height:10px;background:' + tint(f * heatMax, false)
+      })),
+
+      dashReasons: reasons.map(r => ({
+        ...r,
+        typeLabel: r.pos ? 'Tích cực' : 'Tiêu cực',
+        barStyle: 'display:block;height:14px;width:' + Math.round((r.n / 402) * 100) + '%;background:var(--color-' + (r.pos ? 'accent' : 'accent-2') + ')',
+        share: ((r.n / 953) * 100).toFixed(1).replace('.', ',') + '%'
+      })),
+
+      cinemaDots: this.CINEMAS.map(c => {
+        const a = parseFloat(c.avg);
+        return {
+          ...c,
+          dotLeft: 'left:' + (((a - 4) / 1) * 100).toFixed(1) + '%',
+          dotStyle: 'position:absolute;top:50%;transform:translate(-50%,-50%);left:' + (((a - 4) / 1) * 100).toFixed(1) + '%;width:11px;height:11px;border-radius:50%;background:var(--color-accent)',
+          lineStyle: 'position:absolute;top:50%;height:1px;background:var(--color-accent-300);left:0;width:' + (((a - 4) / 1) * 100).toFixed(1) + '%',
+          open: this.go('rank')
+        };
+      }),
+      benchLeft: 'position:absolute;top:0;bottom:0;left:' + (((4.51 - 4) / 1) * 100).toFixed(1) + '%;width:1px;background:var(--color-text)',
+
+      watchList: watch.map(w => ({
+        ...w,
+        spark: this.spark(w.trend, 'var(--color-accent-2)'),
+        open: () => this.setState({ aScreen: 'perf', perfIdx: 3 })
+      }))
+    };
+  }
+
+  go(aScreen) { return () => this.setState({ aScreen, aState: 'ready', printOpen: false, acctOpen: false }); }
+
+  componentDidMount() {
+    this._down = e => {
+      if (!this.state.acctOpen) return;
+      const w = document.querySelector('[data-acct-menu]');
+      if (w && !w.contains(e.target)) this.setState({ acctOpen: false });
+    };
+    this._key = e => { if (e.key === 'Escape' && this.state.acctOpen) this.setState({ acctOpen: false }); };
+    document.addEventListener('mousedown', this._down);
+    document.addEventListener('keydown', this._key);
+  }
+  componentWillUnmount() {
+    document.removeEventListener('mousedown', this._down);
+    document.removeEventListener('keydown', this._key);
+    clearTimeout(this._t);
+  }
+
+  navSpec() {
+    const HO = this.state.role !== 'CM';
+    const g = [
+      { label: 'Tổng quan', items: [['hub', 'Menu chức năng', 'Modules'], ['dash', 'Dashboard', 'Overview']] },
+      { label: 'Feedback', items: [['fb', 'Tất cả feedback', 'All'], ['analytics', 'Phân tích', 'Analytics']] },
+      { label: 'Nhân viên', items: [['staff', 'Danh sách', 'List'], ['import', 'Import', 'Import'], ['qr', 'Quản lý QR', 'QR']] },
+      { label: 'Hiệu suất', items: HO ? [['rank', 'Ranking nhân viên', 'Staff'], ['crank', 'Ranking rạp', 'Cinema']] : [['rank', 'Ranking nhân viên', 'Staff']] },
+      { label: 'Coaching', items: [['coach', 'Coaching cases', 'Cases']] },
+      { label: 'Thông báo', items: HO
+        ? [['notif', 'Hộp thư thông báo', 'Inbox'], ['notifRules', 'Quy tắc & kênh gửi', 'Rules']]
+        : [['notif', 'Hộp thư thông báo', 'Inbox'], ['notifRules', 'Quy tắc (chỉ xem)', 'Rules']] }
+    ];
+    if (HO) g.push({ label: 'Cấu hình', items: [['cfgRating', 'Rating', 'Rating'], ['cfgReason', 'Lý do feedback', 'Reasons']] });
+    g.push({ label: 'Hệ thống', items: HO
+      ? [['cinemas', 'Rạp', 'Cinemas'], ['users', 'Người dùng', 'Users'], ['audit', 'Audit log', 'Audit'], ['login', 'Màn hình login', 'Login']]
+      : [['audit', 'Audit log (rạp mình)', 'Audit'], ['login', 'Màn hình login', 'Login']] });
+    return g;
+  }
+
+  validate() {
+    const s = this.state;
+    const name = s.cname.trim();
+    const digits = s.phone.replace(/[^0-9+]/g, '');
+    return {
+      name: !name ? 'Vui lòng nhập họ tên / Name is required' : name.length < 2 ? 'Tối thiểu 2 ký tự' : '',
+      phone: !digits ? 'Vui lòng nhập số điện thoại / Phone is required'
+        : !/^(0\d{9}|\+?84\d{9})$/.test(digits) ? 'Số điện thoại không đúng định dạng Việt Nam' : '',
+      rating: s.rating === 0,
+      consent: !s.consent
+    };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const err = this.validate();
+    const show = s.tried;
+    const unread = this.NOTIFS.filter(n => !s.readIds.includes(n.id)).length;
+    const notifShown = this.NOTIFS.filter(n =>
+      s.notifFilter === 'all' ? true
+        : s.notifFilter === 'unread' ? !s.readIds.includes(n.id)
+          : n.kind === s.notifFilter);
+    const HO = s.role !== 'CM';
+    const pos = s.rating >= 4;
+    const reasonList = pos ? this.POS : this.NEG;
+
+    const distData = [[5, 612], [4, 198], [3, 74], [2, 41], [1, 28]];
+    const total = 953;
+    const volumes = [42, 55, 48, 61, 73, 58, 66, 80, 72, 69, 85, 91, 78, 88];
+    const ratings = [4.5, 4.6, 4.4, 4.7, 4.8, 4.6, 4.7, 4.75, 4.6, 4.7, 4.8, 4.85, 4.7, 4.82];
+    const posR = [['Thân thiện', 402], ['Phục vụ nhanh', 366], ['Tư vấn rõ ràng', 291], ['Chủ động hỗ trợ', 188], ['Thanh toán thuận tiện', 121]];
+    const negR = [['Thời gian chờ lâu', 64], ['Tư vấn chưa rõ', 41], ['Thái độ phục vụ', 27], ['Đơn hàng chưa chính xác', 19], ['Thanh toán', 11]];
+    const hours = [['10h', 18], ['12h', 34], ['14h', 41], ['16h', 55], ['18h', 88], ['19h', 96], ['20h', 79], ['21h', 61], ['22h', 33], ['23h', 12]];
+
+    const qr = this.qrCells(4, 1);
+    const qrLg = this.qrCells(6, 1);
+    const qrStaff = this.STAFF[s.qrIdx];
+    const perf = this.STAFF[s.perfIdx];
+
+    const dlg = s.dialog;
+    const drawerFb = s.drawer !== null ? this.FB[s.drawer] : null;
+    const dr = drawerFb ? this.RATINGS[drawerFb.rating - 1] : null;
+
+    const rankStaff = [...this.STAFF].filter(x => x.n >= 20);
+    const rankSorted = [...rankStaff].sort((a, b) => parseFloat(b.avg) - parseFloat(a.avg));
+    const rankCin = [...this.CINEMAS].sort((a, b) => parseFloat(b.avg) - parseFloat(a.avg));
+    const isCinemaRank = s.aScreen === 'crank';
+
+    const cfgReasons = [
+      { code: 'FRIENDLY', vi: 'Thân thiện', en: 'Friendly', type: 'POSITIVE', scale: [4, 5], req: false, on: true },
+      { code: 'FAST', vi: 'Phục vụ nhanh', en: 'Fast service', type: 'POSITIVE', scale: [4, 5], req: false, on: true },
+      { code: 'CLEAR', vi: 'Tư vấn rõ ràng', en: 'Clear advice', type: 'POSITIVE', scale: [4, 5], req: false, on: true },
+      { code: 'WAIT', vi: 'Thời gian chờ lâu', en: 'Long wait', type: 'NEGATIVE', scale: [1, 2, 3], req: false, on: true },
+      { code: 'CONSULTING', vi: 'Tư vấn chưa rõ', en: 'Unclear advice', type: 'NEGATIVE', scale: [1, 2, 3], req: false, on: true },
+      { code: 'ATTITUDE', vi: 'Thái độ phục vụ', en: 'Staff attitude', type: 'NEGATIVE', scale: [1, 2], req: true, on: true },
+      { code: 'PAYMENT', vi: 'Thanh toán', en: 'Payment', type: 'NEGATIVE', scale: [1, 2, 3], req: false, on: false },
+      { code: 'OTHER', vi: 'Khác', en: 'Other', type: 'BOTH', scale: [1, 2, 3, 4, 5], req: false, on: true }
+    ];
+
+    return {
+      // masthead / mode
+      isCustomer: s.mode === 'customer', isAdmin: s.mode === 'admin',
+      tabCustomer: this.tab(s.mode === 'customer'), tabAdmin: this.tab(s.mode === 'admin'),
+      goCustomer: () => this.setState({ mode: 'customer' }),
+      goAdmin: () => this.setState({ mode: 'admin' }),
+
+      // customer states
+      custStates: [
+        ['loading', 'Loading / skeleton', 'skeleton'], ['form', 'Biểu mẫu đánh giá', 'form'],
+        ['thanks', 'Cảm ơn', 'thank-you'], ['invalid', 'QR không hợp lệ', 'invalid QR'],
+        ['error', 'Lỗi gửi', 'API error'], ['privacy', 'Chính sách bảo mật', 'privacy']
+      ].map(([k, vi, en]) => ({
+        vi, en, style: this.navBtn(s.cScreen === k),
+        go: () => this.setState({ cScreen: k, tried: false })
+      })),
+      cLoading: s.cScreen === 'loading', cForm: s.cScreen === 'form', cThanks: s.cScreen === 'thanks',
+      cInvalid: s.cScreen === 'invalid', cError: s.cScreen === 'error', cPrivacy: s.cScreen === 'privacy',
+      nowLabel: '05/09/2026 • 21:59',
+
+      ratingOpts: this.RATINGS.map(r => {
+        const on = s.rating === r.value;
+        return {
+          ...r,
+          svg: this.face(r, on ? 'var(--color-primary)' : 'var(--color-neutral-400)'),
+          numColor: on ? 'var(--color-primary)' : 'var(--color-text-muted)',
+          style: 'width:100%;min-height:52px;gap:10px;border-radius:2px;padding:8px 12px;text-align:left;border:1px solid ' +
+            (on ? 'var(--color-primary)' : 'var(--color-divider)') +
+            ';' + (on ? 'background:#FEF3ED;box-shadow:inset 0 0 0 1px var(--color-primary)' : 'background:var(--color-bg)'),
+          pick: () => this.setState({ rating: r.value, reasons: [] })
+        };
+      }),
+      ratingLabel: s.rating ? this.RATINGS[s.rating - 1].vi : '',
+      hasRating: s.rating > 0,
+      reasonPrompt: pos ? 'Điều gì làm bạn hài lòng?' : 'Bạn muốn chia sẻ điều gì?',
+      reasonOpts: reasonList.map(x => ({
+        vi: x,
+        style: 'min-height:40px;font-size:13px;border-radius:2px;border:1px solid ' + (s.reasons.includes(x) ? 'var(--color-primary)' : 'var(--color-divider)') +
+          ';' + (s.reasons.includes(x) ? 'background:var(--color-primary);color:#fff' : 'background:var(--color-bg)'),
+        toggle: () => this.setState(st => ({ reasons: st.reasons.includes(x) ? st.reasons.filter(y => y !== x) : [...st.reasons, x] }))
+      })),
+      ...(() => {
+        const entry = this.props.txnEntry ?? 'scan-first';
+        const mode = s.txnMode ?? (entry === 'prefilled' ? 'resolved' : entry === 'manual-first' ? 'manual' : 'idle');
+        const raw = s.txnId.trim();
+        const bad = mode === 'manual' && raw.length > 0 && !/^\d{6,10}\/\d{3,5}$/.test(raw);
+        return {
+          txnIdle: mode === 'idle', txnScanning: mode === 'scanning',
+          txnManual: mode === 'manual', txnResolved: mode === 'resolved',
+          txnId: mode === 'resolved' && !raw ? '01313035/0002' : s.txnId,
+          tkFilm: '2D · QUY TỤ VƯỢT GIÀU',
+          tkMeta: 'Galaxy Coop Huỳnh Tấn Phát · 04/09/2026 19:00 · Rạp 3 · Ghế G-5',
+          errTxn: bad ? 'Định dạng mã giao dịch chưa đúng (ví dụ 01313035/0002)' : '',
+          setTxn: e => this.setState({ txnId: e.target.value }),
+          startManual: () => this.setState({ txnMode: 'manual' }),
+          startScan: () => {
+            this.setState({ txnMode: 'scanning' });
+            setTimeout(() => this.setState(st => (st.txnMode === 'scanning' ? { txnMode: 'resolved', txnId: '01313035/0002' } : null)), 1400);
+          },
+          clearTxn: () => this.setState({ txnMode: 'idle', txnId: '' })
+        };
+      })(),
+      cname: s.cname, phone: s.phone, consent: s.consent,
+      setName: e => this.setState({ cname: e.target.value }),
+      setPhone: e => this.setState({ phone: e.target.value }),
+      setComment: e => this.setState({ comment: e.target.value }),
+      toggleConsent: e => this.setState({ consent: e.target.checked }),
+      errName: show ? err.name : '', errPhone: show ? err.phone : '',
+      errRating: show && err.rating, errConsent: show && err.consent,
+      submitting: s.submitting,
+      submitLabel: s.submitting ? 'Đang gửi…' : 'GỬI ĐÁNH GIÁ',
+      submit: () => {
+        const e = this.validate();
+        if (e.name || e.phone || e.rating || e.consent) return this.setState({ tried: true });
+        this.setState({ submitting: true, tried: false });
+        setTimeout(() => this.setState({ submitting: false, cScreen: 'thanks' }), 900);
+      },
+      resetForm: () => this.setState({ cScreen: 'form', rating: 0, reasons: [], cname: '', phone: '', comment: '', consent: false, tried: false, txnMode: null, txnId: '' }),
+      goPrivacy: e => { e.preventDefault(); this.setState({ cScreen: 'privacy' }); },
+      backToForm: () => this.setState({ cScreen: 'form' }),
+      retry: () => this.setState({ cScreen: 'form' }),
+      dbgRating: s.rating || 'null',
+      dbgReasons: JSON.stringify(s.reasons),
+
+      // admin roles + nav
+      roles: [['CM', 'Cinema Manager'], ['HO', 'Head Office'], ['SA', 'System Admin']].map(([k, label]) => ({
+        label, style: this.navBtn(s.role === k),
+        pick: () => this.setState({ role: k, aScreen: 'dash', aState: 'ready' })
+      })),
+      roleScope: s.role === 'CM' ? 'Phạm vi: Galaxy Nguyễn Du (1 rạp)' : 'Phạm vi: toàn hệ thống, 6 rạp',
+      isHO: HO,
+      navGroups: this.navSpec().map(g => ({
+        label: g.label,
+        items: g.items.map(([k, vi, en]) => ({ vi, en, style: this.navBtn(s.aScreen === k), go: this.go(k) }))
+      })),
+      dataStates: [['ready', 'Bình thường'], ['loading', 'Loading'], ['empty', 'Empty'], ['error', 'API error'], ['denied', '403']].map(([k, label]) => ({
+        label, style: this.pill(s.aState === k), go: () => this.setState({ aState: k })
+      })),
+      aReady: s.aState === 'ready', aLoading: s.aState === 'loading', aEmpty: s.aState === 'empty',
+      aError: s.aState === 'error', aDenied: s.aState === 'denied',
+      aReadyGo: () => this.setState({ aState: 'ready', aScreen: 'dash' }),
+
+      sDash: s.aScreen === 'dash', sFb: s.aScreen === 'fb', sAnalytics: s.aScreen === 'analytics',
+      sStaff: s.aScreen === 'staff', sImport: s.aScreen === 'import', sQR: s.aScreen === 'qr',
+      sRank: s.aScreen === 'rank' || s.aScreen === 'crank', sPerf: s.aScreen === 'perf',
+      sCoach: s.aScreen === 'coach', sCfgRating: s.aScreen === 'cfgRating', sCfgReason: s.aScreen === 'cfgReason',
+      sCinemas: s.aScreen === 'cinemas', sUsers: s.aScreen === 'users', sAudit: s.aScreen === 'audit',
+      sLogin: s.aScreen === 'login',
+      goHub: this.go('hub'),
+
+      // ── masthead utility rail ──────────────────────────
+      acctUser: s.role === 'CM' ? 'manager.gnd' : s.role === 'HO' ? 'ho.analyst' : 'sysadmin',
+      acctRole: s.role === 'CM' ? 'Cinema Manager' : s.role === 'HO' ? 'Head Office' : 'System Admin',
+      acctOpen: s.acctOpen,
+      toggleAcct: () => this.setState(st => ({ acctOpen: !st.acctOpen })),
+      acctMenu: [
+        ['Tài khoản của tôi', () => { this.setState({ acctOpen: false }); this.toast('Trang tài khoản — chưa có trong bản mockup'); }],
+        ['Đổi mật khẩu', () => { this.setState({ acctOpen: false }); this.toast('Chuyển sang Keycloak account console'); }],
+        ['Đăng xuất', () => this.setState({ acctOpen: false, aScreen: 'login', aState: 'ready' })]
+      ].map(([label, go], i) => ({
+        label, go,
+        style: 'justify-content:flex-start;width:100%;border-radius:0;padding:7px 16px;font-size:13px' +
+          (i === 2 ? ';color:var(--color-accent-2-800);margin-top:4px;border-top:1px solid var(--color-divider)' : '')
+      })),
+
+      // ── module launcher ────────────────────────────────
+      sHub: s.aScreen === 'hub',
+      hubUser: HO ? 'ho.analyst · Head Office' : 'manager.gnd · Cinema Manager',
+      hubScope: HO ? 'Toàn hệ thống · 6 rạp' : 'Galaxy Nguyễn Du',
+      hubModules: [
+        { code: 'FBQ', vi: 'Transaction Feedback QR', en: 'Đánh giá giao dịch qua QR', desc: 'Feedback khách hàng, QR nhân viên, ranking, coaching, cảnh báo.', phase: 'Phase 1 · Đang chạy', live: true, meta: '187 feedback hôm nay' },
+        { code: 'BOX', vi: 'Bán vé & Suất chiếu', en: 'Box office & showtimes', desc: 'Lịch chiếu, sơ đồ ghế, đơn vé và hoàn vé.', phase: 'Phase 2', live: false, meta: 'Dự kiến Q4/2026' },
+        { code: 'FNB', vi: 'F&B & Combo', en: 'Concession', desc: 'Menu bắp nước, combo, tồn kho quầy.', phase: 'Phase 2', live: false, meta: 'Dự kiến Q4/2026' },
+        { code: 'CRM', vi: 'Khách hàng thân thiết', en: 'Loyalty & CRM', desc: 'Hạng thành viên, điểm tích luỹ, chiến dịch ưu đãi.', phase: 'Phase 3', live: false, meta: 'Đang khảo sát' },
+        { code: 'WFM', vi: 'Ca làm & Chấm công', en: 'Workforce', desc: 'Xếp ca, chấm công, liên kết hiệu suất nhân viên.', phase: 'Phase 3', live: false, meta: 'Đang khảo sát' },
+        { code: 'OPS', vi: 'Vận hành rạp', en: 'Cinema operations', desc: 'Checklist mở/đóng rạp, sự cố thiết bị, bảo trì.', phase: 'Phase 3', live: false, meta: 'Đang khảo sát' }
+      ].map(m => ({
+        ...m,
+        style: 'display:flex;flex-direction:column;gap:8px;min-height:184px;' + (m.live ? 'cursor:pointer' : 'opacity:.55'),
+        phaseStyle: this.tagStyle(m.live ? 'ok' : 'muted'),
+        actionLabel: m.live ? 'Vào chức năng →' : 'Chưa mở',
+        actionStyle: m.live ? '' : 'opacity:.5;pointer-events:none',
+        go: m.live ? this.go('dash') : () => this.toast('Chức năng thuộc ' + m.phase + ' — chưa mở trong bản này')
+      })),
+
+      // ── notifications ──────────────────────────────────
+      sNotif: s.aScreen === 'notif', sNotifRules: s.aScreen === 'notifRules',
+      notifUnread: unread,
+      notifUnreadLabel: unread > 0 ? String(unread) : '',
+      notifBellStyle: this.navBtn(s.aScreen === 'notif'),
+      goNotif: this.go('notif'), goNotifRules: this.go('notifRules'),
+      notifFilters: [['all', 'Tất cả', this.NOTIFS.length], ['unread', 'Chưa đọc', unread],
+        ['ALERT', 'Cảnh báo', this.NOTIFS.filter(n => n.kind === 'ALERT').length],
+        ['SYSTEM', 'Hệ thống', this.NOTIFS.filter(n => n.kind === 'SYSTEM').length],
+        ['DIGEST', 'Báo cáo', this.NOTIFS.filter(n => n.kind === 'DIGEST').length]
+      ].map(([k, label, n]) => ({
+        label: label + ' (' + n + ')', style: this.pill(s.notifFilter === k),
+        pick: () => this.setState({ notifFilter: k })
+      })),
+      notifList: notifShown.map(n => {
+        const read = s.readIds.includes(n.id);
+        return {
+          ...n,
+          kindStyle: this.tagStyle(n.kind === 'ALERT' ? 'bad' : n.kind === 'TASK' ? 'ok' : 'muted'),
+          rowStyle: 'display:grid;grid-template-columns:8px minmax(0,1fr) auto;gap:14px;align-items:start;padding:16px 0;border-bottom:1px solid var(--color-divider);' +
+            (read ? 'opacity:.62' : ''),
+          dotStyle: 'display:block;width:8px;height:8px;border-radius:50%;margin-top:7px;background:' +
+            (read ? 'transparent' : n.kind === 'ALERT' ? 'var(--color-accent-2)' : 'var(--color-accent)'),
+          titleStyle: 'font-size:16px;margin:0 0 4px;font-weight:' + (read ? '400' : '600'),
+          readLabel: read ? 'Đã đọc' : 'Đánh dấu đã đọc',
+          toggleRead: () => this.setState(st => ({
+            readIds: st.readIds.includes(n.id) ? st.readIds.filter(x => x !== n.id) : [...st.readIds, n.id]
+          })),
+          open: () => { this.setState(st => ({ readIds: st.readIds.includes(n.id) ? st.readIds : [...st.readIds, n.id] })); this.go(n.to)(); }
+        };
+      }),
+      notifEmpty: notifShown.length === 0,
+      notifEmptyText: s.notifFilter === 'unread' ? 'Bạn đã đọc hết thông báo.' : 'Chưa có thông báo nào trong bộ lọc này.',
+      markAllRead: () => { this.setState({ readIds: this.NOTIFS.map(n => n.id) }); this.toast('Đã đánh dấu tất cả là đã đọc'); },
+      markAllUnread: () => this.setState({ readIds: [] }),
+      notifRules: this.RULES.map(r => ({
+        ...r, chText: r.ch.join(' · '),
+        statusLabel: r.on ? 'Bật' : 'Tắt',
+        statusStyle: this.tagStyle(r.on ? 'ok' : 'muted'),
+        canEdit: HO
+      })),
+      sendLog: this.SENDLOG.map(l => ({
+        ...l, style: this.tagStyle(l.status === 'Thất bại' ? 'bad' : l.status === 'Đã đọc' ? 'muted' : 'ok')
+      })),
+      rulesReadOnly: !HO,
+      goDash: this.go('dash'), goQR: this.go('qr'), goImport: this.go('import'),
+      goFb: this.go('fb'), goRank: this.go('rank'),
+
+      // dashboard
+      dashKicker: HO ? 'Head Office · toàn hệ thống' : 'Cinema Manager · Galaxy Nguyễn Du',
+      dashTitle: HO ? 'Dashboard toàn hệ thống' : 'Dashboard rạp Nguyễn Du',
+      kpiTotal: HO ? '3.868' : '953',
+      kpiAvg: HO ? '4.51' : '4.62',
+      kpiEligible: HO ? '148' : '31',
+      ...this.dashData(HO),
+      distribution: distData.map(([v, c]) => ({
+        value: v, short: this.RATINGS[v - 1].short, count: c,
+        pct: Math.round((c / total) * 100) + '%',
+        barStyle: this.bar(Math.round((c / 612) * 100), v >= 4 ? 'var(--color-accent)' : v === 3 ? 'var(--color-neutral-400)' : 'var(--color-accent-2)')
+      })),
+      trendVolume: this.poly(volumes, 30, 100, 100),
+      trendRating: this.poly(ratings, 4.2, 5, 100),
+      posReasons: posR.map(([vi, n]) => ({ vi, n, barStyle: this.bar(Math.round((n / 402) * 100), 'var(--color-accent)') })),
+      negReasons: negR.map(([vi, n]) => ({ vi, n, barStyle: this.bar(Math.round((n / 64) * 100), 'var(--color-accent-2)') })),
+      hourly: hours.map(([label, n]) => ({ label, barStyle: 'display:block;width:100%;height:' + Math.round((n / 96) * 100) + '%;background:var(--color-accent-300)' })),
+      cinemaRows: this.CINEMAS.map(c => ({
+        ...c, barStyle: this.bar(Math.round(((parseFloat(c.avg) - 4) / 0.8) * 100), 'var(--color-accent)'),
+        open: this.go('rank')
+      })),
+      staffPerf: this.STAFF.filter(x => x.n > 0).map((x, i) => ({
+        ...x, open: () => this.setState({ aScreen: 'perf', perfIdx: this.STAFF.indexOf(x) })
+      })),
+
+      // feedback
+      feedbacks: this.FB.map((f, i) => this.fmtFb(f, i)),
+      fbCount: '953',
+
+      // staff
+      staffScopeNote: HO ? '176 nhân viên · 6 rạp' : '42 nhân viên · Galaxy Nguyễn Du',
+      staffRows: this.STAFF.map((x, i) => ({
+        ...x,
+        statusStyle: this.tagStyle(x.status === 'Active' ? 'ok' : 'muted'),
+        qrStyle: this.tagStyle(x.qr === 'Active' ? 'ok' : x.qr === 'Chưa tạo' ? 'muted' : 'bad'),
+        openPerf: () => this.setState({ aScreen: 'perf', perfIdx: i }),
+        openQR: () => this.setState({ aScreen: 'qr', qrIdx: i, printOpen: false })
+      })),
+      openCreateStaff: () => this.setState({ dialog: 'staff' }),
+      openCreateCinema: () => this.setState({ dialog: 'cinema' }),
+      openCreateUser: () => this.setState({ dialog: 'user' }),
+
+      // import
+      importSteps: [[1, 'Upload tệp', 'Upload'], [2, 'Xem trước & kiểm tra', 'Validate & preview'], [3, 'Kết quả', 'Result']].map(([n, vi, en]) => ({
+        n, vi, en,
+        style: 'padding-left:14px;border-left:3px solid ' + (s.importStep === n ? 'var(--color-accent)' : 'var(--color-divider)') +
+          (s.importStep === n ? '' : ';opacity:.5')
+      })),
+      imp1: s.importStep === 1, imp2: s.importStep === 2, imp3: s.importStep === 3,
+      impNext: () => this.setState(st => ({ importStep: Math.min(3, st.importStep + 1) })),
+      impReset: () => this.setState({ importStep: 1 }),
+      importRows: this.IMPORT_ROWS.map(r => ({ ...r, style: this.tagStyle(r.ok ? 'ok' : 'bad') })),
+
+      // qr
+      qrRows: this.STAFF.map((x, i) => ({
+        code: x.code, name: x.name, status: x.qr, updated: x.updated,
+        style: this.tagStyle(x.qr === 'Active' ? 'ok' : x.qr === 'Chưa tạo' ? 'muted' : 'bad'),
+        action: x.qr === 'Chưa tạo' ? 'Generate' : 'Xem',
+        rowStyle: i === s.qrIdx ? 'background:color-mix(in srgb, var(--color-accent) 9%, transparent)' : '',
+        select: () => this.setState({ qrIdx: i, printOpen: false })
+      })),
+      qrTitle: qrStaff.qr === 'Chưa tạo' ? 'QR — ' + qrStaff.code : 'QR — ' + qrStaff.code,
+      qrSub: qrStaff.name + ' · ' + qrStaff.cinema,
+      qrEmpty: qrStaff.qr === 'Chưa tạo',
+      qrHas: qrStaff.qr !== 'Chưa tạo',
+      qrCells: qr.cells, qrGridStyle: qr.grid, qrGridStyleLg: qrLg.grid,
+      qrToken: ['X7M4Q9AKP2', 'K2R8T5MWZ4', 'P9Q1L6VBN3', 'D4H7Y2XCS8', '—', 'B6N3M8QWE1', 'T5Y9U2IOP7', 'L3K8J1HGF6'][s.qrIdx],
+      qrStaffCode: qrStaff.code,
+      generateOne: () => this.toast('Đã tạo QR cho ' + qrStaff.code + ' · ghi audit GENERATE_QR'),
+      toastCopy: () => this.toast('Đã copy public URL'),
+      toastPng: () => this.toast('Đang tải QR PNG (1024 × 1024)…'),
+      toastSvg: () => this.toast('Đang tải QR SVG…'),
+      toastPdf: () => this.toast('Đang tạo PDF mẫu in A6…'),
+      toastPrint: () => this.toast('Mở hộp thoại in…'),
+      toastSaved: () => this.toast('Đã lưu · ghi audit UPDATE_FEEDBACK_CONFIG'),
+      showPrint: () => this.setState({ printOpen: true }),
+      hidePrint: () => this.setState({ printOpen: false }),
+      printOpen: s.printOpen,
+      openBatch: () => this.setState({ dialog: 'batch' }),
+      openRegen: () => this.setState({ dialog: 'regen' }),
+      openDisable: () => this.setState({ dialog: 'disable' }),
+
+      // ranking
+      rankTitle: isCinemaRank ? 'Ranking rạp' : 'Ranking nhân viên',
+      rankSub: isCinemaRank ? 'Cinema ranking — 6 rạp' : 'Staff ranking — min 20 feedback',
+      rankUnit: isCinemaRank ? 'Rạp' : 'Nhân viên',
+      rankTop: (isCinemaRank ? rankCin.slice(0, 5) : rankSorted.slice(0, 5)).map((x, i) => ({
+        pos: i + 1, label: isCinemaRank ? x.name : x.code + ' · ' + x.name, avg: x.avg, n: x.n
+      })),
+      rankBottom: (isCinemaRank ? rankCin.slice(-3).reverse() : rankSorted.slice(-3).reverse()).map((x, i) => ({
+        pos: (isCinemaRank ? rankCin.length : rankSorted.length) - i, label: isCinemaRank ? x.name : x.code + ' · ' + x.name, avg: x.avg, n: x.n
+      })),
+
+      // performance
+      perfName: perf.name, perfCode: perf.code, perfCinema: 'Galaxy ' + perf.cinema,
+      perfN: perf.n, perfAvg: perf.avg, perfPos: perf.pos, perfNeg: perf.neg,
+      perfRank: '#' + (rankSorted.findIndex(x => x.code === perf.code) + 1 || '—') + ' / ' + rankSorted.length,
+      perfTrend: this.poly([3.4, 3.5, 3.3, 3.6, 3.7, 3.6, 4.0, 4.2, 4.3, 4.4], 3, 5, 100),
+      perfReasons: [['Thời gian chờ lâu', 22], ['Tư vấn chưa rõ', 18], ['Thái độ phục vụ', 9], ['Thanh toán', 4]].map(([vi, n]) => ({
+        vi, n, barStyle: this.bar(Math.round((n / 22) * 100), 'var(--color-accent-2)')
+      })),
+      perfNegList: this.FB.filter(f => f.rating <= 3).map((f) => this.fmtFb(f, this.FB.indexOf(f))),
+      openCoaching: () => this.setState({ dialog: 'coaching' }),
+      openPerfFromDrawer: () => this.setState({ drawer: null, aScreen: 'perf' }),
+
+      // coaching
+      coachRows: this.COACH.map(c => ({
+        ...c, style: this.tagStyle(c.status === 'COMPLETED' ? 'ok' : c.status === 'IN_PROGRESS' ? 'muted' : 'bad')
+      })),
+
+      // config
+      ratingTypes: ['ICON+TEXT', 'STAR', 'BUTTON', 'TEXT'].map(t => ({
+        label: t, on: s.ratingType === t,
+        style: s.ratingType === t ? 'background:var(--color-accent);color:var(--color-bg)' : '',
+        pick: () => this.setState({ ratingType: t })
+      })),
+      ratingTypeLabel: s.ratingType,
+      previewOpts: this.RATINGS.map(r => {
+        const e = React.createElement;
+        const label = e('span', { style: { fontSize: '13px' } }, r.short);
+        const render = s.ratingType === 'ICON+TEXT'
+          ? e('span', { style: { display: 'inline-flex', alignItems: 'center', gap: '8px' } },
+              e('span', { style: { width: '20px', height: '20px', display: 'inline-flex' } }, this.face(r, 'var(--color-primary)')), label)
+          : s.ratingType === 'STAR' ? '★'.repeat(r.value)
+          : s.ratingType === 'TEXT' ? r.vi : String(r.value);
+        return {
+          render,
+          style: 'display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 12px;font-size:' +
+            (s.ratingType === 'TEXT' ? '12px' : '14px') +
+            ';border:1px solid var(--color-divider);border-radius:2px;background:var(--color-bg)'
+        };
+      }),
+      reasonConfig: cfgReasons.map(r => ({
+        ...r,
+        typeStyle: this.tagStyle(r.type === 'POSITIVE' ? 'ok' : r.type === 'NEGATIVE' ? 'bad' : 'muted'),
+        statusStyle: this.tagStyle(r.on ? 'ok' : 'muted'),
+        status: r.on ? 'ACTIVE' : 'DISABLED',
+        scale: [1, 2, 3, 4, 5].map(n => ({
+          n, style: 'display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;font-size:11px;border-radius:2px;' +
+            (r.scale.includes(n) ? 'background:var(--color-accent);color:var(--color-bg)' : 'background:var(--color-surface);color:color-mix(in srgb, var(--color-text) 40%, transparent)')
+        }))
+      })),
+
+      // admin tables
+      cinemaAdmin: this.CINEMAS.map(c => ({ ...c, style: this.tagStyle(c.status === 'Active' ? 'ok' : 'muted') })),
+      userRows: this.USERS.map(u => ({
+        ...u, style: this.tagStyle(u.status === 'Active' ? 'ok' : 'bad'),
+        roleStyle: this.tagStyle(u.role === 'CINEMA_MANAGER' ? 'muted' : 'ok')
+      })),
+      auditRows: this.AUDIT,
+
+      // drawer
+      drawerOpen: drawerFb !== null,
+      closeDrawer: () => this.setState({ drawer: null }),
+      stop: e => e.stopPropagation(),
+      dTime: drawerFb ? drawerFb.time : '', dIcon: dr ? dr.icon : '',
+      dRating: drawerFb ? drawerFb.rating : '', dRatingLabel: dr ? dr.vi : '',
+      dFlagStyle: this.tagStyle(drawerFb && drawerFb.suspicious ? 'bad' : 'muted'),
+      dFlagText: drawerFb && drawerFb.suspicious ? '⚑ Nghi vấn' : 'Bình thường',
+      dName: drawerFb ? drawerFb.name : '', dPhone: drawerFb ? drawerFb.phone : '',
+      dStaffCode: drawerFb ? drawerFb.staffCode : '', dStaffName: drawerFb ? drawerFb.staffName : '',
+      dCinema: drawerFb ? 'Galaxy ' + drawerFb.cinema : '',
+      dReasons: drawerFb ? drawerFb.reasons.map(r => ({ vi: r, style: this.tagStyle(drawerFb.rating >= 4 ? 'ok' : 'bad') })) : [],
+      dComment: drawerFb ? (drawerFb.comment || 'Không có bình luận') : '',
+      dToken: drawerFb ? 'X7M4Q9AKP2' : '', dCreated: drawerFb ? '2026-09-05T14:59:00Z' : '',
+
+      // dialogs
+      dialogOpen: !!dlg,
+      closeDialog: () => this.setState({ dialog: null }),
+      dlgTitle: dlg === 'batch' ? 'Generate QR cho tất cả nhân viên?'
+        : dlg === 'regen' ? 'Regenerate QR?'
+        : dlg === 'disable' ? 'Disable QR này?'
+        : dlg === 'coaching' ? 'Tạo coaching'
+        : dlg === 'staff' ? 'Thêm nhân viên'
+        : dlg === 'cinema' ? 'Thêm rạp' : 'Thêm người dùng',
+      dlgBody: dlg === 'batch' ? 'Hệ thống chỉ tạo QR cho 12 nhân viên chưa có QR. QR hiện có giữ nguyên. Sau khi xong bạn có thể tải gói ZIP/PDF.'
+        : dlg === 'regen' ? 'Token cũ mất hiệu lực ngay lập tức. Thẻ QR đã in tại quầy sẽ không dùng được nữa và cần in lại.'
+        : dlg === 'disable' ? 'QR sẽ không nhận feedback. Khách quét sẽ thấy thông báo chung. Hành động được ghi vào audit log.'
+        : dlg === 'coaching' ? 'Case sẽ ở trạng thái OPEN và xuất hiện trong Follow-up.'
+        : 'Thông tin sẽ được ghi vào audit log.',
+      dlgForm: dlg === 'coaching' || dlg === 'staff' || dlg === 'cinema' || dlg === 'user',
+      dlgFields: dlg === 'coaching' ? [{ label: 'Chủ đề', ph: 'Tư vấn promotion' }, { label: 'Hành động', ph: 'Roleplay 5 phút trước ca' }, { label: 'Ngày follow-up', ph: '12/09/2026' }]
+        : dlg === 'staff' ? [{ label: 'Staff Code *', ph: 'GS042' }, { label: 'Họ tên *', ph: 'Nguyễn Văn A' }, { label: 'Rạp *', ph: HO ? 'Chọn rạp' : 'Galaxy Nguyễn Du (mặc định)' }]
+        : dlg === 'cinema' ? [{ label: 'Cinema Code *', ph: 'GND' }, { label: 'Tên rạp *', ph: 'Galaxy Nguyễn Du' }]
+        : dlg === 'user' ? [{ label: 'Username *', ph: 'manager.gnd' }, { label: 'Role *', ph: 'CINEMA_MANAGER' }, { label: 'Phạm vi rạp *', ph: 'Galaxy Nguyễn Du' }] : [],
+      dlgConfirm: dlg === 'batch' ? 'Generate 12 QR' : dlg === 'regen' ? 'Regenerate' : dlg === 'disable' ? 'Disable QR' : 'Lưu',
+      dlgConfirmStyle: (dlg === 'regen' || dlg === 'disable') ? 'background:var(--color-accent-2);color:var(--color-bg)' : '',
+      confirmDialog: () => {
+        const msg = dlg === 'batch' ? 'Đã tạo 12 QR · gói ZIP đang được chuẩn bị'
+          : dlg === 'regen' ? 'Đã regenerate QR · token cũ đã revoke'
+          : dlg === 'disable' ? 'Đã disable QR'
+          : dlg === 'coaching' ? 'Đã tạo coaching case (OPEN)'
+          : 'Đã lưu · ghi audit log';
+        this.setState({ dialog: null });
+        this.toast(msg);
+      },
+
+      toast: s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>

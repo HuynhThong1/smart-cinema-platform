@@ -3,7 +3,7 @@ import { validTransaction } from './transaction-parser';
 import { TransactionSource } from '@cinema/core';
 import { I18n } from '@cinema/i18n';
 import { Component, inject, signal } from '@angular/core';
-import { ActivatedRoute, ResolveFn } from '@angular/router';
+import { ActivatedRoute, ResolveFn, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Api, FeedbackConfig, errorMessage } from '@cinema/core';
@@ -41,6 +41,7 @@ export const feedbackResolver: ResolveFn<Initial> = async (route) => {
 @Component({
   selector: 'cinema-feedback',
   imports: [
+    RouterLink,
     FormsModule,
     TransactionField,
     CinemaButton,
