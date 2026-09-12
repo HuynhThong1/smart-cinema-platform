@@ -199,7 +199,7 @@ func (s *Server) submitFeedback(c *gin.Context) {
 			if _, e = s.Store.Update(ctx, "cinemas", bson.M{"_id": ci.ID}, bson.M{"$inc": bson.M{"feedbackRevision": 1}}); e != nil {
 				return e
 			}
-			repeated, err := s.Store.Count(ctx, "feedbacks", bson.M{"cinema.id": ci.ID, "transactionId": in.TransactionID, "createdAt": bson.M{"$gte": now.Add(-10 * time.Minute)}})
+			repeated, err := s.Store.Count(ctx, "feedbacks", bson.M{"cinema.id": ci.ID, "transactionId": bson.M{"$regex": "^" + in.TransactionID + "(/[0-9]{3,5})?$"}, "createdAt": bson.M{"$gte": now.Add(-10 * time.Minute)}})
 			if err != nil {
 				return err
 			}

@@ -81,7 +81,7 @@ import { focusViewport, scanViewport, ScanViewport } from './scan-viewport';
           inputmode="text"
           autocomplete="off"
           maxlength="32"
-          placeholder="01313035/0002"
+          placeholder="01313035"
           aria-describedby="transaction-help transaction-status"
           [attr.aria-invalid]="!!value() && !valid(value())"
         />
@@ -322,7 +322,7 @@ export class TransactionField {
   change(raw: string) {
     ++this.lookup;
     clearTimeout(this.timer);
-    const id = raw.trim();
+    const id = parseTransaction(raw) ?? raw.trim();
     this.value.set(id);
     this.changed.emit({
       id: validTransaction(id) ? id : '',

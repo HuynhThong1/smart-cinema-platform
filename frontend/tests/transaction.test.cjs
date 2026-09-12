@@ -10,9 +10,13 @@ new Function(
   }).outputText,
 )(exported);
 test('parses Galaxy entry QR and preserves leading zeroes', () => {
-  assert.equal(exported.parseTransaction('T001201313035 0002'), '01313035/0002');
-  assert.equal(exported.parseTransaction('T999900000001 0001'), '00000001/0001');
-  assert.equal(exported.parseTransaction('01313035/0002'), '01313035/0002');
+  assert.equal(exported.parseTransaction('T001201313035 0002'), '01313035');
+  assert.equal(exported.parseTransaction('T999900000001 0001'), '00000001');
+  assert.equal(exported.parseTransaction('01313035/0002'), '01313035');
+});
+test('normalizes quantities to the same transaction', () => {
+  for (const raw of ['01313035', '01313035/0003', 'T001201313035 0003'])
+    assert.equal(exported.parseTransaction(raw), '01313035');
 });
 test('rejects unrelated QR payloads and ambiguous transaction parameters', () => {
   for (const raw of [
@@ -39,10 +43,13 @@ test('rejects unrelated QR payloads and ambiguous transaction parameters', () =>
 });
 
 test('transaction ID validation requires the entire value and keeps length bounds', () => {
-  for (const value of ['123456/123', '1234567890/12345'])
+  for (const value of ['123456', '1234567890', '01313035'])
     assert.equal(exported.validTransaction(value), true);
   for (const value of [
     '',
+    '01313035/0002',
+    '12345',
+    '12345678901',
     '12345/123',
     '12345678901/123',
     '123456/12',
