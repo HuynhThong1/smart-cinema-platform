@@ -1,5 +1,5 @@
 import { TransactionField } from './transaction';
-import { validTransaction } from './transaction-parser';
+import { parseTransaction, validTransaction } from './transaction-parser';
 import { TransactionSource } from '@cinema/core';
 import { I18n } from '@cinema/i18n';
 import { Component, inject, signal } from '@angular/core';
@@ -67,7 +67,7 @@ export class FeedbackPage {
   reasons = signal<string[]>([]);
   name = '';
   phone = '';
-  transactionId = this.route.snapshot.queryParamMap.get('tx')?.slice(0, 32) || '';
+  transactionId = parseTransaction(this.route.snapshot.queryParamMap.get('tx') || '') || '';
   transactionSource: TransactionSource = validTransaction(this.transactionId)
     ? 'QR_TICKET'
     : 'NONE';

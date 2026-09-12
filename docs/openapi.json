@@ -146,7 +146,7 @@
           },
           "transactionId": {
             "type": "string",
-            "description": "Optional printed Trans No, digits 6-10/slash/digits 3-5. Empty or malformed input is omitted without blocking feedback."
+            "description": "Optional Trans No: 6-10 digits, preserving leading zeroes (e.g. 01313035). Legacy /quantity suffixes of 3-5 digits are accepted and removed. Stored and returned IDs exclude ticket quantity. Empty or malformed input is omitted without blocking feedback."
           },
           "transactionSource": {
             "type": "string",
@@ -356,7 +356,7 @@
           },
           "transactionId": {
             "type": "string",
-            "description": "Optional printed Trans No, digits 6-10/slash/digits 3-5. Empty or malformed input is omitted without blocking feedback."
+            "description": "Optional Trans No: 6-10 digits, preserving leading zeroes (e.g. 01313035). Legacy /quantity suffixes of 3-5 digits are accepted and removed. Stored and returned IDs exclude ticket quantity. Empty or malformed input is omitted without blocking feedback."
           },
           "transactionSource": {
             "type": "string",

@@ -83,6 +83,7 @@ func (s *Server) listFeedback(c *gin.Context) {
 		return
 	}
 	for i := range v {
+		v[i].TransactionID, _ = domain.NormalizeTransaction(v[i].TransactionID, v[i].TransactionSource)
 		v[i].Customer.Phone = maskPhone(v[i].Customer.Phone)
 		v[i].Metadata.IPHash = ""
 		v[i].Metadata.UserAgent = ""
@@ -101,6 +102,7 @@ func (s *Server) feedbackDetail(c *gin.Context) {
 		fail(c, 403, "Permission denied")
 		return
 	}
+	v.TransactionID, _ = domain.NormalizeTransaction(v.TransactionID, v.TransactionSource)
 	c.JSON(200, v)
 }
 func safeCSV(v string) string {
@@ -128,6 +130,7 @@ func (s *Server) exportFeedback(c *gin.Context) {
 	w := csv.NewWriter(&b)
 	_ = w.Write([]string{"Time", "Rating", "Customer", "Phone", "Staff", "Cinema", "Reasons", "Comment", "Suspicious", "Transaction ID", "Transaction source", "Transaction verified"})
 	for _, x := range v {
+		x.TransactionID, _ = domain.NormalizeTransaction(x.TransactionID, x.TransactionSource)
 		reasons := []string{}
 		for _, r := range x.Reasons {
 			reasons = append(reasons, r.Label)
