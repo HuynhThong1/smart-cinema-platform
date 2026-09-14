@@ -10,7 +10,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Api, TransactionSource } from '@cinema/core';
+import { TransactionSource } from '@cinema/core';
 import { I18n } from '@cinema/i18n';
 import { CinemaButton, CinemaInput } from '@cinema/ui';
 import { TransactionHelp } from './transaction-help';
@@ -245,7 +245,6 @@ import { focusViewport, scanViewport, ScanViewport } from './scan-viewport';
 })
 export class TransactionField {
   i18n = inject(I18n);
-  private api = inject(Api);
   initial = input('');
   changed = output<{ id: string; source: TransactionSource }>();
   helpOpen = signal(false);
@@ -266,22 +265,17 @@ export class TransactionField {
   manualInput = viewChild<ElementRef<HTMLInputElement>>('manualInput');
   private stream?: MediaStream;
   private generation = 0;
-  private lookup = 0;
-  private timer?: ReturnType<typeof setTimeout>;
   private scanFrame?: number;
   private captureTimer?: ReturnType<typeof setTimeout>;
   constructor() {
     inject(DestroyRef).onDestroy(() => {
       this.stop();
-      ++this.lookup;
-      clearTimeout(this.timer);
     });
     afterNextRender(() => {
       if (this.initial()) {
         this.value.set(this.initial());
         this.mode.set(validTransaction(this.initial()) ? 'captured' : 'manual');
-        if (validTransaction(this.initial())) void this.resolve(this.initial());
-        else this.message.set('transaction.invalid');
+        if (!validTransaction(this.initial())) this.message.set('transaction.invalid');
       }
       const hide = () => {
         if (document.hidden && this.mode() === 'scanning') this.manual(false);
@@ -312,16 +306,12 @@ export class TransactionField {
   }
   clear() {
     this.stop();
-    ++this.lookup;
-    clearTimeout(this.timer);
     this.value.set('');
     this.message.set('');
     this.mode.set('idle');
     this.changed.emit({ id: '', source: 'NONE' });
   }
   change(raw: string) {
-    ++this.lookup;
-    clearTimeout(this.timer);
     const id = parseTransaction(raw) ?? raw.trim();
     this.value.set(id);
     this.changed.emit({
@@ -329,22 +319,9 @@ export class TransactionField {
       source: validTransaction(id) ? 'MANUAL' : 'NONE',
     });
     this.message.set(id && !validTransaction(id) ? 'transaction.invalid' : '');
-    if (validTransaction(id)) this.timer = setTimeout(() => void this.resolve(id), 500);
-  }
-  private async resolve(id: string) {
-    const request = ++this.lookup;
-    this.message.set('transaction.checking');
-    try {
-      await this.api.get('/public/transaction/' + encodeURIComponent(id));
-      if (request === this.lookup) this.message.set('transaction.unverified');
-    } catch {
-      if (request === this.lookup) this.message.set('transaction.unavailable');
-    }
   }
   async scan() {
     this.stop();
-    ++this.lookup;
-    clearTimeout(this.timer);
     const generation = this.generation;
     this.message.set('');
     this.mode.set('scanning');
@@ -444,7 +421,6 @@ export class TransactionField {
                     this.value.set(id);
                     this.mode.set('captured');
                     this.changed.emit({ id, source: 'QR_SCAN' });
-                    void this.resolve(id);
                   },
                   reducedMotion ? 0 : 420,
                 );

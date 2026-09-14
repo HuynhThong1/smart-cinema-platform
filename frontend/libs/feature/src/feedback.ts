@@ -130,7 +130,7 @@ import { AsyncPage, Filters, PageState, Pager } from './shared';
                   <span>{{ i18n.label(r) }} · </span>
                 }
               </td>
-              <td>{{ f.transactionId || '—' }}</td>
+              <td>{{ displayTransactionId(f.transactionId) }}</td>
               <td>{{ f.metadata.suspicious ? '⚑' : '' }}</td>
             </tr></ng-template
           ><ng-template #empty
@@ -157,12 +157,9 @@ import { AsyncPage, Filters, PageState, Pager } from './shared';
         <dl>
           <dt>{{ i18n.t('transaction.label') }}</dt>
           <dd>
-            {{ f.transactionId || '—' }}
+            {{ displayTransactionId(f.transactionId) }}
             @if (f.transactionId) {
-              <br />{{
-                i18n.t(f.transactionVerified ? 'transaction.verified' : 'transaction.notVerified')
-              }}
-              · {{ i18n.t('transaction.' + (f.transactionSource || 'NONE')) }}
+              <br />{{ i18n.t('transaction.' + (f.transactionSource || 'NONE')) }}
             }
           </dd>
           <dt>{{ i18n.t('feedback.customer') }}</dt>
@@ -202,6 +199,10 @@ import { AsyncPage, Filters, PageState, Pager } from './shared';
     </cinema-overlay>`,
 })
 export class FeedbackList extends AsyncPage {
+  displayTransactionId(id?: string): string {
+    return id?.replace(/^0+(?=\d)/, '') || '—';
+  }
+
   route = inject(ActivatedRoute);
   data = signal<Page<Feedback>>({ items: [], total: 0, page: 1, pageSize: 20 });
   staff = signal<Staff[]>([]);
